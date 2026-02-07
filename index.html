@@ -419,6 +419,18 @@
         .mtg-add-btn:hover { opacity: .85; }
         .mtg-del { font-size: 10px; color: var(--text3); cursor: pointer; padding: 2px 4px; border-radius: 3px; }
         .mtg-del:hover { color: var(--accent4); background: rgba(239,68,68,.1); }
+        .oc-note { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+        .oc-note:last-child { border-bottom: none; }
+        .oc-note-type { font-size: 9px; padding: 2px 5px; border-radius: 3px; font-weight: 600; flex-shrink: 0; text-transform: uppercase; }
+        .oc-note-type.note { background: rgba(99,102,241,.15); color: #818cf8; }
+        .oc-note-type.follow-up { background: rgba(251,191,36,.15); color: #fbbf24; }
+        .oc-note-type.pipeline { background: rgba(52,211,153,.15); color: #34d399; }
+        .oc-note-type.flag { background: rgba(239,68,68,.15); color: #ef4444; }
+        .oc-note-body { flex: 1; min-width: 0; }
+        .oc-note-text { color: var(--text); word-break: break-word; }
+        .oc-note-meta { color: var(--text3); font-size: 9px; margin-top: 2px; }
+        .oc-note-dismiss { font-size: 10px; color: var(--text3); cursor: pointer; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
+        .oc-note-dismiss:hover { color: var(--accent4); background: rgba(239,68,68,.1); }
 
         @media (max-width: 1000px) {
             .kpi-row, .pillar-grid { grid-template-columns: repeat(2, 1fr); }
@@ -598,11 +610,16 @@
                 </div>
             </div>
             <div class="panel">
-                <div class="panel-title">$3M Path — Scenarios</div>
-                <div class="action-item"><strong style="color:var(--accent);">60 deals @ $50K avg</strong> = $3M</div>
-                <div class="action-item"><strong style="color:var(--accent);">30 deals @ $100K avg</strong> = $3M</div>
-                <div class="action-item"><strong style="color:var(--accent);">12 deals @ $250K avg</strong> = $3M</div>
-                <div class="action-item" style="margin-top:8px;color:var(--text3);font-style:italic;">Current closed: $24K<br>Need 3x pipeline = <strong style="color:var(--accent3);">$9M</strong></div>
+                <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>OpenClaw Inbox</span>
+                    <span style="display:flex;gap:6px;align-items:center;">
+                        <span id="ocInboxCount" style="display:none;font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(251,191,36,.15);color:#fbbf24;font-weight:600;"></span>
+                        <span style="font-size:13px;cursor:pointer;color:var(--text3);" title="Refresh" onclick="fetchOcNotes()">&#x21bb;</span>
+                    </span>
+                </div>
+                <div id="dashOcInbox">
+                    <div class="action-item" style="color:var(--text3);font-style:italic;">No notes yet. Message OpenClaw on Telegram to add notes here.</div>
+                </div>
             </div>
         </div>
     </div>
@@ -2710,10 +2727,61 @@ function updateDashFlags() {
     ).join('');
 }
 
+// --- OpenClaw Inbox ---
+let ocNotes = [];
+function fetchOcNotes() {
+    fetch('http://127.0.0.1:18790/notes')
+        .then(r => r.json())
+        .then(notes => { ocNotes = notes; renderOcInbox(); })
+        .catch(() => {});
+}
+function renderOcInbox() {
+    const el = document.getElementById('dashOcInbox');
+    const badge = document.getElementById('ocInboxCount');
+    if (!el) return;
+    if (ocNotes.length === 0) {
+        el.innerHTML = '<div class="action-item" style="color:var(--text3);font-style:italic;">No notes yet. Message OpenClaw on Telegram to add notes here.</div>';
+        if (badge) badge.style.display = 'none';
+        return;
+    }
+    if (badge) { badge.textContent = ocNotes.length; badge.style.display = 'inline'; }
+    el.innerHTML = ocNotes.slice(0, 6).map(n => {
+        const d = new Date(n.dt);
+        const ago = timeAgo(d);
+        const acctStr = n.account ? `<strong>${n.account}</strong> — ` : '';
+        return `<div class="oc-note">
+            <span class="oc-note-type ${n.type || 'note'}">${n.type || 'note'}</span>
+            <div class="oc-note-body">
+                <div class="oc-note-text">${acctStr}${escHtml(n.text)}</div>
+                <div class="oc-note-meta">${ago}</div>
+            </div>
+            <span class="oc-note-dismiss" onclick="dismissOcNote(${n.id})" title="Dismiss">&times;</span>
+        </div>`;
+    }).join('');
+    if (ocNotes.length > 6) {
+        el.innerHTML += `<div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center;">+${ocNotes.length - 6} more</div>`;
+    }
+}
+function dismissOcNote(id) {
+    fetch('http://127.0.0.1:18790/notes/' + id, { method: 'DELETE' })
+        .then(() => { ocNotes = ocNotes.filter(n => n.id !== id); renderOcInbox(); })
+        .catch(() => {});
+}
+function timeAgo(d) {
+    const s = Math.floor((Date.now() - d.getTime()) / 1000);
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+}
+function escHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
 updateDashPipeline();
 updateCompetitorFootprint();
 updateDashFollowUps();
 updateDashFlags();
+fetchOcNotes();
+setInterval(fetchOcNotes, 30000); // Poll every 30s for new notes
 </script>
 
 </body>
