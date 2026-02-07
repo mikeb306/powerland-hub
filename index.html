@@ -2243,6 +2243,7 @@ function saveModal() {
     updateCompetitorFootprint();
     updateDashFollowUps();
     updateDashFlags();
+    syncPipelineToProxy();
 }
 
 // Close modal on overlay click
@@ -2776,11 +2777,44 @@ function timeAgo(d) {
 }
 function escHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
+// --- Pipeline Sync to Proxy (for Thursday email export) ---
+function syncPipelineToProxy() {
+    const allAccts = [...entAccounts.map(a=>({...a, tier:'ENT'})), ...smbAccounts.map(a=>({...a, tier:'SMB'}))];
+    const deals = [];
+    allAccts.forEach(a => {
+        const d = getAcctData(a.name);
+        if (d.stage && d.stage !== 'Fresh') {
+            deals.push({
+                account: a.name,
+                tier: a.tier,
+                sector: a.sector || a.industry || '',
+                stage: d.stage,
+                value: Number(d.value) || 0,
+                prob: d.prob || '',
+                closeQ: d.closeQ || '',
+                incumbent: d.incumbent || '',
+                contactName: d.contactName || '',
+                contactEmail: d.contactEmail || '',
+                followUp: d.followUp || '',
+                notes: d.notes || ''
+            });
+        }
+    });
+    deals.sort((a, b) => b.value - a.value);
+    const total = deals.reduce((s, d) => s + d.value, 0);
+    fetch('http://127.0.0.1:18790/pipeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deals, totalPipeline: total, dealCount: deals.length, target: 3000000 })
+    }).catch(() => {});
+}
+
 updateDashPipeline();
 updateCompetitorFootprint();
 updateDashFollowUps();
 updateDashFlags();
 fetchOcNotes();
+syncPipelineToProxy(); // Sync on load too
 setInterval(fetchOcNotes, 30000); // Poll every 30s for new notes
 </script>
 
