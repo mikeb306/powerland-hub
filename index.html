@@ -546,8 +546,11 @@
         .deal-card-meddpicc.myellow { background: rgba(245,158,11,.2); color: #fbbf24; }
         .deal-card-meddpicc.mgreen { background: rgba(52,211,153,.2); color: #34d399; }
         .deal-card-next { font-size: 10px; color: var(--text3); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .deal-card-age-warning { border-left-color: var(--accent3) !important; }
-        .deal-card-age-critical { border-left-color: var(--accent4) !important; }
+        .deal-card-age-warning { border-left-color: var(--accent3) !important; background: rgba(245,158,11,.06) !important; }
+        .deal-card-age-warning .deal-card-days { color: var(--accent3); font-weight: 700; }
+        .deal-card-age-critical { border-left-color: var(--accent4) !important; background: rgba(239,68,68,.08) !important; animation: pulse-critical 2s ease-in-out infinite; }
+        .deal-card-age-critical .deal-card-days { color: var(--accent4); font-weight: 700; }
+        @keyframes pulse-critical { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 8px rgba(239,68,68,.25); } }
         .kanban-summary { display: flex; gap: 16px; margin-bottom: 8px; flex-wrap: wrap; }
         .kanban-stat { font-size: 12px; color: var(--text2); }
         .kanban-stat strong { color: var(--text); font-family: var(--mono); }
@@ -3886,14 +3889,15 @@ function renderKanban() {
         const cards = stageDeals.sort((a,b) => b.value - a.value).map(deal => {
             const age = getDealAgeStatus(deal);
             const ageClass = age === 'critical' ? ' deal-card-age-critical' : age === 'warning' ? ' deal-card-age-warning' : '';
-            return `<div class="deal-card${ageClass}" data-account="${deal.account.replace(/"/g,'&quot;')}" style="--stage-color:${config.color};" onclick="openModal('${deal.account.replace(/'/g,"\\'")}','${deal.type}')">
+            const ageTitle = age === 'critical' ? 'STALE: ' + deal.daysInStage + 'd in ' + deal.stage + ' (expected ' + config.minDays + '-' + config.maxDays + 'd)' : age === 'warning' ? 'Aging: ' + deal.daysInStage + 'd in ' + deal.stage + ' (expected ' + config.minDays + '-' + config.maxDays + 'd)' : '';
+            return `<div class="deal-card${ageClass}" data-account="${deal.account.replace(/"/g,'&quot;')}" style="--stage-color:${config.color};"${ageTitle ? ' title="' + ageTitle + '"' : ''} onclick="openModal('${deal.account.replace(/'/g,"\\'")}','${deal.type}')">
                 <div class="deal-card-header">
                     <span class="deal-card-account">${deal.account}</span>
                     <span class="deal-card-health">${dealHealthDot(deal)}</span>
                 </div>
                 <div class="deal-card-value">${deal.value ? '$'+deal.value.toLocaleString() : '—'}</div>
                 <div class="deal-card-meta">
-                    <span class="deal-card-days">${deal.daysInStage}d</span>
+                    <span class="deal-card-days">${deal.daysInStage}d${age === 'critical' ? ' &#9888;' : age === 'warning' ? ' &#9201;' : ''}</span>
                     ${meddpiccBadge(deal.meddpicc)}
                 </div>
                 ${deal.nextAction ? `<div class="deal-card-next">&#128203; ${deal.nextAction}</div>` : ''}
