@@ -91,6 +91,31 @@
         .topbar-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
         .topbar-target { font-size: 11px; color: var(--text3); font-family: var(--mono); }
         .topbar-target strong { color: var(--accent2); }
+        .topbar-restore {
+            font-size: 11px; color: var(--text3); cursor: pointer; border: none;
+            background: none; font-family: var(--font); padding: 4px 8px; border-radius: 6px;
+            transition: all .15s;
+        }
+        .topbar-restore:hover { color: var(--text); background: rgba(255,255,255,.05); }
+        .restore-modal {
+            position: fixed; inset: 0; z-index: 998; background: rgba(0,0,0,.6);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .restore-modal.hidden { display: none; }
+        .restore-box {
+            background: var(--card); border: 1px solid var(--border2);
+            border-radius: 16px; padding: 28px 24px; width: 400px; text-align: center;
+        }
+        .restore-box h3 { font-size: 16px; margin-bottom: 12px; }
+        .restore-box p { font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.6; }
+        .restore-box .restore-info { font-size: 12px; color: var(--text3); margin-bottom: 16px; font-family: var(--mono); }
+        .restore-btns { display: flex; gap: 10px; justify-content: center; }
+        .restore-btns button {
+            padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+            font-family: var(--font); cursor: pointer; border: none; transition: opacity .2s;
+        }
+        .restore-btns .btn-cancel { background: var(--bg); color: var(--text2); border: 1px solid var(--border2); }
+        .restore-btns .btn-restore { background: var(--accent); color: #fff; }
 
         /* PAGES */
         .page { display: none; }
@@ -485,6 +510,7 @@
         </div>
         <div class="topbar-right">
             <div class="topbar-target">FY2026: <strong>$3M</strong></div>
+            <button class="topbar-restore" onclick="openRestoreModal()" title="Backup & Restore">&#9881;</button>
         </div>
     </div>
 </nav>
@@ -1725,6 +1751,19 @@ Sr Account Executive | Xerox IT Solutions
 
 <div style="height:60px;"></div>
 
+<!-- RESTORE FROM BACKUP MODAL -->
+<div class="restore-modal hidden" id="restoreModal">
+    <div class="restore-box">
+        <h3>Backup & Restore</h3>
+        <div id="restoreInfo" class="restore-info">Checking for backup...</div>
+        <p id="restoreDesc"></p>
+        <div class="restore-btns">
+            <button class="btn-cancel" onclick="document.getElementById('restoreModal').classList.add('hidden')">Cancel</button>
+            <button class="btn-restore" id="restoreBtn" onclick="restoreFromBackup()" style="display:none;">Restore Data</button>
+        </div>
+    </div>
+</div>
+
 <script>
 // ===== AUTH =====
 const ACCESS_CODE = 'xits2026';
@@ -2860,6 +2899,73 @@ updateDashFlags();
 fetchOcNotes();
 safePipelineSync(); // Safe sync on load — never overwrites cal-proxy with empty data
 setInterval(fetchOcNotes, 30000); // Poll every 30s for new notes
+
+// --- localStorage Backup & Restore ---
+function backupLocalStorage() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('xits_')) {
+            data[key] = localStorage.getItem(key);
+        }
+    }
+    if (Object.keys(data).length === 0) return; // Nothing to backup
+    fetch('http://127.0.0.1:18790/backup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            keys: data,
+            keyCount: Object.keys(data).length,
+            userAgent: navigator.userAgent
+        })
+    }).then(() => console.log('[Hub] localStorage backed up'))
+      .catch(() => console.warn('[Hub] Backup failed — cal-proxy unreachable'));
+}
+
+// Backup on page unload
+window.addEventListener('beforeunload', backupLocalStorage);
+// Also backup every 5 minutes while page is open
+setInterval(backupLocalStorage, 300000);
+
+function openRestoreModal() {
+    const modal = document.getElementById('restoreModal');
+    const info = document.getElementById('restoreInfo');
+    const desc = document.getElementById('restoreDesc');
+    const btn = document.getElementById('restoreBtn');
+    info.textContent = 'Checking for backup...';
+    desc.textContent = '';
+    btn.style.display = 'none';
+    modal.classList.remove('hidden');
+    fetch('http://127.0.0.1:18790/backup').then(r => {
+        if (!r.ok) throw new Error('No backup found');
+        return r.json();
+    }).then(backup => {
+        const ts = new Date(backup.backupTimestamp);
+        const ago = timeAgo(ts);
+        const keyCount = backup.keyCount || Object.keys(backup.keys || {}).length;
+        const ua = backup.userAgent || 'Unknown device';
+        const shortDevice = ua.includes('Mac') ? 'Mac' : ua.includes('Windows') ? 'Windows' : ua.includes('Linux') ? 'Linux' : 'Unknown';
+        info.textContent = 'Last backup: ' + ts.toLocaleString() + ' (' + ago + ')';
+        desc.textContent = keyCount + ' keys from ' + shortDevice + '. Restoring will overwrite current localStorage data for all xits_ keys.';
+        btn.style.display = 'inline-block';
+    }).catch(() => {
+        info.textContent = 'No backup available';
+        desc.textContent = 'No previous backup found on cal-proxy. Open the Hub and use it normally — backups are created automatically when you close the page.';
+    });
+}
+
+function restoreFromBackup() {
+    fetch('http://127.0.0.1:18790/backup').then(r => r.json()).then(backup => {
+        const keys = backup.keys || {};
+        Object.entries(keys).forEach(([k, v]) => {
+            localStorage.setItem(k, v);
+        });
+        document.getElementById('restoreModal').classList.add('hidden');
+        location.reload();
+    }).catch(() => {
+        alert('Restore failed — could not reach cal-proxy');
+    });
+}
 </script>
 
 </body>
