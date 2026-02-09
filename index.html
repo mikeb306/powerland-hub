@@ -2778,7 +2778,7 @@ function timeAgo(d) {
 function escHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
 // --- Pipeline Sync to Proxy (for Thursday email export) ---
-function syncPipelineToProxy() {
+function buildLocalPipeline() {
     const allAccts = [...entAccounts.map(a=>({...a, tier:'ENT'})), ...smbAccounts.map(a=>({...a, tier:'SMB'}))];
     const deals = [];
     allAccts.forEach(a => {
@@ -2802,11 +2802,55 @@ function syncPipelineToProxy() {
     });
     deals.sort((a, b) => b.value - a.value);
     const total = deals.reduce((s, d) => s + d.value, 0);
+    return { deals, totalPipeline: total, dealCount: deals.length, target: 3000000 };
+}
+
+function syncPipelineToProxy() {
+    const pipeline = buildLocalPipeline();
+    if (pipeline.dealCount === 0) return; // Never overwrite cal-proxy with empty data
     fetch('http://127.0.0.1:18790/pipeline', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deals, totalPipeline: total, dealCount: deals.length, target: 3000000 })
+        body: JSON.stringify(pipeline)
     }).catch(() => {});
+}
+
+function safePipelineSync() {
+    // Safe sync on page load: fetch cal-proxy first, merge intelligently
+    const localPipeline = buildLocalPipeline();
+    fetch('http://127.0.0.1:18790/pipeline').then(r => r.json()).then(remote => {
+        const remoteHasData = remote && remote.deals && remote.deals.length > 0;
+        const localHasData = localPipeline.dealCount > 0;
+        if (!localHasData && remoteHasData) {
+            // localStorage is empty, cal-proxy has data — restore from cal-proxy
+            remote.deals.forEach(deal => {
+                const existing = getAcctData(deal.account);
+                if (!existing.stage || existing.stage === 'Fresh') {
+                    setAcctData(deal.account, {
+                        ...existing,
+                        stage: deal.stage,
+                        value: deal.value,
+                        prob: deal.prob || '',
+                        closeQ: deal.closeQ || '',
+                        incumbent: deal.incumbent || '',
+                        contactName: deal.contactName || '',
+                        contactEmail: deal.contactEmail || '',
+                        followUp: deal.followUp || '',
+                        notes: deal.notes || ''
+                    });
+                }
+            });
+            updateDashPipeline();
+            console.log('[Hub] Restored ' + remote.deals.length + ' deals from cal-proxy into localStorage');
+        } else if (localHasData) {
+            // localStorage has data — push to cal-proxy (current behavior)
+            syncPipelineToProxy();
+        }
+        // If both are empty, do nothing
+    }).catch(() => {
+        // cal-proxy unreachable — use localStorage, don't push empty data
+        if (localPipeline.dealCount > 0) syncPipelineToProxy();
+    });
 }
 
 updateDashPipeline();
@@ -2814,7 +2858,7 @@ updateCompetitorFootprint();
 updateDashFollowUps();
 updateDashFlags();
 fetchOcNotes();
-syncPipelineToProxy(); // Sync on load too
+safePipelineSync(); // Safe sync on load — never overwrites cal-proxy with empty data
 setInterval(fetchOcNotes, 30000); // Poll every 30s for new notes
 </script>
 
