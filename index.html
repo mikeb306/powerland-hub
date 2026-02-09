@@ -555,6 +555,31 @@
         .kanban-stat { font-size: 12px; color: var(--text2); }
         .kanban-stat strong { color: var(--text); font-family: var(--mono); }
 
+        /* WHITESPACE HEATMAP */
+        .whitespace-controls { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+        .whitespace-controls select, .whitespace-controls input {
+            padding: 6px 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); font-family: var(--font); font-size: 12px; outline: none;
+        }
+        .whitespace-controls select:focus, .whitespace-controls input:focus { border-color: var(--accent); }
+        .whitespace-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .whitespace-table th { position: sticky; top: 0; background: var(--bg2); padding: 6px 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text3); border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .whitespace-table th:first-child { text-align: left; min-width: 140px; }
+        .whitespace-table td { padding: 5px 4px; text-align: center; border-bottom: 1px solid var(--border); }
+        .whitespace-table td:first-child { text-align: left; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+        .whitespace-table tr:hover td { background: rgba(255,255,255,.03); }
+        .ws-active { color: var(--accent2); font-size: 14px; }
+        .ws-gap { color: var(--accent4); font-size: 14px; opacity: .4; }
+        .ws-score { font-family: var(--mono); font-weight: 700; font-size: 10px; }
+        .ws-score-high { color: var(--accent4); }
+        .ws-score-med { color: var(--accent3); }
+        .ws-score-low { color: var(--accent2); }
+        .ws-summary { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+        .ws-stat { font-size: 12px; color: var(--text2); }
+        .ws-stat strong { color: var(--text); font-family: var(--mono); }
+        .whitespace-wrap { max-height: 600px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; }
+        .pillar-header { writing-mode: vertical-lr; transform: rotate(180deg); max-height: 80px; }
+
         /* COMPETITIVE INTEL */
         .competitor-chips { display: flex; flex-wrap: wrap; gap: 5px; }
         .comp-chip {
@@ -1214,6 +1239,29 @@
         <div class="panel">
             <div class="panel-title">Data Center & Co-Location</div>
             <p style="font-size:13px;color:var(--text2);">Full data center solutions including co-location services. Dell, HPE, and Lenovo infrastructure available through Powerland WebStore for on-premise deployments. Hewlett Packard Enterprise on-premise and co-location options.</p>
+        </div>
+
+        <div class="sec-header" style="margin-top:32px;">
+            <h2>Whitespace Heatmap</h2>
+            <p>Cross-account view: which pillars are active vs untapped? Higher whitespace % = more opportunity.</p>
+        </div>
+        <div class="whitespace-controls">
+            <select id="wsFilter" onchange="renderWhitespaceHeatmap()">
+                <option value="all">All Accounts</option>
+                <option value="ent">Enterprise Only</option>
+                <option value="smb">SMB Only</option>
+                <option value="active">Active Deals Only</option>
+            </select>
+            <select id="wsSort" onchange="renderWhitespaceHeatmap()">
+                <option value="whitespace">Sort: Most Whitespace</option>
+                <option value="name">Sort: Name A-Z</option>
+                <option value="value">Sort: Deal Value</option>
+            </select>
+            <input id="wsSearch" placeholder="Search accounts..." oninput="renderWhitespaceHeatmap()">
+        </div>
+        <div class="ws-summary" id="wsSummary"></div>
+        <div class="whitespace-wrap">
+            <div id="whitespaceTable"></div>
         </div>
     </div>
 </div>
@@ -2758,6 +2806,7 @@ document.querySelectorAll('.topbar-tab').forEach(tab => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         tab.classList.add('active');
         document.getElementById(tab.dataset.page).classList.add('active');
+        if (tab.dataset.page === 'pillars') renderWhitespaceHeatmap();
         window.scrollTo(0, 0);
     });
 });
@@ -3053,6 +3102,7 @@ function saveModal() {
     updateHotDeals();
     updateKPICards();
     updateAtRiskPanel();
+    renderWhitespaceHeatmap();
     renderKanban();
     syncPipelineToProxy();
 }
@@ -3936,6 +3986,92 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') ['qaLogModal','qaDealModal','qaWeekModal'].forEach(id => document.getElementById(id).classList.add('hidden'));
 });
 
+// ===== WHITESPACE HEATMAP =====
+const WS_PILLARS = ['Cloud','Virtualization','Infrastructure','Endpoint','Security','Data Protection','Print/Doc Mgmt','Network','AI/Copilot','Managed IT','Prof Services','Support Svc'];
+
+function renderWhitespaceHeatmap() {
+    const filter = document.getElementById('wsFilter') ? document.getElementById('wsFilter').value : 'all';
+    const sort = document.getElementById('wsSort') ? document.getElementById('wsSort').value : 'whitespace';
+    const search = document.getElementById('wsSearch') ? document.getElementById('wsSearch').value.toLowerCase() : '';
+
+    // Collect accounts based on filter
+    let accounts = [];
+    if (filter === 'ent' || filter === 'all' || filter === 'active') {
+        entAccounts.forEach(a => accounts.push({ name: a.name, type: 'ent', sector: a.sector }));
+    }
+    if (filter === 'smb' || filter === 'all' || filter === 'active') {
+        smbAccounts.forEach(a => accounts.push({ name: a.name, type: 'smb', sector: a.industry }));
+    }
+
+    // Enrich with data
+    accounts = accounts.map(a => {
+        const d = getAcctData(a.name);
+        return { ...a, pillars: d.pillars || [], stage: d.stage || 'Fresh', value: Number(d.value) || 0 };
+    });
+
+    // Filter: active deals only
+    if (filter === 'active') {
+        accounts = accounts.filter(a => a.stage && a.stage !== 'Fresh' && a.stage !== 'Closed Won' && a.stage !== 'Closed Lost');
+    }
+
+    // Filter: search
+    if (search) {
+        accounts = accounts.filter(a => a.name.toLowerCase().includes(search));
+    }
+
+    // Calculate whitespace score
+    accounts.forEach(a => {
+        a.wsScore = Math.round(((WS_PILLARS.length - a.pillars.length) / WS_PILLARS.length) * 100);
+    });
+
+    // Sort
+    if (sort === 'whitespace') accounts.sort((a, b) => b.wsScore - a.wsScore || b.value - a.value);
+    else if (sort === 'name') accounts.sort((a, b) => a.name.localeCompare(b.name));
+    else if (sort === 'value') accounts.sort((a, b) => b.value - a.value);
+
+    // Summary stats
+    const totalAccts = accounts.length;
+    const avgWs = totalAccts > 0 ? Math.round(accounts.reduce((s, a) => s + a.wsScore, 0) / totalAccts) : 0;
+    const pillarCounts = {};
+    WS_PILLARS.forEach(p => pillarCounts[p] = 0);
+    accounts.forEach(a => a.pillars.forEach(p => { if (pillarCounts[p] !== undefined) pillarCounts[p]++; }));
+    const topGap = WS_PILLARS.slice().sort((a, b) => pillarCounts[a] - pillarCounts[b]);
+
+    const summaryEl = document.getElementById('wsSummary');
+    if (summaryEl) {
+        summaryEl.innerHTML = `
+            <span class="ws-stat"><strong>${totalAccts}</strong> accounts</span>
+            <span class="ws-stat">Avg whitespace: <strong>${avgWs}%</strong></span>
+            <span class="ws-stat">Biggest gap: <strong>${topGap[0] || '—'}</strong> (${pillarCounts[topGap[0]] || 0}/${totalAccts})</span>
+        `;
+    }
+
+    // Build table
+    let html = '<table class="whitespace-table"><thead><tr><th>Account</th>';
+    WS_PILLARS.forEach(p => {
+        const shortName = p.replace('Virtualization','Virt').replace('Infrastructure','Infra').replace('Data Protection','Data Prot').replace('Print/Doc Mgmt','Print').replace('AI/Copilot','AI').replace('Managed IT','Mgd IT').replace('Prof Services','Prof Svc').replace('Support Svc','Sup Svc');
+        html += `<th><span class="pillar-header">${shortName}</span></th>`;
+    });
+    html += '<th>Gap</th><th>Value</th></tr></thead><tbody>';
+
+    accounts.forEach(a => {
+        html += `<tr onclick="openModal('${a.name.replace(/'/g,"\\'")}','${a.type}')" style="cursor:pointer;">`;
+        html += `<td title="${a.name}">${a.name}</td>`;
+        WS_PILLARS.forEach(p => {
+            const active = a.pillars.includes(p);
+            html += `<td class="${active ? 'ws-active' : 'ws-gap'}" title="${p}: ${active ? 'Active' : 'Whitespace'}">&#9679;</td>`;
+        });
+        const scoreClass = a.wsScore >= 70 ? 'ws-score-high' : a.wsScore >= 40 ? 'ws-score-med' : 'ws-score-low';
+        html += `<td class="ws-score ${scoreClass}">${a.wsScore}%</td>`;
+        html += `<td style="font-family:var(--mono);font-size:10px;color:var(--accent2);">${a.value ? '$' + a.value.toLocaleString() : '—'}</td>`;
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    const tableEl = document.getElementById('whitespaceTable');
+    if (tableEl) tableEl.innerHTML = html;
+}
+
 // ===== DATA MIGRATION =====
 function migrateAllAccounts() {
     const stageMap = { 'Needs Analysis': 'Solution Design', 'Qualifying': 'Solution Design' };
@@ -4601,6 +4737,7 @@ updateStaleAccounts();
 updateHotDeals();
 updateKPICards();
 updateAtRiskPanel();
+renderWhitespaceHeatmap();
 renderKanban();
 fetchOcNotes();
 safePipelineSync(); // Safe sync on load — never overwrites cal-proxy with empty data
