@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --bg: #0b0d11;
@@ -555,6 +557,23 @@
         .kanban-stat { font-size: 12px; color: var(--text2); }
         .kanban-stat strong { color: var(--text); font-family: var(--mono); }
 
+        /* TERRITORY MAP */
+        .map-container { height: 520px; border-radius: 10px; border: 1px solid var(--border); overflow: hidden; }
+        .map-controls { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+        .map-controls select { padding: 6px 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--font); font-size: 12px; outline: none; }
+        .map-controls select:focus { border-color: var(--accent); }
+        .map-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+        .map-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+        .map-legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .map-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+        .map-stats .ws-stat { font-size: 12px; color: var(--text2); }
+        .map-stats .ws-stat strong { color: var(--text); font-family: var(--mono); }
+        .leaflet-popup-content-wrapper { background: var(--bg2) !important; color: var(--text) !important; border: 1px solid var(--border2) !important; border-radius: 10px !important; box-shadow: 0 8px 24px rgba(0,0,0,.4) !important; }
+        .leaflet-popup-tip { background: var(--bg2) !important; border: 1px solid var(--border2) !important; }
+        .leaflet-popup-content { font-family: var(--font) !important; font-size: 12px !important; margin: 10px 14px !important; }
+        .map-popup-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+        .map-popup-detail { color: var(--text2); font-size: 11px; line-height: 1.5; }
+
         /* WHITESPACE HEATMAP */
         .whitespace-controls { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
         .whitespace-controls select, .whitespace-controls input {
@@ -795,6 +814,7 @@
                 <button class="topbar-tab" data-page="highered">Higher Ed</button>
                 <button class="topbar-tab" data-page="creditunions">Credit Unions</button>
                 <button class="topbar-tab" data-page="pillars">Pillars</button>
+                <button class="topbar-tab" data-page="territory">Territory</button>
                 <button class="topbar-tab" data-page="playbook">Playbook</button>
                 <button class="topbar-tab" data-page="tools">Tools</button>
                 <button class="topbar-tab" data-page="calendar">Calendar</button>
@@ -1263,6 +1283,36 @@
         <div class="whitespace-wrap">
             <div id="whitespaceTable"></div>
         </div>
+    </div>
+</div>
+
+<!-- ==================== TERRITORY MAP ==================== -->
+<div id="territory" class="page">
+    <div class="container">
+        <div class="sec-header">
+            <h2>Saskatchewan Territory Map</h2>
+            <p>Geographic view of all accounts. Color = deal status. Size = deal value.</p>
+        </div>
+        <div class="map-controls">
+            <select id="mapFilter" onchange="updateMapPins()">
+                <option value="all">All Accounts</option>
+                <option value="ent">Enterprise Only</option>
+                <option value="smb">SMB Only</option>
+                <option value="active">Active Deals Only</option>
+                <option value="atrisk">At Risk Only</option>
+            </select>
+            <select id="mapSector" onchange="updateMapPins()">
+                <option value="">All Sectors</option>
+            </select>
+            <select id="mapColor" onchange="updateMapPins()">
+                <option value="status">Color: Deal Status</option>
+                <option value="priority">Color: Priority</option>
+                <option value="health">Color: Health Score</option>
+            </select>
+        </div>
+        <div class="map-legend" id="mapLegend"></div>
+        <div class="map-stats" id="mapStats"></div>
+        <div class="map-container" id="territoryMap"></div>
     </div>
 </div>
 
@@ -2807,6 +2857,7 @@ document.querySelectorAll('.topbar-tab').forEach(tab => {
         tab.classList.add('active');
         document.getElementById(tab.dataset.page).classList.add('active');
         if (tab.dataset.page === 'pillars') renderWhitespaceHeatmap();
+        if (tab.dataset.page === 'territory') { initTerritoryMap(); setTimeout(() => { if (territoryMap) territoryMap.invalidateSize(); }, 100); }
         window.scrollTo(0, 0);
     });
 });
@@ -3985,6 +4036,189 @@ function showWeekPriorities() {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') ['qaLogModal','qaDealModal','qaWeekModal'].forEach(id => document.getElementById(id).classList.add('hidden'));
 });
+
+// ===== TERRITORY MAP =====
+const SK_GEOCODE = {
+    'Regina': [50.4452, -104.6189], 'Saskatoon': [52.1332, -106.6700],
+    'Prince Albert': [53.2034, -105.7531], 'Moose Jaw': [50.3934, -105.5519],
+    'Swift Current': [50.2881, -107.7937], 'Yorkton': [51.2139, -102.4628],
+    'North Battleford': [52.7575, -108.2861], 'Estevan': [49.1392, -102.9861],
+    'Weyburn': [49.6612, -103.8519], 'Lloydminster': [53.2781, -110.0005],
+    'Meadow Lake': [54.1242, -108.4347], 'Nipawin': [53.3617, -104.0087],
+    'Humboldt': [52.2010, -105.1226], 'Melville': [50.9299, -102.8078],
+    'La Ronge': [55.1001, -105.2842], 'Lanigan': [51.8500, -105.0333],
+    'Rocanville': [50.4500, -101.8500], 'Vanscoy': [52.0333, -107.0333],
+    'St Brieux': [52.5667, -104.8167], 'Bethune': [50.7333, -105.0833],
+    'Whitecap': [51.9833, -106.4167], 'Esterhazy': [50.6500, -102.0833],
+    'Unity': [52.4500, -109.1667], 'Biggar': [52.0600, -108.0000],
+    'Creighton': [54.7633, -101.9256], 'Ile a la Crosse': [55.4500, -107.8833],
+    'Regina Beach': [50.7833, -105.0167],
+    // Compound cities — map to primary
+    'Regina/Province-wide': [50.4452, -104.6189], 'Saskatoon/Esterhazy': [52.1332, -106.6700],
+    'Saskatoon/Regina': [51.3000, -105.6500], 'Saskatoon/Regina/PA/MJ': [51.3000, -105.6500],
+    'Regina/Saskatoon': [51.3000, -105.6500], 'NW Central SK': [52.7575, -108.2861],
+    'West Central SK': [51.6500, -108.0000], 'Around Regina': [50.5000, -104.8000],
+    'Melville/Yorkton': [51.0700, -102.6300],
+};
+
+const MAP_STATUS_COLORS = {
+    customer: '#22c55e', pipeline: '#3b82f6', target: '#f59e0b', cold: '#6b7280', closedlost: '#ef4444'
+};
+const MAP_PRIORITY_COLORS = { A: '#ef4444', B: '#f59e0b', C: '#6b7280' };
+const MAP_HEALTH_COLORS = { green: '#22c55e', yellow: '#f59e0b', red: '#ef4444', none: '#6b7280' };
+
+let territoryMap = null;
+let mapMarkers = [];
+
+function getAccountStatus(d) {
+    if (!d.stage || d.stage === 'Fresh') return 'cold';
+    if (d.stage === 'Closed Won') return 'customer';
+    if (d.stage === 'Closed Lost') return 'closedlost';
+    return 'pipeline';
+}
+
+function getAccountColor(acct, d, mode) {
+    if (mode === 'priority') return MAP_PRIORITY_COLORS[acct.priority] || '#6b7280';
+    if (mode === 'health') {
+        const score = calculateHealthScore(d);
+        if (score.total >= 80) return MAP_HEALTH_COLORS.green;
+        if (score.total >= 40) return MAP_HEALTH_COLORS.yellow;
+        if (score.total > 0) return MAP_HEALTH_COLORS.red;
+        return MAP_HEALTH_COLORS.none;
+    }
+    return MAP_STATUS_COLORS[getAccountStatus(d)] || '#6b7280';
+}
+
+function getMarkerRadius(value) {
+    if (value >= 500000) return 12;
+    if (value >= 100000) return 9;
+    if (value >= 25000) return 7;
+    return 5;
+}
+
+function resolveCity(acct) {
+    // Try city, then region (K-12)
+    return acct.city || acct.region || '';
+}
+
+function initTerritoryMap() {
+    if (territoryMap) return;
+    const el = document.getElementById('territoryMap');
+    if (!el) return;
+    territoryMap = L.map('territoryMap', { zoomControl: true }).setView([52.9399, -106.4509], 6);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+        subdomains: 'abcd', maxZoom: 13
+    }).addTo(territoryMap);
+
+    // Populate sector filter
+    const sectors = new Set();
+    entAccounts.forEach(a => sectors.add(a.sector));
+    smbAccounts.forEach(a => sectors.add(a.industry));
+    const sel = document.getElementById('mapSector');
+    [...sectors].sort().forEach(s => { if (s) sel.innerHTML += `<option value="${s}">${s}</option>`; });
+
+    updateMapPins();
+}
+
+function updateMapPins() {
+    if (!territoryMap) return;
+    mapMarkers.forEach(m => territoryMap.removeLayer(m));
+    mapMarkers = [];
+
+    const filter = document.getElementById('mapFilter').value;
+    const sector = document.getElementById('mapSector').value;
+    const colorMode = document.getElementById('mapColor').value;
+
+    // Collect accounts
+    let accounts = [];
+    if (filter !== 'smb') {
+        entAccounts.forEach(a => accounts.push({ ...a, _type: 'ent', _sector: a.sector }));
+    }
+    if (filter !== 'ent') {
+        smbAccounts.forEach(a => accounts.push({ ...a, _type: 'smb', _sector: a.industry }));
+    }
+
+    // Enrich with data
+    accounts = accounts.map(a => {
+        const d = getAcctData(a.name);
+        return { ...a, _data: d, _city: resolveCity(a) };
+    });
+
+    // Filters
+    if (filter === 'active') accounts = accounts.filter(a => a._data.stage && a._data.stage !== 'Fresh' && a._data.stage !== 'Closed Won' && a._data.stage !== 'Closed Lost');
+    if (filter === 'atrisk') accounts = accounts.filter(a => { const s = calculateHealthScore(a._data); return s.total < 40 && a._data.stage && a._data.stage !== 'Fresh'; });
+    if (sector) accounts = accounts.filter(a => a._sector === sector);
+
+    // Place markers — jitter accounts sharing same city
+    const cityCount = {};
+    let pinned = 0, noloc = 0;
+    const statusCounts = { customer: 0, pipeline: 0, target: 0, cold: 0, closedlost: 0 };
+
+    accounts.forEach(a => {
+        const cityKey = a._city.split('/')[0].trim();
+        const coords = SK_GEOCODE[a._city] || SK_GEOCODE[cityKey];
+        if (!coords) { noloc++; return; }
+
+        // Jitter to avoid overlap
+        if (!cityCount[cityKey]) cityCount[cityKey] = 0;
+        const jitter = cityCount[cityKey] * 0.012;
+        const angle = cityCount[cityKey] * 2.4; // golden angle
+        const lat = coords[0] + jitter * Math.cos(angle);
+        const lng = coords[1] + jitter * Math.sin(angle);
+        cityCount[cityKey]++;
+
+        const d = a._data;
+        const color = getAccountColor(a, d, colorMode);
+        const value = Number(d.value) || 0;
+        const radius = getMarkerRadius(value);
+        const status = getAccountStatus(d);
+        statusCounts[status]++;
+
+        const marker = L.circleMarker([lat, lng], {
+            radius: radius, fillColor: color, color: '#000', weight: 1, opacity: 0.8, fillOpacity: 0.85
+        }).addTo(territoryMap);
+
+        const stage = d.stage || 'Fresh';
+        const healthScore = calculateHealthScore(d).total;
+        marker.bindPopup(`
+            <div class="map-popup-name">${a.name}</div>
+            <div class="map-popup-detail">
+                ${a._sector ? a._sector + ' &middot; ' : ''}${a._city}<br>
+                Stage: <strong>${stage}</strong>${value ? ' &middot; $' + value.toLocaleString() : ''}<br>
+                Priority: <strong>${a.priority || '—'}</strong> &middot; Health: <strong>${healthScore}</strong>/100
+                ${d.competitors && d.competitors.primary ? '<br>vs <strong>' + d.competitors.primary + '</strong>' : ''}
+            </div>
+        `, { maxWidth: 250 });
+
+        mapMarkers.push(marker);
+        pinned++;
+    });
+
+    // Update legend
+    const legendEl = document.getElementById('mapLegend');
+    if (colorMode === 'status') {
+        legendEl.innerHTML = [
+            ['#22c55e','Customer'],['#3b82f6','Pipeline'],['#f59e0b','Target'],['#6b7280','Cold'],['#ef4444','Closed Lost']
+        ].map(([c,l]) => `<span class="map-legend-item"><span class="map-legend-dot" style="background:${c}"></span>${l}</span>`).join('');
+    } else if (colorMode === 'priority') {
+        legendEl.innerHTML = [
+            ['#ef4444','A — Strategic'],['#f59e0b','B — Target'],['#6b7280','C — Opportunistic']
+        ].map(([c,l]) => `<span class="map-legend-item"><span class="map-legend-dot" style="background:${c}"></span>${l}</span>`).join('');
+    } else {
+        legendEl.innerHTML = [
+            ['#22c55e','Healthy (80+)'],['#f59e0b','Attention (40-79)'],['#ef4444','At Risk (<40)'],['#6b7280','No data']
+        ].map(([c,l]) => `<span class="map-legend-item"><span class="map-legend-dot" style="background:${c}"></span>${l}</span>`).join('');
+    }
+
+    // Stats
+    document.getElementById('mapStats').innerHTML = `
+        <span class="ws-stat"><strong>${pinned}</strong> mapped</span>
+        ${noloc > 0 ? `<span class="ws-stat" style="color:var(--text3);">${noloc} no location</span>` : ''}
+        <span class="ws-stat">Pipeline: <strong>${statusCounts.pipeline}</strong></span>
+        <span class="ws-stat">Customers: <strong>${statusCounts.customer}</strong></span>
+    `;
+}
 
 // ===== WHITESPACE HEATMAP =====
 const WS_PILLARS = ['Cloud','Virtualization','Infrastructure','Endpoint','Security','Data Protection','Print/Doc Mgmt','Network','AI/Copilot','Managed IT','Prof Services','Support Svc'];
