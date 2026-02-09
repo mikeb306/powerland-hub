@@ -2241,6 +2241,18 @@ function closeModal() {
     currentModalAcct = '';
 }
 
+// Toggle visual state of check-item chips when clicked
+document.querySelectorAll('.check-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+        const cb = this.querySelector('input');
+        // The label click already toggles the checkbox, so sync the CSS class
+        // Use setTimeout(0) so the browser's default checkbox toggle happens first
+        setTimeout(() => {
+            this.classList.toggle('checked', cb.checked);
+        }, 0);
+    });
+});
+
 function saveModal() {
     const pillars = [];
     document.querySelectorAll('#m-pillars .check-item input:checked').forEach(cb => {
