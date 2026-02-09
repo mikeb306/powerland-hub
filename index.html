@@ -1,0 +1,2822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK Command Center — Mike Bernhardt | Xerox IT Solutions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0d11;
+            --bg2: #10131a;
+            --bg3: #161a24;
+            --card: #161a24;
+            --card-hover: #1c2030;
+            --text: #e8eaed;
+            --text2: #9aa0ac;
+            --text3: #5a6070;
+            --accent: #4f8cff;
+            --accent2: #34d399;
+            --accent3: #f59e0b;
+            --accent4: #ef4444;
+            --accent5: #a78bfa;
+            --xerox-red: #e4002b;
+            --border: rgba(255,255,255,.07);
+            --border2: rgba(255,255,255,.12);
+            --font: 'DM Sans', system-ui, sans-serif;
+            --mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+        .container { max-width: 1360px; margin: 0 auto; padding: 0 24px; }
+
+        /* AUTH SCREEN */
+        .auth-overlay {
+            position: fixed; inset: 0; z-index: 999;
+            background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-overlay.hidden { display: none; }
+        .auth-box {
+            background: var(--card); border: 1px solid var(--border2);
+            border-radius: 16px; padding: 40px 36px; width: 360px; text-align: center;
+        }
+        .auth-logo { font-size: 18px; font-weight: 700; color: var(--xerox-red); margin-bottom: 4px; }
+        .auth-logo span { color: var(--text2); font-weight: 400; font-size: 14px; }
+        .auth-subtitle { font-size: 13px; color: var(--text3); margin-bottom: 28px; }
+        .auth-input {
+            width: 100%; padding: 12px 16px; border-radius: 10px;
+            background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+            font-family: var(--font); font-size: 14px; outline: none; text-align: center;
+            letter-spacing: .1em;
+        }
+        .auth-input:focus { border-color: var(--accent); }
+        .auth-btn {
+            width: 100%; padding: 12px; border-radius: 10px; margin-top: 12px;
+            background: var(--xerox-red); color: #fff; border: none;
+            font-family: var(--font); font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: opacity .2s;
+        }
+        .auth-btn:hover { opacity: .9; }
+        .auth-error { font-size: 12px; color: var(--accent4); margin-top: 10px; display: none; }
+
+        /* APP WRAPPER */
+        .app { display: none; }
+        .app.visible { display: block; }
+
+        /* NAV */
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(11,13,17,.92); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); padding: 10px 0;
+        }
+        .topbar-inner { display: flex; justify-content: space-between; align-items: center; }
+        .topbar-left { display: flex; align-items: center; gap: 20px; }
+        .topbar-brand { display: flex; align-items: center; gap: 10px; }
+        .topbar-xerox { font-weight: 700; font-size: 15px; color: var(--xerox-red); letter-spacing: .02em; }
+        .topbar-its { font-size: 13px; color: var(--text2); font-weight: 500; }
+        .topbar-sep { color: var(--text3); font-size: 12px; }
+        .topbar-name { font-size: 12px; color: var(--text3); }
+        .topbar-tabs { display: flex; gap: 3px; overflow-x: auto; }
+        .topbar-tab {
+            padding: 6px 13px; border-radius: 8px; font-size: 12px; font-weight: 500;
+            color: var(--text2); cursor: pointer; border: none; background: none;
+            transition: all .15s; white-space: nowrap;
+        }
+        .topbar-tab:hover { color: var(--text); background: rgba(255,255,255,.05); }
+        .topbar-tab.active { color: var(--accent); background: rgba(79,140,255,.1); }
+        .topbar-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+        .topbar-target { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+        .topbar-target strong { color: var(--accent2); }
+
+        /* PAGES */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* DASH HEADER */
+        .dash-header { padding: 28px 0 20px; }
+        .dash-header h1 { font-size: 22px; font-weight: 700; color: var(--text); }
+        .dash-header p { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+        /* KPI */
+        .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 16px; }
+        .kpi {
+            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 18px 16px; position: relative;
+        }
+        .kpi-label { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+        .kpi-value { font-size: 26px; font-weight: 700; color: var(--text); font-family: var(--mono); }
+        .kpi-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
+        .kpi-accent .kpi-value { color: var(--accent); }
+        .kpi-green .kpi-value { color: var(--accent2); }
+        .kpi-warn .kpi-value { color: var(--accent3); }
+        .kpi-red .kpi-value { color: var(--accent4); }
+
+        /* TARGET BAR */
+        .target-bar-wrap { margin-bottom: 20px; }
+        .target-bar-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+        .target-bar-title { font-size: 13px; font-weight: 600; color: var(--text); }
+        .target-bar-pct { font-size: 18px; font-weight: 700; color: var(--accent2); font-family: var(--mono); }
+        .target-bar-outer { height: 16px; border-radius: 10px; background: var(--bg3); overflow: hidden; }
+        .target-bar-inner { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--xerox-red), var(--accent2)); transition: width 1s ease; }
+        .target-bar-markers { display: flex; justify-content: space-between; font-size: 10px; color: var(--text3); margin-top: 4px; font-family: var(--mono); }
+
+        /* GRIDS */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+
+        .panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+        .panel-title { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text2); margin-bottom: 14px; }
+
+        /* BARS */
+        .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .bar-label { font-size: 12px; color: var(--text2); width: 110px; flex-shrink: 0; text-align: right; }
+        .bar-track { flex: 1; height: 20px; background: var(--bg); border-radius: 6px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 8px; font-size: 10px; font-weight: 600; color: var(--bg); min-width: 20px; }
+        .bar-count { font-size: 12px; color: var(--text3); width: 28px; text-align: right; font-family: var(--mono); }
+
+        /* TABLES */
+        .tbl-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th {
+            text-align: left; padding: 9px 10px; font-size: 10px; font-weight: 600;
+            letter-spacing: .06em; text-transform: uppercase; color: var(--text3);
+            border-bottom: 1px solid var(--border2); position: sticky; top: 0; background: var(--card);
+        }
+        td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+        tr:hover td { background: rgba(255,255,255,.02); color: var(--text); }
+        .tag { display: inline-block; padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 600; letter-spacing: .02em; white-space: nowrap; }
+        .tag-a { background: rgba(239,68,68,.12); color: #f87171; }
+        .tag-b { background: rgba(245,158,11,.12); color: #fbbf24; }
+        .tag-c { background: rgba(100,116,139,.15); color: #94a3b8; }
+        .tag-new { background: rgba(100,116,139,.1); color: var(--text3); }
+        .tag-db { background: rgba(79,140,255,.1); color: var(--accent); }
+
+        /* FILTERS */
+        .filter-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+        .filter-input {
+            flex: 1; min-width: 180px; padding: 9px 13px; border-radius: 10px;
+            background: var(--bg); border: 1px solid var(--border); color: var(--text);
+            font-family: var(--font); font-size: 13px; outline: none;
+        }
+        .filter-input:focus { border-color: var(--accent); }
+        .filter-input::placeholder { color: var(--text3); }
+        .filter-select {
+            padding: 9px 13px; border-radius: 10px;
+            background: var(--bg); border: 1px solid var(--border); color: var(--text);
+            font-family: var(--font); font-size: 12px; outline: none; cursor: pointer;
+        }
+
+        /* PILLAR CARDS */
+        .pillar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .pillar-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 16px 14px; transition: all .2s;
+        }
+        .pillar-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .pillar-icon { font-size: 20px; margin-bottom: 8px; }
+        .pillar-name { font-size: 12px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+        .pillar-vendors { font-size: 11px; color: var(--text3); line-height: 1.5; }
+        .pillar-services { font-size: 11px; color: var(--accent); margin-top: 6px; }
+
+        /* PLAYBOOK */
+        .play-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+        .play-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 22px 18px; transition: all .2s;
+        }
+        .play-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .play-card h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .play-card p { font-size: 12px; color: var(--text2); line-height: 1.65; }
+        .play-example {
+            margin-top: 10px; padding: 10px; border-radius: 8px;
+            background: rgba(255,255,255,.03); border: 1px solid var(--border);
+            font-size: 11px; color: var(--text2); line-height: 1.6;
+        }
+        .play-example strong { color: var(--accent); }
+
+        /* CALC */
+        .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .calc-panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+        .calc-panel h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
+        .calc-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); }
+        .calc-row:last-child { border: none; font-weight: 700; color: var(--accent); }
+        .calc-label { font-size: 12px; color: var(--text2); }
+        .calc-val { font-size: 13px; color: var(--text); font-family: var(--mono); }
+
+        .sec-header { padding: 24px 0 16px; }
+        .sec-header h2 { font-size: 18px; font-weight: 700; }
+        .sec-header p { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+        .tbl-scroll { max-height: 600px; overflow-y: auto; border-radius: var(--radius); }
+        .tbl-scroll::-webkit-scrollbar { width: 5px; }
+        .tbl-scroll::-webkit-scrollbar-thumb { background: var(--text3); border-radius: 3px; }
+
+        .action-item { padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text2); }
+        .action-item:last-child { border: none; }
+
+        .count-badge { display: inline-block; background: rgba(79,140,255,.15); color: var(--accent); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: 6px; font-family: var(--mono); }
+
+        /* SECTION TABS */
+        .section-tabs { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+        .section-tab {
+            padding: 7px 14px; border-radius: 8px; font-size: 11px; font-weight: 600;
+            color: var(--text3); cursor: pointer; border: 1px solid var(--border); background: none;
+            transition: all .15s; text-transform: uppercase; letter-spacing: .04em;
+        }
+        .section-tab:hover { color: var(--text); border-color: var(--border2); }
+        .section-tab.active { color: var(--accent); border-color: var(--accent); background: rgba(79,140,255,.08); }
+        .section-content { display: none; }
+        .section-content.active { display: block; }
+
+        /* DISCOVERY Q */
+        .q-group { margin-bottom: 14px; }
+        .q-group-header {
+            display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+            cursor: pointer; transition: all .15s;
+        }
+        .q-group-header:hover { border-color: var(--border2); }
+        .q-group-header .q-icon { font-size: 16px; }
+        .q-group-header .q-title { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+        .q-group-header .q-toggle { font-size: 11px; color: var(--text3); transition: transform .2s; }
+        .q-group.open .q-toggle { transform: rotate(90deg); }
+        .q-body { display: none; padding: 12px 16px; border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); background: rgba(22,26,36,.6); }
+        .q-group.open .q-body { display: block; }
+        .q-item { padding: 5px 0; font-size: 12px; color: var(--text2); border-bottom: 1px solid var(--border); }
+        .q-item:last-child { border: none; }
+        .q-item strong { color: var(--accent); font-weight: 500; }
+
+        /* BATTLE CARDS */
+        .battle-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 20px; margin-bottom: 12px;
+        }
+        .battle-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+        .battle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .battle-col h4 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+        .battle-col.strengths h4 { color: var(--accent4); }
+        .battle-col.weaknesses h4 { color: var(--accent2); }
+        .battle-col li { font-size: 12px; color: var(--text2); margin-bottom: 3px; margin-left: 14px; }
+        .battle-counter { margin-top: 10px; padding: 10px; border-radius: 8px; background: rgba(79,140,255,.06); border: 1px solid rgba(79,140,255,.15); }
+        .battle-counter strong { color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+        .battle-counter p { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+        /* EMAIL TEMPLATES */
+        .email-tpl {
+            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 18px; margin-bottom: 12px;
+        }
+        .email-tpl h3 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+        .email-tpl .email-subject { font-size: 11px; color: var(--accent); margin-bottom: 8px; }
+        .email-tpl .email-body {
+            font-size: 12px; color: var(--text2); line-height: 1.7;
+            padding: 12px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border);
+            white-space: pre-line;
+        }
+        .copy-btn {
+            margin-top: 8px; padding: 5px 12px; border-radius: 6px; font-size: 11px;
+            font-weight: 600; background: rgba(79,140,255,.1); color: var(--accent);
+            border: 1px solid rgba(79,140,255,.2); cursor: pointer; transition: all .15s;
+        }
+        .copy-btn:hover { background: rgba(79,140,255,.2); }
+
+        /* DEAL CALC */
+        .deal-input {
+            width: 100%; padding: 9px 12px; border-radius: 8px; margin-bottom: 8px;
+            background: var(--bg); border: 1px solid var(--border); color: var(--text);
+            font-family: var(--mono); font-size: 13px; outline: none;
+        }
+        .deal-input:focus { border-color: var(--accent); }
+        .deal-label { font-size: 11px; color: var(--text3); margin-bottom: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+        .deal-result {
+            padding: 12px; border-radius: 8px; background: rgba(52,211,153,.06);
+            border: 1px solid rgba(52,211,153,.15); margin-top: 10px;
+        }
+        .deal-result .dr-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; }
+        .deal-result .dr-label { color: var(--text2); }
+        .deal-result .dr-val { color: var(--accent2); font-family: var(--mono); font-weight: 600; }
+
+        /* NOTES */
+        .notes-area {
+            width: 100%; min-height: 120px; padding: 12px; border-radius: 8px;
+            background: var(--bg); border: 1px solid var(--border); color: var(--text);
+            font-family: var(--font); font-size: 13px; outline: none; resize: vertical;
+        }
+        .notes-area:focus { border-color: var(--accent); }
+        .notes-saved { font-size: 11px; color: var(--accent2); margin-top: 4px; opacity: 0; transition: opacity .3s; }
+        .notes-saved.show { opacity: 1; }
+
+        /* CALENDAR */
+        .cal-month { margin-bottom: 12px; }
+        .cal-month-name { font-size: 13px; font-weight: 700; color: var(--text); padding: 8px 0 6px; border-bottom: 1px solid var(--border); }
+        .cal-event { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+        .cal-event:last-child { border: none; }
+        .cal-date { color: var(--accent); font-family: var(--mono); font-weight: 600; width: 50px; flex-shrink: 0; }
+        .cal-desc { color: var(--text2); }
+        .cal-type { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; margin-left: auto; flex-shrink: 0; }
+        .cal-budget { background: rgba(245,158,11,.12); color: var(--accent3); }
+        .cal-rfp { background: rgba(239,68,68,.12); color: var(--accent4); }
+        .cal-renewal { background: rgba(167,139,250,.12); color: var(--accent5); }
+        .cal-outreach { background: rgba(52,211,153,.12); color: var(--accent2); }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
+            display: flex; align-items: flex-start; justify-content: center;
+            padding: 40px 20px; overflow-y: auto;
+        }
+        .modal-overlay.hidden { display: none; }
+        .modal {
+            background: var(--bg2); border: 1px solid var(--border2);
+            border-radius: 16px; width: 680px; max-width: 100%;
+            animation: modalIn .2s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(10px); } }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 22px; border-bottom: 1px solid var(--border);
+        }
+        .modal-header h2 { font-size: 16px; font-weight: 700; }
+        .modal-close {
+            width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
+            background: none; color: var(--text3); font-size: 16px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { color: var(--text); border-color: var(--border2); }
+        .modal-body { padding: 18px 22px; }
+        .modal-section { margin-bottom: 18px; }
+        .modal-section-title {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .08em; color: var(--text3); margin-bottom: 8px;
+        }
+        .modal-row { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+        .modal-field { flex: 1; min-width: 140px; }
+        .modal-field label { display: block; font-size: 10px; color: var(--text3); margin-bottom: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+        .modal-field input, .modal-field select {
+            width: 100%; padding: 8px 10px; border-radius: 8px;
+            background: var(--bg); border: 1px solid var(--border); color: var(--text);
+            font-family: var(--font); font-size: 12px; outline: none;
+        }
+        .modal-field input:focus, .modal-field select:focus { border-color: var(--accent); }
+        .modal-field input[type="date"] { font-family: var(--mono); font-size: 11px; }
+        .check-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+        .check-item {
+            display: flex; align-items: center; gap: 5px; padding: 5px 10px;
+            border-radius: 8px; border: 1px solid var(--border); cursor: pointer;
+            font-size: 11px; color: var(--text2); transition: all .15s; user-select: none;
+        }
+        .check-item:hover { border-color: var(--border2); }
+        .check-item.checked { border-color: var(--accent); color: var(--accent); background: rgba(79,140,255,.08); }
+        .check-item input { display: none; }
+        .modal-notes {
+            width: 100%; min-height: 80px; padding: 10px; border-radius: 8px;
+            background: var(--bg); border: 1px solid var(--border); color: var(--text);
+            font-family: var(--font); font-size: 12px; outline: none; resize: vertical;
+        }
+        .modal-notes:focus { border-color: var(--accent); }
+        .modal-footer {
+            display: flex; justify-content: flex-end; gap: 8px;
+            padding: 14px 22px; border-top: 1px solid var(--border);
+        }
+        .modal-btn {
+            padding: 9px 20px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            cursor: pointer; border: none; transition: all .15s;
+        }
+        .modal-btn-primary { background: var(--accent); color: #fff; }
+        .modal-btn-primary:hover { opacity: .9; }
+        .modal-btn-ghost { background: none; border: 1px solid var(--border); color: var(--text2); }
+        .modal-btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+        .tbl-clickable tbody tr { cursor: pointer; }
+        .tbl-clickable tbody tr:hover td { background: rgba(79,140,255,.04); }
+        .tag-discovery { background: rgba(79,140,255,.12); color: var(--accent); }
+        .tag-qualifying { background: rgba(167,139,250,.12); color: var(--accent5); }
+        .tag-proposal { background: rgba(245,158,11,.12); color: var(--accent3); }
+        .tag-negotiation { background: rgba(239,68,68,.12); color: var(--accent4); }
+        .tag-won { background: rgba(52,211,153,.15); color: var(--accent2); }
+        .tag-lost { background: rgba(100,116,139,.15); color: var(--text3); text-decoration: line-through; }
+        .tag-fresh { background: rgba(100,116,139,.1); color: var(--text3); }
+        .pillar-dots { display: flex; gap: 2px; flex-wrap: wrap; }
+        .pdot { display: inline-block; padding: 1px 4px; border-radius: 3px; font-size: 8px; font-weight: 700; background: rgba(79,140,255,.12); color: var(--accent); letter-spacing: .02em; }
+        .flag-icons { display: flex; gap: 3px; font-size: 12px; }
+        .cal-embed { width: 100%; height: 700px; border: none; border-radius: var(--radius); background: var(--card); }
+        .grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+        .mtg-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+        .mtg-item:last-child { border-bottom: none; }
+        .mtg-time { min-width: 52px; font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 600; line-height: 1.4; }
+        .mtg-time .mtg-date { font-size: 9px; color: var(--text3); font-weight: 400; }
+        .mtg-info { flex: 1; min-width: 0; }
+        .mtg-info .mtg-title { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mtg-info .mtg-acct { font-size: 10px; color: var(--text3); }
+        .mtg-add-row { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+        .mtg-add-row input { flex: 1; min-width: 70px; font-size: 11px; padding: 5px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; color: var(--text); font-family: var(--sans); }
+        .mtg-add-row input:focus { border-color: var(--accent); outline: none; }
+        .mtg-add-btn { font-size: 11px; padding: 5px 10px; background: var(--accent); color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+        .mtg-add-btn:hover { opacity: .85; }
+        .mtg-del { font-size: 10px; color: var(--text3); cursor: pointer; padding: 2px 4px; border-radius: 3px; }
+        .mtg-del:hover { color: var(--accent4); background: rgba(239,68,68,.1); }
+        .oc-note { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+        .oc-note:last-child { border-bottom: none; }
+        .oc-note-type { font-size: 9px; padding: 2px 5px; border-radius: 3px; font-weight: 600; flex-shrink: 0; text-transform: uppercase; }
+        .oc-note-type.note { background: rgba(99,102,241,.15); color: #818cf8; }
+        .oc-note-type.follow-up { background: rgba(251,191,36,.15); color: #fbbf24; }
+        .oc-note-type.pipeline { background: rgba(52,211,153,.15); color: #34d399; }
+        .oc-note-type.flag { background: rgba(239,68,68,.15); color: #ef4444; }
+        .oc-note-body { flex: 1; min-width: 0; }
+        .oc-note-text { color: var(--text); word-break: break-word; }
+        .oc-note-meta { color: var(--text3); font-size: 9px; margin-top: 2px; }
+        .oc-note-dismiss { font-size: 10px; color: var(--text3); cursor: pointer; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
+        .oc-note-dismiss:hover { color: var(--accent4); background: rgba(239,68,68,.1); }
+
+        @media (max-width: 1000px) {
+            .kpi-row, .pillar-grid { grid-template-columns: repeat(2, 1fr); }
+            .grid-2, .grid-3, .grid-4, .calc-grid { grid-template-columns: 1fr; }
+            .topbar-tabs { overflow-x: auto; flex-wrap: nowrap; }
+            .topbar-inner { flex-direction: column; gap: 8px; }
+        }
+        @media (max-width: 600px) {
+            .kpi-row, .pillar-grid { grid-template-columns: 1fr; }
+            .bar-label { width: 80px; font-size: 11px; }
+            .topbar-brand { flex-direction: column; gap: 2px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div class="auth-overlay" id="authOverlay">
+    <div class="auth-box">
+        <div class="auth-logo">Xerox <span>IT Solutions</span></div>
+        <div class="auth-subtitle">SK Territory — Prospecting Command Center</div>
+        <input type="password" class="auth-input" id="authPass" placeholder="Enter access code" autofocus>
+        <button class="auth-btn" id="authBtn">Unlock</button>
+        <div class="auth-error" id="authError">Incorrect code. Try again.</div>
+    </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+
+<nav class="topbar">
+    <div class="container topbar-inner">
+        <div class="topbar-left">
+            <div class="topbar-brand">
+                <span class="topbar-xerox">Xerox</span>
+                <span class="topbar-its">IT Solutions</span>
+                <span class="topbar-sep">|</span>
+                <span class="topbar-name">Mike Bernhardt &middot; Sr Account Executive</span>
+            </div>
+            <div class="topbar-tabs">
+                <button class="topbar-tab active" data-page="dashboard">Dashboard</button>
+                <button class="topbar-tab" data-page="ent">ENT Accounts</button>
+                <button class="topbar-tab" data-page="smb">SMB</button>
+                <button class="topbar-tab" data-page="k12">K-12</button>
+                <button class="topbar-tab" data-page="highered">Higher Ed</button>
+                <button class="topbar-tab" data-page="creditunions">Credit Unions</button>
+                <button class="topbar-tab" data-page="pillars">Pillars</button>
+                <button class="topbar-tab" data-page="playbook">Playbook</button>
+                <button class="topbar-tab" data-page="tools">Tools</button>
+                <button class="topbar-tab" data-page="calendar">Calendar</button>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <div class="topbar-target">FY2026: <strong>$3M</strong></div>
+        </div>
+    </div>
+</nav>
+
+<!-- ==================== DASHBOARD ==================== -->
+<div id="dashboard" class="page active">
+    <div class="container">
+        <div class="dash-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div>
+                <h1>Pipeline Command Center</h1>
+                <p>Saskatchewan Territory — FY2026</p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <button class="mtg-add-btn" style="padding:7px 14px;font-size:11px;background:var(--border);color:var(--text2);" onclick="showCalSetup()" id="calSetupBtn" title="Connect Google Calendar">&#9881; Cal</button>
+                <button class="mtg-add-btn" style="padding:7px 14px;font-size:11px;" onclick="generateDigest()">End of Day Digest</button>
+            </div>
+        </div>
+
+        <div class="target-bar-wrap">
+            <div class="target-bar-header">
+                <span class="target-bar-title">$3M Annual Target</span>
+                <span class="target-bar-pct" id="targetPct">0.8%</span>
+            </div>
+            <div class="target-bar-outer">
+                <div class="target-bar-inner" id="targetBar" style="width: 0.8%;"></div>
+            </div>
+            <div class="target-bar-markers">
+                <span>$0</span><span>$750K</span><span>$1.5M</span><span>$2.25M</span><span>$3M</span>
+            </div>
+        </div>
+
+        <div class="kpi-row">
+            <div class="kpi kpi-green">
+                <div class="kpi-label">Closed Revenue</div>
+                <div class="kpi-value">$24K</div>
+                <div class="kpi-sub">FY2026 booked</div>
+            </div>
+            <div class="kpi kpi-accent">
+                <div class="kpi-label">Gap to Target</div>
+                <div class="kpi-value">$2.98M</div>
+                <div class="kpi-sub">Remaining to close</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-label">Prospect Accounts</div>
+                <div class="kpi-value" id="totalProspects">111</div>
+                <div class="kpi-sub">All sectors combined</div>
+            </div>
+            <div class="kpi kpi-red">
+                <div class="kpi-label">Must Win (A)</div>
+                <div class="kpi-value" id="aTierCount">21</div>
+                <div class="kpi-sub">Priority accounts</div>
+            </div>
+            <div class="kpi kpi-accent" id="pipelineKpi">
+                <div class="kpi-label">Pipeline</div>
+                <div class="kpi-value">$0</div>
+                <div class="kpi-sub">0 active opportunities</div>
+            </div>
+            <div class="kpi kpi-warn">
+                <div class="kpi-label">Months Remaining</div>
+                <div class="kpi-value" id="monthsLeft">11</div>
+                <div class="kpi-sub" id="monthlyNeeded">$271K/mo needed</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-title">Prospect Accounts by Sector</div>
+                <div class="bar-row"><div class="bar-label">ENT Accounts</div><div class="bar-track"><div class="bar-fill" style="width:62%;background:#ef4444;">35</div></div><div class="bar-count">35</div></div>
+                <div class="bar-row"><div class="bar-label">SMB</div><div class="bar-track"><div class="bar-fill" style="width:54%;background:#60a5fa;">30</div></div><div class="bar-count">30</div></div>
+                <div class="bar-row"><div class="bar-label">K-12 Education</div><div class="bar-track"><div class="bar-fill" style="width:48%;background:#818cf8;">27</div></div><div class="bar-count">27</div></div>
+                <div class="bar-row"><div class="bar-label">Credit Unions</div><div class="bar-track"><div class="bar-fill" style="width:25%;background:#34d399;">14</div></div><div class="bar-count">14</div></div>
+                <div class="bar-row"><div class="bar-label">Higher Ed</div><div class="bar-track"><div class="bar-fill" style="width:9%;background:#fbbf24;">5</div></div><div class="bar-count">5</div></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">IT Competitor Footprint</div>
+                <div id="competitorBars">
+                    <div class="bar-row"><div class="bar-label">WBM</div><div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--accent3);" id="cf-wbm-bar">—</div></div><div class="bar-count" id="cf-wbm-ct">—</div></div>
+                    <div class="bar-row"><div class="bar-label">Horizon</div><div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--accent4);" id="cf-horizon-bar">—</div></div><div class="bar-count" id="cf-horizon-ct">—</div></div>
+                    <div class="bar-row"><div class="bar-label">PC Place</div><div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--accent5);" id="cf-pcplace-bar">—</div></div><div class="bar-count" id="cf-pcplace-ct">—</div></div>
+                    <div class="bar-row"><div class="bar-label">Wolf Strata</div><div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--accent2);" id="cf-wolfstrata-bar">—</div></div><div class="bar-count" id="cf-wolfstrata-ct">—</div></div>
+                    <div class="bar-row"><div class="bar-label">Compugen</div><div class="bar-track"><div class="bar-fill" style="width:5%;background:#a78bfa;" id="cf-compugen-bar">—</div></div><div class="bar-count" id="cf-compugen-ct">—</div></div>
+                    <div class="bar-row"><div class="bar-label">Other / Unknown</div><div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--text3);" id="cf-unknown-bar">—</div></div><div class="bar-count" id="cf-unknown-ct">—</div></div>
+                </div>
+                <p style="font-size:10px;color:var(--text3);margin-top:8px;">Auto-updated from account IT Incumbent data</p>
+            </div>
+        </div>
+
+        <div class="grid-4">
+            <div class="panel">
+                <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span id="mtgPanelTitle">Next Meetings</span>
+                    <span style="display:flex;gap:6px;align-items:center;">
+                        <span id="mtgLiveIndicator" style="display:none;font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(52,211,153,.15);color:#34d399;font-weight:600;">LIVE</span>
+                        <span id="mtgRefreshBtn" style="display:none;font-size:13px;cursor:pointer;color:var(--text3);" title="Refresh" onclick="fetchCalendarEvents()">&#x21bb;</span>
+                        <span id="mtgToggleAdd" style="font-size:16px;cursor:pointer;color:var(--accent);line-height:1;" title="Add meeting manually">+</span>
+                    </span>
+                </div>
+                <div id="mtgAddForm" style="display:none;margin-bottom:10px;">
+                    <div class="mtg-add-row">
+                        <input type="datetime-local" id="mtg-dt" style="min-width:130px;">
+                        <input type="text" id="mtg-title" placeholder="Meeting title">
+                    </div>
+                    <div class="mtg-add-row" style="margin-top:4px;">
+                        <input type="text" id="mtg-acct" placeholder="Account (optional)">
+                        <button class="mtg-add-btn" onclick="addMeeting()">Add</button>
+                    </div>
+                </div>
+                <div id="dashMeetings">
+                    <div class="action-item" style="color:var(--text3);font-style:italic;">Loading...</div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">Upcoming Follow-Ups</div>
+                <div id="dashFollowUps">
+                    <div class="action-item" style="color:var(--text3);font-style:italic;">No follow-ups scheduled yet. Set dates in account details.</div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">Flagged Accounts</div>
+                <div id="dashFlags">
+                    <div class="action-item" style="color:var(--text3);font-style:italic;">No flags set yet. Flag accounts with RFPs, expiring contracts, etc.</div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>OpenClaw Inbox</span>
+                    <span style="display:flex;gap:6px;align-items:center;">
+                        <span id="ocInboxCount" style="display:none;font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(251,191,36,.15);color:#fbbf24;font-weight:600;"></span>
+                        <span style="font-size:13px;cursor:pointer;color:var(--text3);" title="Refresh" onclick="fetchOcNotes()">&#x21bb;</span>
+                    </span>
+                </div>
+                <div id="dashOcInbox">
+                    <div class="action-item" style="color:var(--text3);font-style:italic;">No notes yet. Message OpenClaw on Telegram to add notes here.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== ENT ACCOUNTS ==================== -->
+<div id="ent" class="page">
+    <div class="container">
+        <div class="sec-header">
+            <h2>Enterprise Accounts <span class="count-badge" id="entCount">35</span></h2>
+            <p>Major SK organizations (500+ employees). All treated as fresh prospects.</p>
+        </div>
+        <div class="filter-bar">
+            <input type="text" class="filter-input" id="entSearch" placeholder="Search enterprise accounts, sectors, contacts...">
+            <select class="filter-select" id="entPriority">
+                <option value="">All Priorities</option>
+                <option value="A">A — Must Win</option>
+                <option value="B">B — Strategic</option>
+                <option value="C">C — Develop</option>
+            </select>
+            <select class="filter-select" id="entSector">
+                <option value="">All Sectors</option>
+                <option value="Government">Government</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Crown Corp">Crown Corp</option>
+                <option value="Mining">Mining</option>
+                <option value="Financial">Financial</option>
+                <option value="Manufacturing">Manufacturing</option>
+                <option value="Energy">Energy</option>
+                <option value="Gaming">Gaming</option>
+                <option value="Retail">Retail</option>
+                <option value="Agriculture">Agriculture</option>
+            </select>
+        </div>
+        <div class="panel" style="padding:0;">
+            <div class="tbl-wrap tbl-scroll">
+                <table id="entTable" class="tbl-clickable"><thead><tr>
+                    <th>Account</th><th>Sector</th><th>Emp</th><th>City</th><th>Pri</th><th>Stage</th><th>Value</th><th>Pillars</th><th>Flags</th>
+                </tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SMB ==================== -->
+<div id="smb" class="page">
+    <div class="container">
+        <div class="sec-header">
+            <h2>SMB Prospects <span class="count-badge" id="smbCount">30</span></h2>
+            <p>Mid-market SK organizations (100–499 employees or $10M+ revenue). Sourced from SK Company Database.</p>
+        </div>
+        <div class="filter-bar">
+            <input type="text" class="filter-input" id="smbSearch" placeholder="Search SMB prospects, industries, cities...">
+            <select class="filter-select" id="smbIndustry">
+                <option value="">All Industries</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Gaming">Gaming</option>
+                <option value="Technology">Technology</option>
+                <option value="Manufacturing">Manufacturing</option>
+                <option value="Energy">Energy</option>
+                <option value="Mining">Mining</option>
+                <option value="Transportation">Transportation</option>
+                <option value="Construction">Construction</option>
+                <option value="Government">Government</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Media">Media</option>
+                <option value="Finance">Finance</option>
+            </select>
+        </div>
+        <div class="panel" style="padding:0;">
+            <div class="tbl-wrap tbl-scroll">
+                <table id="smbTable" class="tbl-clickable"><thead><tr>
+                    <th>Company</th><th>Industry</th><th>Emp</th><th>City</th><th>Stage</th><th>Value</th><th>Pillars</th><th>Flags</th>
+                </tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== K-12 ==================== -->
+<div id="k12" class="page">
+    <div class="container">
+        <div class="sec-header">
+            <h2>K-12 Education <span class="count-badge">27</span></h2>
+            <p>27 school divisions. Contact info retained. All treated as fresh prospects.</p>
+        </div>
+        <div class="filter-bar">
+            <input type="text" class="filter-input" id="k12Search" placeholder="Search divisions, contacts...">
+            <select class="filter-select" id="k12Priority">
+                <option value="">All Priorities</option>
+                <option value="A">A — Must Win</option>
+                <option value="B">B — Strategic</option>
+                <option value="C">C — Develop</option>
+            </select>
+        </div>
+        <div class="panel" style="padding:0;">
+            <div class="tbl-wrap tbl-scroll">
+                <table id="k12Table"><thead><tr>
+                    <th>School Division</th><th>Type</th><th>Region</th><th>Students</th><th>Incumbent</th><th>CFO</th><th>IT Contact</th><th>Priority</th>
+                </tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== HIGHER ED ==================== -->
+<div id="highered" class="page">
+    <div class="container">
+        <div class="sec-header">
+            <h2>Higher Education <span class="count-badge">5</span></h2>
+            <p>Saskatchewan universities, polytechnic, and indigenous institutions.</p>
+        </div>
+        <div class="panel" style="padding:0;">
+            <div class="tbl-wrap tbl-scroll">
+                <table id="higheredTable"><thead><tr>
+                    <th>Institution</th><th>Type</th><th>City</th><th>Priority</th><th>MPS Opp</th><th>M365/Cloud Opp</th><th>Managed IT Opp</th><th>Stage</th>
+                </tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== CREDIT UNIONS ==================== -->
+<div id="creditunions" class="page">
+    <div class="container">
+        <div class="sec-header">
+            <h2>Saskatchewan Credit Unions <span class="count-badge">14</span></h2>
+            <p>14 credit unions by assets. All treated as fresh prospects.</p>
+        </div>
+        <div class="filter-bar">
+            <input type="text" class="filter-input" id="cuSearch" placeholder="Search credit unions...">
+        </div>
+        <div class="panel" style="padding:0;">
+            <div class="tbl-wrap tbl-scroll">
+                <table id="cuTable"><thead><tr>
+                    <th>Credit Union</th><th>Rank</th><th>Assets</th><th>Members</th><th>Locations</th><th>City</th><th>Priority</th>
+                </tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== PILLARS ==================== -->
+<div id="pillars" class="page">
+    <div class="container">
+        <div class="sec-header">
+            <h2>Xerox IT Solutions — Portfolio</h2>
+            <p>Full solution stack via Powerland. On-premise, cloud, and managed services.</p>
+        </div>
+
+        <div class="pillar-grid">
+            <div class="pillar-card">
+                <div class="pillar-icon">&#9729;&#65039;</div>
+                <div class="pillar-name">Cloud</div>
+                <div class="pillar-vendors">Microsoft 365 &middot; Azure &middot; AWS</div>
+                <div class="pillar-services">Licensing, migration, management</div>
+            </div>
+            <div class="pillar-card">
+                <div class="pillar-icon">&#128187;</div>
+                <div class="pillar-name">Virtualization</div>
+                <div class="pillar-vendors">Azure Local &middot; VMware &middot; Nutanix</div>
+                <div class="pillar-services">HCI, private cloud, VDI</div>
+            </div>
+            <div class="pillar-card">
+                <div class="pillar-icon">&#128421;&#65039;</div>
+                <div class="pillar-name">Infrastructure</div>
+                <div class="pillar-vendors">Dell &middot; HPE &middot; Lenovo</div>
+                <div class="pillar-services">Servers, storage, compute</div>
+            </div>
+            <div class="pillar-card">
+                <div class="pillar-icon">&#128190;</div>
+                <div class="pillar-name">Endpoint</div>
+                <div class="pillar-vendors">Dell &middot; HP &middot; Lenovo</div>
+                <div class="pillar-services">Laptops, desktops, thin clients</div>
+            </div>
+            <div class="pillar-card">
+                <div class="pillar-icon">&#128274;</div>
+                <div class="pillar-name">Security</div>
+                <div class="pillar-vendors">Darktrace &middot; Netskope &middot; Fortinet &middot; Palo Alto &middot; Arctic Wolf</div>
+                <div class="pillar-services">SASE, EDR/XDR, SOC, firewall</div>
+            </div>
+            <div class="pillar-card">
+                <div class="pillar-icon">&#128737;&#65039;</div>
+                <div class="pillar-name">Data Protection</div>
+                <div class="pillar-vendors">Veeam &middot; Zerto &middot; Backupify</div>
+                <div class="pillar-services">Backup, DR, replication</div>
+            </div>
+            <div class="pillar-card">
+                <div class="pillar-icon">&#128424;</div>
+                <div class="pillar-name">Print & Document Mgmt</div>
+                <div class="pillar-vendors">Xerox &middot; M-Files</div>
+                <div class="pillar-services">MPS, ECM, document workflows</div>
+            </div>
+            <div class="pillar-card">
+                <div class="pillar-icon">&#127760;</div>
+                <div class="pillar-name">Network</div>
+                <div class="pillar-vendors">HPE Aruba &middot; Cisco &middot; Extreme &middot; Juniper</div>
+                <div class="pillar-services">Switching, wireless, SD-WAN</div>
+            </div>
+            <div class="pillar-card">
+                <div class="pillar-icon">&#129302;</div>
+                <div class="pillar-name">AI</div>
+                <div class="pillar-vendors">Microsoft Copilot &middot; Xerox AI</div>
+                <div class="pillar-services">AI adoption, automation, workshops</div>
+            </div>
+            <div class="pillar-card">
+                <div class="pillar-icon">&#128736;&#65039;</div>
+                <div class="pillar-name">Managed IT Services</div>
+                <div class="pillar-vendors">NOC/SOC &middot; MDR/EDR/XDR &middot; Helpdesk</div>
+                <div class="pillar-services">Remote monitoring, MPS, service desk</div>
+            </div>
+            <div class="pillar-card">
+                <div class="pillar-icon">&#128295;</div>
+                <div class="pillar-name">IT Professional Services</div>
+                <div class="pillar-vendors">Design &middot; Architecture &middot; Implementation</div>
+                <div class="pillar-services">Cloud migration, data center, wireless</div>
+            </div>
+            <div class="pillar-card">
+                <div class="pillar-icon">&#128230;</div>
+                <div class="pillar-name">IT Support Services</div>
+                <div class="pillar-vendors">Install &middot; Imaging &middot; Depot &middot; Warranty</div>
+                <div class="pillar-services">Asset mgmt, disposal, Xerox CareGPS</div>
+            </div>
+        </div>
+
+        <div class="sec-header"><h2>Powerland WebStore</h2><p>On-premise hardware procurement through Powerland's e-commerce platform.</p></div>
+        <div class="panel">
+            <div class="panel-title">Data Center & Co-Location</div>
+            <p style="font-size:13px;color:var(--text2);">Full data center solutions including co-location services. Dell, HPE, and Lenovo infrastructure available through Powerland WebStore for on-premise deployments. Hewlett Packard Enterprise on-premise and co-location options.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== PLAYBOOK ==================== -->
+<div id="playbook" class="page">
+    <div class="container">
+        <div class="sec-header">
+            <h2>Sales Playbook</h2>
+            <p>Plays, discovery questions, competitive intel, and templates aligned to Powerland's 12 pillars.</p>
+        </div>
+
+        <div class="section-tabs" id="playbookTabs">
+            <button class="section-tab active" data-sec="pb-plays">Sales Plays</button>
+            <button class="section-tab" data-sec="pb-discovery">Discovery Questions</button>
+            <button class="section-tab" data-sec="pb-battle">Battle Cards</button>
+            <button class="section-tab" data-sec="pb-emails">Email Templates</button>
+            <button class="section-tab" data-sec="pb-objections">Objection Handlers</button>
+        </div>
+
+        <!-- SALES PLAYS -->
+        <div id="pb-plays" class="section-content active">
+            <div class="play-grid">
+                <div class="play-card">
+                    <h3>Managed IT Services</h3>
+                    <p>The anchor deal. NOC/SOC, helpdesk, remote monitoring, MDR/EDR/XDR. Recurring MRR that compounds. Target orgs with 50-500 seats who have a small internal IT team drowning in tickets.</p>
+                    <div class="play-example"><strong>Open:</strong> "How many people are on your IT team vs how many endpoints you support? Most orgs we talk to are running at a 1:150+ ratio — that's where things fall through the cracks. We augment, not replace."</div>
+                </div>
+                <div class="play-card">
+                    <h3>Microsoft CSP / Cloud Licensing</h3>
+                    <p>Become their M365 partner of record. Free license audit finds savings, then you own the renewal. E3→E5 upsells, Copilot add-ons, Azure consumption. Sticky annual recurring revenue.</p>
+                    <div class="play-example"><strong>Open:</strong> "Who manages your Microsoft licensing today? We're finding most SK orgs are either overpaying or under-licensed. 30-minute audit, no cost — we usually find 15-20% savings."</div>
+                </div>
+                <div class="play-card">
+                    <h3>Hardware Refresh — Infrastructure</h3>
+                    <p>Dell, HPE, Lenovo servers, storage, compute. 3-5 year refresh cycles are predictable revenue. Time outreach to budget cycles. Government = April, Schools = September, CUs = January.</p>
+                    <div class="play-example"><strong>Open:</strong> "When was your last server refresh? If your infrastructure is 4+ years old, you're likely spending more on maintenance than a new solution would cost — and you're at higher risk of downtime."</div>
+                </div>
+                <div class="play-card">
+                    <h3>Security Stack</h3>
+                    <p>Darktrace, Netskope, Fortinet, Palo Alto, Arctic Wolf. Lead with a free security posture assessment. Every board and exec team is worried about ransomware. Fear sells. Insurance companies are mandating better security.</p>
+                    <div class="play-example"><strong>Open:</strong> "Has your cyber insurance provider increased your premiums or added requirements this year? We do a free security posture review — most orgs we assess in SK have 3-5 critical gaps."</div>
+                </div>
+                <div class="play-card">
+                    <h3>Backup & Disaster Recovery</h3>
+                    <p>Veeam, Zerto, Backupify. Ask when they last tested a restore. Most haven't. DR plans that haven't been tested are just documents. Compliance requirements (especially health, finance, government) are your leverage.</p>
+                    <div class="play-example"><strong>Open:</strong> "If ransomware hit tonight — and it's not if, it's when — what's your recovery time? We can get you to a 15-minute RPO and 1-hour RTO. Can I show you how?"</div>
+                </div>
+                <div class="play-card">
+                    <h3>Network Infrastructure</h3>
+                    <p>HPE Aruba, Cisco, Extreme, Juniper. Switching, wireless, SD-WAN. Schools and hospitals are big wireless buyers. Wi-Fi 6E/7 refresh cycles are happening now. Campus-wide deployments are $50K-$300K.</p>
+                    <div class="play-example"><strong>Open:</strong> "How old is your wireless infrastructure? With remote work and BYOD, most orgs are running 3x the devices they had 5 years ago on the same network. We do free wireless assessments."</div>
+                </div>
+                <div class="play-card">
+                    <h3>Endpoint / Hardware — Desktops & Laptops</h3>
+                    <p>Dell, HP, Lenovo. Volume endpoint deals for school divisions (1:1 programs), government fleets, enterprise refreshes. Pair with Managed IT for deployment, imaging, and lifecycle management.</p>
+                    <div class="play-example"><strong>Open:</strong> "How are you handling your next device refresh? We can bundle procurement, imaging, deployment, and lifecycle management into a single per-device cost — no surprises."</div>
+                </div>
+                <div class="play-card">
+                    <h3>Print & Document Management (Bridge to IT)</h3>
+                    <p>Your Xerox heritage opens the door. MPS, M-Files ECM, document workflows. But the real play is bridging to the full IT stack. Every print conversation should map the network and security posture.</p>
+                    <div class="play-example"><strong>Bridge:</strong> "While we're looking at your print fleet, I noticed you're running some older switches and your firewall is end-of-life. Would it be helpful if our team did a quick network and security review while we're here?"</div>
+                </div>
+                <div class="play-card">
+                    <h3>AI & Copilot Workshops</h3>
+                    <p>Microsoft Copilot is the hottest conversation in every boardroom. Offer free 2-hour workshops. Requires E5 or Copilot add-on licenses — ties directly to CSP revenue. Low commitment, high perceived value.</p>
+                    <div class="play-example"><strong>Open:</strong> "Every exec I talk to wants AI but nobody knows where to start. We run a 2-hour Copilot readiness workshop — your team walks away with a real adoption plan. No cost."</div>
+                </div>
+                <div class="play-card">
+                    <h3>RFP Response Strategy</h3>
+                    <p>Government and education buy through RFPs. Get on vendor lists early. Build relationships BEFORE the RFP drops — by the time it's public, the winner is usually already chosen. Use assessments to shape the spec.</p>
+                    <div class="play-example"><strong>Strategy:</strong> Offer free assessments 6-12 months before expected RFP. Your findings become the basis for the spec. If you shape the requirements, you win the deal. Track contract expiry dates religiously.</div>
+                </div>
+                <div class="play-card">
+                    <h3>Software Renewals & True-ups</h3>
+                    <p>Every org has software renewals hitting every month. Microsoft EA/CSP, VMware, Veeam, Fortinet, etc. Become the single point of contact for all renewals. Once you own the renewal, you own the relationship.</p>
+                    <div class="play-example"><strong>Open:</strong> "How many different vendors are you managing renewals with? We consolidate everything — licensing, support, renewals — into one relationship. One invoice, one throat to choke, better pricing."</div>
+                </div>
+                <div class="play-card">
+                    <h3>Virtualization & Cloud Migration</h3>
+                    <p>Azure Local, VMware, Nutanix. The VMware→Broadcom pricing change is driving migrations. Orgs on VMware are looking for alternatives NOW. Azure Local and Nutanix are hot alternatives.</p>
+                    <div class="play-example"><strong>Open:</strong> "Have your VMware costs gone up since the Broadcom acquisition? We're helping a lot of SK orgs evaluate Azure Local and Nutanix — we can run a side-by-side cost analysis for free."</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DISCOVERY QUESTIONS -->
+        <div id="pb-discovery" class="section-content">
+            <p style="font-size:12px;color:var(--text3);margin-bottom:14px;">Click any category to expand. Use these during first meetings to uncover opportunities across all pillars.</p>
+
+            <div class="q-group" onclick="this.classList.toggle('open')">
+                <div class="q-group-header"><span class="q-icon">&#128736;</span><span class="q-title">General IT Landscape</span><span class="q-toggle">&#9654;</span></div>
+                <div class="q-body">
+                    <div class="q-item">How many total employees / endpoints are you supporting?</div>
+                    <div class="q-item">What does your IT team look like? How many people?</div>
+                    <div class="q-item">What's your biggest IT pain point right now?</div>
+                    <div class="q-item">What does your IT budget cycle look like? When do you plan for next year?</div>
+                    <div class="q-item">Are you working with any IT partners or VARs today? Who?</div>
+                    <div class="q-item">Any major IT projects planned in the next 6-12 months?</div>
+                    <div class="q-item">Who makes the final decision on IT purchases?</div>
+                </div>
+            </div>
+
+            <div class="q-group" onclick="this.classList.toggle('open')">
+                <div class="q-group-header"><span class="q-icon">&#9729;</span><span class="q-title">Cloud & Microsoft 365</span><span class="q-toggle">&#9654;</span></div>
+                <div class="q-body">
+                    <div class="q-item">What Microsoft licenses are you on today? E1/E3/E5/Business?</div>
+                    <div class="q-item">Who is your Microsoft CSP partner (or are you buying direct)?</div>
+                    <div class="q-item">When is your Microsoft agreement up for renewal?</div>
+                    <div class="q-item">Are you using Teams, SharePoint, OneDrive fully — or just email?</div>
+                    <div class="q-item">Have you looked at Copilot? Any interest in AI productivity tools?</div>
+                    <div class="q-item">Any cloud workloads on Azure or AWS today?</div>
+                    <div class="q-item">What's your current on-prem vs cloud split?</div>
+                </div>
+            </div>
+
+            <div class="q-group" onclick="this.classList.toggle('open')">
+                <div class="q-group-header"><span class="q-icon">&#128274;</span><span class="q-title">Security</span><span class="q-toggle">&#9654;</span></div>
+                <div class="q-body">
+                    <div class="q-item">What does your security stack look like today? Firewall? EDR? SIEM?</div>
+                    <div class="q-item">Do you have a SOC or managed detection & response service?</div>
+                    <div class="q-item">When was your last security assessment or pen test?</div>
+                    <div class="q-item">Has your cyber insurance provider changed requirements recently?</div>
+                    <div class="q-item">Have you had any security incidents in the past 12 months?</div>
+                    <div class="q-item">How are you handling employee security awareness training?</div>
+                    <div class="q-item">What's your patch management process look like?</div>
+                </div>
+            </div>
+
+            <div class="q-group" onclick="this.classList.toggle('open')">
+                <div class="q-group-header"><span class="q-icon">&#128737;</span><span class="q-title">Backup & Disaster Recovery</span><span class="q-toggle">&#9654;</span></div>
+                <div class="q-body">
+                    <div class="q-item">What's your current backup solution?</div>
+                    <div class="q-item">When was the last time you tested a full restore?</div>
+                    <div class="q-item">What's your RPO and RTO today? Is that documented?</div>
+                    <div class="q-item">Do you have an offsite or cloud backup copy?</div>
+                    <div class="q-item">Are you backing up M365 (Exchange, SharePoint, Teams)?</div>
+                    <div class="q-item">Do you have a documented DR plan? Has it been tested?</div>
+                </div>
+            </div>
+
+            <div class="q-group" onclick="this.classList.toggle('open')">
+                <div class="q-group-header"><span class="q-icon">&#128421;</span><span class="q-title">Infrastructure & Hardware</span><span class="q-toggle">&#9654;</span></div>
+                <div class="q-body">
+                    <div class="q-item">How old is your server and storage infrastructure?</div>
+                    <div class="q-item">Are you running Dell, HPE, Lenovo, or other?</div>
+                    <div class="q-item">Any servers approaching end-of-support or warranty expiry?</div>
+                    <div class="q-item">What does your desktop/laptop fleet look like? Age? OS?</div>
+                    <div class="q-item">Are you running any HCI (hyper-converged) today?</div>
+                    <div class="q-item">Do you have a hardware lifecycle / refresh plan?</div>
+                </div>
+            </div>
+
+            <div class="q-group" onclick="this.classList.toggle('open')">
+                <div class="q-group-header"><span class="q-icon">&#127760;</span><span class="q-title">Network</span><span class="q-toggle">&#9654;</span></div>
+                <div class="q-body">
+                    <div class="q-item">What switching and wireless vendors are you running?</div>
+                    <div class="q-item">How old is your wireless infrastructure?</div>
+                    <div class="q-item">Are you doing SD-WAN or traditional WAN?</div>
+                    <div class="q-item">How many locations are you connecting?</div>
+                    <div class="q-item">Any issues with Wi-Fi capacity or coverage?</div>
+                    <div class="q-item">Who manages your network today — internal or outsourced?</div>
+                </div>
+            </div>
+
+            <div class="q-group" onclick="this.classList.toggle('open')">
+                <div class="q-group-header"><span class="q-icon">&#128424;</span><span class="q-title">Print & Document Management</span><span class="q-toggle">&#9654;</span></div>
+                <div class="q-body">
+                    <div class="q-item">How many printers/MFPs are in your fleet?</div>
+                    <div class="q-item">Who's your current print vendor? When does the contract expire?</div>
+                    <div class="q-item">Are you on a managed print services agreement or buying ad hoc?</div>
+                    <div class="q-item">How are you managing document workflows — scanning, archiving, compliance?</div>
+                    <div class="q-item">Have you looked at document management systems like M-Files?</div>
+                </div>
+            </div>
+
+            <div class="q-group" onclick="this.classList.toggle('open')">
+                <div class="q-group-header"><span class="q-icon">&#128176;</span><span class="q-title">Budget & Decision Making</span><span class="q-toggle">&#9654;</span></div>
+                <div class="q-body">
+                    <div class="q-item">What does your IT budget look like for this fiscal year?</div>
+                    <div class="q-item">Is there a formal procurement process or RFP requirement?</div>
+                    <div class="q-item">Who are the key stakeholders involved in IT decisions?</div>
+                    <div class="q-item">Do you prefer CapEx purchases or OpEx/monthly billing?</div>
+                    <div class="q-item">Are there any compliance or regulatory requirements driving IT spend?</div>
+                    <div class="q-item">What would make this a "must do now" vs "nice to have next year"?</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BATTLE CARDS -->
+        <div id="pb-battle" class="section-content">
+            <p style="font-size:12px;color:var(--text3);margin-bottom:14px;">Competitive intelligence for the main SK competitors. Use to position against and counter.</p>
+
+            <div class="battle-card">
+                <h3 style="color:var(--accent3);">WBM Technologies</h3>
+                <div class="battle-row">
+                    <div class="battle-col strengths">
+                        <h4>Their Strengths</h4>
+                        <ul>
+                            <li>Strong SK presence, offices in Regina & Saskatoon</li>
+                            <li>Long-standing government relationships</li>
+                            <li>Full IT services stack (managed, cloud, hardware)</li>
+                            <li>Dell & HP partner</li>
+                            <li>Good reputation in education</li>
+                        </ul>
+                    </div>
+                    <div class="battle-col weaknesses">
+                        <h4>Where We Win</h4>
+                        <ul>
+                            <li>We have Xerox print relationship as door opener they don't</li>
+                            <li>Broader vendor portfolio (Darktrace, Arctic Wolf, Nutanix)</li>
+                            <li>Powerland national scale = better pricing on Dell/HPE/Lenovo</li>
+                            <li>Microsoft CSP competency — aggressive M365 pricing</li>
+                            <li>AI/Copilot workshops — they lack this capability</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="battle-counter"><strong>Counter play:</strong><p>Don't compete head-to-head on what WBM does well. Anchor on security (Darktrace/Arctic Wolf), Copilot workshops, and M365 licensing savings. Be the "fresh perspective" — many accounts are fatigued with WBM.</p></div>
+            </div>
+
+            <div class="battle-card">
+                <h3 style="color:var(--accent3);">Horizon Computer Solutions</h3>
+                <div class="battle-row">
+                    <div class="battle-col strengths">
+                        <h4>Their Strengths</h4>
+                        <ul>
+                            <li>Established SK IT provider with strong local roots</li>
+                            <li>Good relationships in mid-market and government</li>
+                            <li>Managed IT and cloud services offering</li>
+                            <li>Responsive local support team</li>
+                        </ul>
+                    </div>
+                    <div class="battle-col weaknesses">
+                        <h4>Where We Win</h4>
+                        <ul>
+                            <li>Powerland national scale = deeper vendor pricing (Dell/HPE/Lenovo)</li>
+                            <li>Broader security portfolio (Darktrace, Arctic Wolf)</li>
+                            <li>Microsoft CSP competency — aggressive M365 licensing</li>
+                            <li>AI/Copilot workshops they can't match</li>
+                            <li>Xerox print relationship as additional door opener</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="battle-counter"><strong>Counter play:</strong><p>Horizon is solid but lacks the vendor depth and national pricing we bring. Lead with security stack (Darktrace/Arctic Wolf) and M365 savings — two areas where our scale creates real dollar gaps. Position Copilot workshops as the forward-looking differentiator.</p></div>
+            </div>
+
+            <div class="battle-card">
+                <h3 style="color:var(--accent3);">PC Place</h3>
+                <div class="battle-row">
+                    <div class="battle-col strengths">
+                        <h4>Their Strengths</h4>
+                        <ul>
+                            <li>Well-known retail + business IT in Saskatchewan</li>
+                            <li>Strong hardware resale and device deployment</li>
+                            <li>Quick-turn local service for SMB</li>
+                            <li>Trusted by smaller orgs for break/fix</li>
+                        </ul>
+                    </div>
+                    <div class="battle-col weaknesses">
+                        <h4>Where We Win</h4>
+                        <ul>
+                            <li>Limited managed services depth — mostly hardware-focused</li>
+                            <li>No enterprise security stack (no SOC, no SIEM)</li>
+                            <li>Can't match our cloud and GreenLake as-a-Service model</li>
+                            <li>No M365 CSP competency at scale</li>
+                            <li>We offer full lifecycle — they sell boxes</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="battle-counter"><strong>Counter play:</strong><p>PC Place wins on quick hardware sales to SMB. Position against them by leading with managed services and security — show the account they're buying hardware but have no monitoring, no backup strategy, no security layer. "Who's watching your network at 2 AM?"</p></div>
+            </div>
+
+            <div class="battle-card">
+                <h3 style="color:var(--accent3);">Wolf Strata</h3>
+                <div class="battle-row">
+                    <div class="battle-col strengths">
+                        <h4>Their Strengths</h4>
+                        <ul>
+                            <li>Focused managed IT and cloud consultancy</li>
+                            <li>Good technical depth in Azure/M365 environments</li>
+                            <li>Consultative approach resonates with mid-market</li>
+                            <li>Growing reputation in SK IT community</li>
+                        </ul>
+                    </div>
+                    <div class="battle-col weaknesses">
+                        <h4>Where We Win</h4>
+                        <ul>
+                            <li>Smaller operation — can't match Powerland's bench depth</li>
+                            <li>Limited hardware procurement scale</li>
+                            <li>Narrower vendor portfolio — we bring Darktrace, Arctic Wolf, Nutanix, HPE</li>
+                            <li>No print relationship to cross-sell from</li>
+                            <li>We offer GreenLake as-a-Service — they can't</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="battle-counter"><strong>Counter play:</strong><p>Wolf Strata competes on consultative cloud/M365 — don't fight them there alone. Bundle hardware + security + managed services to show total value. Our edge is the full stack: "one partner for everything" vs their niche play.</p></div>
+            </div>
+
+            <div class="battle-card">
+                <h3 style="color:var(--accent3);">Compugen</h3>
+                <div class="battle-row">
+                    <div class="battle-col strengths">
+                        <h4>Their Strengths</h4>
+                        <ul>
+                            <li>National scale — large Canadian IT solutions provider</li>
+                            <li>Strong enterprise and government contracts</li>
+                            <li>Deep vendor partnerships (HP, Cisco, Microsoft)</li>
+                            <li>Professional services and deployment capability</li>
+                        </ul>
+                    </div>
+                    <div class="battle-col weaknesses">
+                        <h4>Where We Win</h4>
+                        <ul>
+                            <li>Compugen is national — we have boots on the ground in SK</li>
+                            <li>Local relationships and faster response times</li>
+                            <li>More flexible and agile for mid-market deals</li>
+                            <li>Xerox print footprint gives us a warm intro they don't have</li>
+                            <li>AI/Copilot workshops — we're proactive, they're reactive</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="battle-counter"><strong>Counter play:</strong><p>Compugen wins big enterprise deals on scale. Beat them by being local and fast — "we're in Regina, not Toronto." Mid-market accounts want a partner who picks up the phone, not a ticket queue. Leverage existing Xerox relationships they can't touch.</p></div>
+            </div>
+
+            <div class="battle-card">
+                <h3 style="color:var(--accent3);">Internal IT / "We Handle It Ourselves"</h3>
+                <div class="battle-row">
+                    <div class="battle-col strengths">
+                        <h4>Their Argument</h4>
+                        <ul>
+                            <li>"We know our environment best"</li>
+                            <li>"We don't want to lose control"</li>
+                            <li>"We've always done it this way"</li>
+                            <li>Cost perception — think outsourcing is more expensive</li>
+                        </ul>
+                    </div>
+                    <div class="battle-col weaknesses">
+                        <h4>Where We Win</h4>
+                        <ul>
+                            <li>Augment, don't replace — we make their team better</li>
+                            <li>24/7 SOC they can't afford to staff</li>
+                            <li>Better vendor pricing through Powerland volume</li>
+                            <li>Skills gap — one IT person can't know security + cloud + networking</li>
+                            <li>Risk reduction — what happens when their IT person quits?</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="battle-counter"><strong>Counter play:</strong><p>"We augment your team, not replace them. Your IT person becomes the hero who brought in enterprise-grade security and 24/7 monitoring. And if they ever leave, you're not dead in the water."</p></div>
+            </div>
+        </div>
+
+        <!-- EMAIL TEMPLATES -->
+        <div id="pb-emails" class="section-content">
+            <div class="email-tpl">
+                <h3>Cold Outreach — IT Assessment</h3>
+                <div class="email-subject">Subject: Quick IT health check for [Company] — no cost</div>
+                <div class="email-body">Hi [First Name],
+
+I'm Mike Bernhardt with Xerox IT Solutions (Powerland) — we work with a number of organizations in Saskatchewan on their full IT stack: security, cloud, infrastructure, and managed services.
+
+I noticed [Company] would be a great fit for our complimentary IT assessment. We typically uncover 3-5 areas where organizations are either overspending or carrying unnecessary risk.
+
+Takes about 30 minutes and there's no obligation. Would you be open to a quick conversation this week or next?
+
+Best,
+Mike Bernhardt
+Sr Account Executive | Xerox IT Solutions
+[phone] | [email]</div>
+                <button class="copy-btn" onclick="copyEmail(this)">Copy to clipboard</button>
+            </div>
+
+            <div class="email-tpl">
+                <h3>Cold Outreach — M365 License Savings</h3>
+                <div class="email-subject">Subject: Are you overpaying for Microsoft 365? (Most SK orgs are)</div>
+                <div class="email-body">Hi [First Name],
+
+Quick question — when was the last time someone audited your Microsoft 365 licensing?
+
+We're finding that 8 out of 10 organizations in Saskatchewan are either on the wrong plan, have unused licenses, or are missing features they're already paying for.
+
+We do a free 30-minute licensing audit. Most orgs save 15-20%. Worst case, you confirm you're in good shape.
+
+Worth a quick call?
+
+Mike Bernhardt
+Sr Account Executive | Xerox IT Solutions
+[phone] | [email]</div>
+                <button class="copy-btn" onclick="copyEmail(this)">Copy to clipboard</button>
+            </div>
+
+            <div class="email-tpl">
+                <h3>Cold Outreach — Security Assessment</h3>
+                <div class="email-subject">Subject: Has [Company]'s cyber insurance gone up this year?</div>
+                <div class="email-body">Hi [First Name],
+
+Insurance providers across Canada are tightening cybersecurity requirements — and premiums are going up for orgs that can't demonstrate proper controls.
+
+We're offering a complimentary security posture review for Saskatchewan organizations. It takes about an hour, and we assess your environment against the frameworks insurance companies are looking for (MFA, EDR, backup, network segmentation).
+
+Most orgs we assess find 3-5 gaps. Would it be worth 20 minutes to discuss?
+
+Mike Bernhardt
+Sr Account Executive | Xerox IT Solutions
+[phone] | [email]</div>
+                <button class="copy-btn" onclick="copyEmail(this)">Copy to clipboard</button>
+            </div>
+
+            <div class="email-tpl">
+                <h3>Follow-Up After Meeting</h3>
+                <div class="email-subject">Subject: Great connecting — next steps for [Company]</div>
+                <div class="email-body">Hi [First Name],
+
+Thanks for taking the time today. I enjoyed learning about [Company]'s IT environment and the challenges you're facing with [specific pain point discussed].
+
+As discussed, here's what I'm going to do next:
+- [Action item 1]
+- [Action item 2]
+- [Action item 3]
+
+I'll have [deliverable] to you by [date]. In the meantime, if anything comes up, don't hesitate to reach out.
+
+Looking forward to working together.
+
+Mike Bernhardt
+Sr Account Executive | Xerox IT Solutions
+[phone] | [email]</div>
+                <button class="copy-btn" onclick="copyEmail(this)">Copy to clipboard</button>
+            </div>
+
+            <div class="email-tpl">
+                <h3>Re-Engagement — Contract Expiry</h3>
+                <div class="email-subject">Subject: Your [Vendor] contract is coming up — options?</div>
+                <div class="email-body">Hi [First Name],
+
+I understand your current [IT/print/security] agreement with [incumbent vendor] is coming up for renewal around [timeframe].
+
+Before you auto-renew, it might be worth seeing what else is available. Technology moves fast, and pricing has changed significantly in the last few years.
+
+We can put together a comparison in a couple of days — no pressure, just so you have options on the table. Would that be helpful?
+
+Mike Bernhardt
+Sr Account Executive | Xerox IT Solutions
+[phone] | [email]</div>
+                <button class="copy-btn" onclick="copyEmail(this)">Copy to clipboard</button>
+            </div>
+        </div>
+
+        <!-- OBJECTION HANDLERS -->
+        <div id="pb-objections" class="section-content">
+            <div class="play-grid">
+                <div class="play-card">
+                    <h3>"We already have a vendor"</h3>
+                    <p>"Totally understand. We're not here to replace what's working. We do a complimentary assessment that often finds savings your current vendor hasn't surfaced. Worst case you validate you're in good shape. Best case you save money. Either way you win."</p>
+                </div>
+                <div class="play-card">
+                    <h3>"We're locked into a contract"</h3>
+                    <p>"When does it come up? The best outcomes happen when we start the conversation 6-12 months before expiry. That way you're not rushed into a renewal. Can I put a reminder to reach out in [month]?"</p>
+                </div>
+                <div class="play-card">
+                    <h3>"Our IT team handles everything"</h3>
+                    <p>"That's actually our sweet spot. We don't replace IT teams — we give them leverage. A 24/7 SOC, vendor management, escalation support. Most IT directors tell us they got 30% of their week back to focus on strategic projects."</p>
+                </div>
+                <div class="play-card">
+                    <h3>"Xerox? You guys just do printers"</h3>
+                    <p>"I get that a lot — and honestly, that's the old Xerox. Through Powerland, we now deliver the full IT stack: security with Darktrace and Arctic Wolf, cloud with Microsoft, infrastructure with Dell and HPE, managed services. Same trusted relationship, 10x the capability."</p>
+                </div>
+                <div class="play-card">
+                    <h3>"We don't have budget right now"</h3>
+                    <p>"Totally fair. Two things though — the M365 audit and security assessment are free, so no budget needed. And if we do find savings, that often funds the next project. When does your next budget cycle start? Let's plan for that."</p>
+                </div>
+                <div class="play-card">
+                    <h3>"Send me some info"</h3>
+                    <p>"Happy to — but honestly, a generic brochure won't help. If I can ask just 2-3 questions, I can send you something actually relevant to [Company]. What's your biggest IT headache right now?"</p>
+                </div>
+                <div class="play-card">
+                    <h3>"We went through an RFP recently"</h3>
+                    <p>"Good to know — when does that agreement come up? I'd love to be on your radar for the next cycle. In the meantime, we could do a complementary assessment in an area your current vendor doesn't cover — like security or M365 optimization."</p>
+                </div>
+                <div class="play-card">
+                    <h3>"We're too small for that"</h3>
+                    <p>"Actually, that's exactly why managed services make sense. You can't afford a full IT team — but you can afford enterprise-grade IT at a per-seat cost. Our sweet spot is 50-500 seats."</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== TOOLS ==================== -->
+<div id="tools" class="page">
+    <div class="container">
+        <div class="sec-header">
+            <h2>Revenue Calculator & Tools</h2>
+            <p>Deal sizing, quota tracking, activity planning, and territory intelligence.</p>
+        </div>
+
+        <div class="section-tabs" id="toolsTabs">
+            <button class="section-tab active" data-sec="t-quota">Quota Math</button>
+            <button class="section-tab" data-sec="t-dealcalc">Deal Calculator</button>
+            <button class="section-tab" data-sec="t-activity">Activity Targets</button>
+            <button class="section-tab" data-sec="t-calendar">SK Calendar</button>
+            <button class="section-tab" data-sec="t-notes">Quick Notes</button>
+        </div>
+
+        <!-- QUOTA MATH -->
+        <div id="t-quota" class="section-content active">
+            <div class="calc-grid">
+                <div class="calc-panel">
+                    <h3>Quota Math — $3M FY2026</h3>
+                    <div class="calc-row"><span class="calc-label">Annual Target</span><span class="calc-val">$3,000,000</span></div>
+                    <div class="calc-row"><span class="calc-label">Closed YTD</span><span class="calc-val" style="color:var(--accent2);">$24,000</span></div>
+                    <div class="calc-row"><span class="calc-label">Remaining</span><span class="calc-val">$2,976,000</span></div>
+                    <div class="calc-row"><span class="calc-label">Monthly Target (remaining)</span><span class="calc-val" id="calcMonthly">$271K</span></div>
+                    <div class="calc-row"><span class="calc-label">Quarterly Target</span><span class="calc-val">$750,000</span></div>
+                    <div class="calc-row"><span class="calc-label">Daily Revenue Target</span><span class="calc-val">$12,000</span></div>
+                    <div class="calc-row"><span class="calc-label">3x Pipeline Needed</span><span class="calc-val" style="color:var(--accent3);">$9,000,000</span></div>
+                </div>
+                <div class="calc-panel">
+                    <h3>Deal Sizing Guide</h3>
+                    <div class="calc-row"><span class="calc-label">Hardware — Servers & Storage</span><span class="calc-val">$50K–$500K</span></div>
+                    <div class="calc-row"><span class="calc-label">Endpoint Devices (100+ seats)</span><span class="calc-val">$80K–$250K</span></div>
+                    <div class="calc-row"><span class="calc-label">Microsoft 365 CSP (100 users)</span><span class="calc-val">$40K–$80K/yr</span></div>
+                    <div class="calc-row"><span class="calc-label">Managed IT Services (50 seats)</span><span class="calc-val">$60K–$120K/yr</span></div>
+                    <div class="calc-row"><span class="calc-label">Managed IT Services (200+)</span><span class="calc-val">$200K–$500K/yr</span></div>
+                    <div class="calc-row"><span class="calc-label">HPE GreenLake (as-a-Service)</span><span class="calc-val">$100K–$1M+/yr</span></div>
+                    <div class="calc-row"><span class="calc-label">Security Stack</span><span class="calc-val">$30K–$150K/yr</span></div>
+                    <div class="calc-row"><span class="calc-label">Software Renewals / Licensing</span><span class="calc-val">$20K–$200K/yr</span></div>
+                    <div class="calc-row"><span class="calc-label">Full IT Stack — Enterprise</span><span class="calc-val">$300K–$1.5M+</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEAL CALCULATOR -->
+        <div id="t-dealcalc" class="section-content">
+            <div class="calc-grid">
+                <div class="calc-panel">
+                    <h3>Build a Deal</h3>
+                    <div class="deal-label">Account Name</div>
+                    <input class="deal-input" id="dc-name" placeholder="e.g. Government of Saskatchewan">
+                    <div class="deal-label">Managed IT (monthly per seat)</div>
+                    <input class="deal-input" type="number" id="dc-mit-price" placeholder="$100" value="">
+                    <div class="deal-label">Number of Seats</div>
+                    <input class="deal-input" type="number" id="dc-seats" placeholder="200" value="">
+                    <div class="deal-label">M365 CSP (monthly per user)</div>
+                    <input class="deal-input" type="number" id="dc-csp" placeholder="$36" value="">
+                    <div class="deal-label">Security Stack (annual)</div>
+                    <input class="deal-input" type="number" id="dc-security" placeholder="$50000" value="">
+                    <div class="deal-label">Hardware / Infrastructure (one-time)</div>
+                    <input class="deal-input" type="number" id="dc-hw" placeholder="$100000" value="">
+                    <div class="deal-label">GreenLake / as-a-Service (monthly)</div>
+                    <input class="deal-input" type="number" id="dc-mps" placeholder="$5000" value="">
+                    <div class="deal-label">Other Annual Revenue</div>
+                    <input class="deal-input" type="number" id="dc-other" placeholder="$0" value="">
+                    <button class="copy-btn" style="margin-top:12px;padding:10px 20px;font-size:13px;" onclick="calcDeal()">Calculate Deal</button>
+                </div>
+                <div class="calc-panel">
+                    <h3>Deal Summary</h3>
+                    <div id="dealResult">
+                        <p style="color:var(--text3);font-size:12px;">Fill in the fields and click Calculate to see deal value breakdown.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIVITY TARGETS -->
+        <div id="t-activity" class="section-content">
+            <div class="calc-grid">
+                <div class="calc-panel">
+                    <h3>Weekly Activity Targets</h3>
+                    <div class="calc-row"><span class="calc-label">Outbound Calls</span><span class="calc-val">30–40</span></div>
+                    <div class="calc-row"><span class="calc-label">Emails Sent</span><span class="calc-val">15–20</span></div>
+                    <div class="calc-row"><span class="calc-label">Discovery Meetings</span><span class="calc-val">4–6</span></div>
+                    <div class="calc-row"><span class="calc-label">Proposals Sent</span><span class="calc-val">2–3</span></div>
+                    <div class="calc-row"><span class="calc-label">LinkedIn Touches</span><span class="calc-val">10–15</span></div>
+                    <div class="calc-row"><span class="calc-label">Account Plans / Week</span><span class="calc-val">1–2</span></div>
+                    <div class="calc-row"><span class="calc-label">Follow-Up Touches</span><span class="calc-val">15–20</span></div>
+                </div>
+                <div class="calc-panel">
+                    <h3>SK Territory Key Stats</h3>
+                    <div class="calc-row"><span class="calc-label">Province Population</span><span class="calc-val">~1.2M</span></div>
+                    <div class="calc-row"><span class="calc-label">Major Cities</span><span class="calc-val">Saskatoon, Regina, PA, MJ</span></div>
+                    <div class="calc-row"><span class="calc-label">Top Industries</span><span class="calc-val">Ag, Mining, Govt, Energy</span></div>
+                    <div class="calc-row"><span class="calc-label">Key Competitors</span><span class="calc-val">WBM, KM, Toshiba</span></div>
+                    <div class="calc-row"><span class="calc-label">Govt Fiscal Year</span><span class="calc-val">April 1</span></div>
+                    <div class="calc-row"><span class="calc-label">School Division FY</span><span class="calc-val">September 1</span></div>
+                    <div class="calc-row"><span class="calc-label">Credit Union FY</span><span class="calc-val">January 1</span></div>
+                </div>
+            </div>
+            <div class="calc-grid" style="margin-top:14px;">
+                <div class="calc-panel">
+                    <h3>Pipeline Conversion Math</h3>
+                    <div class="calc-row"><span class="calc-label">Target: $3M closed</span><span class="calc-val">$3,000,000</span></div>
+                    <div class="calc-row"><span class="calc-label">Assumed close rate</span><span class="calc-val">33%</span></div>
+                    <div class="calc-row"><span class="calc-label">Pipeline needed (3x)</span><span class="calc-val" style="color:var(--accent3);">$9,000,000</span></div>
+                    <div class="calc-row"><span class="calc-label">Avg deal size $75K → deals needed</span><span class="calc-val">120 opps</span></div>
+                    <div class="calc-row"><span class="calc-label">Opps per month</span><span class="calc-val">10/mo</span></div>
+                    <div class="calc-row"><span class="calc-label">Meetings to opp (30%)</span><span class="calc-val">~33 meetings/mo</span></div>
+                    <div class="calc-row"><span class="calc-label">Calls to meeting (10%)</span><span class="calc-val">~330 calls/mo</span></div>
+                </div>
+                <div class="calc-panel">
+                    <h3>Revenue Mix Target</h3>
+                    <div class="calc-row"><span class="calc-label">Recurring (MRR/ARR)</span><span class="calc-val" style="color:var(--accent2);">60% = $1.8M</span></div>
+                    <div class="calc-row"><span class="calc-label">- Managed IT Services</span><span class="calc-val">$600K</span></div>
+                    <div class="calc-row"><span class="calc-label">- M365 CSP Licensing</span><span class="calc-val">$400K</span></div>
+                    <div class="calc-row"><span class="calc-label">- Security Stack (annual)</span><span class="calc-val">$400K</span></div>
+                    <div class="calc-row"><span class="calc-label">- MPS / Print</span><span class="calc-val">$400K</span></div>
+                    <div class="calc-row"><span class="calc-label">One-Time (hardware/projects)</span><span class="calc-val" style="color:var(--accent);">40% = $1.2M</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SK CALENDAR -->
+        <div id="t-calendar" class="section-content">
+            <div class="calc-grid">
+                <div class="calc-panel" style="grid-column: span 2;">
+                    <h3>Saskatchewan Territory Calendar — Key Dates & Budget Cycles</h3>
+                    <div class="cal-month">
+                        <div class="cal-month-name">January – March (Q1)</div>
+                        <div class="cal-event"><span class="cal-date">Jan 1</span><span class="cal-desc">Credit Union fiscal year starts — budget available</span><span class="cal-type cal-budget">Budget</span></div>
+                        <div class="cal-event"><span class="cal-date">Jan-Feb</span><span class="cal-desc">Credit unions: Q1 budget allocation, best time to pitch new projects</span><span class="cal-type cal-outreach">Outreach</span></div>
+                        <div class="cal-event"><span class="cal-date">Feb-Mar</span><span class="cal-desc">Government departments planning next fiscal year (Apr 1 start)</span><span class="cal-type cal-budget">Budget</span></div>
+                        <div class="cal-event"><span class="cal-date">Mar</span><span class="cal-desc">Government "use it or lose it" — end of fiscal year spending</span><span class="cal-type cal-budget">Budget</span></div>
+                        <div class="cal-event"><span class="cal-date">Q1</span><span class="cal-desc">Microsoft EA / CSP renewals — many orgs on Jan-Dec cycle</span><span class="cal-type cal-renewal">Renewal</span></div>
+                    </div>
+                    <div class="cal-month">
+                        <div class="cal-month-name">April – June (Q2)</div>
+                        <div class="cal-event"><span class="cal-date">Apr 1</span><span class="cal-desc">Government of SK fiscal year starts — new budget available</span><span class="cal-type cal-budget">Budget</span></div>
+                        <div class="cal-event"><span class="cal-date">Apr 1</span><span class="cal-desc">Crown Corps (SaskTel, SaskEnergy, SGI, SLGA) fiscal year start</span><span class="cal-type cal-budget">Budget</span></div>
+                        <div class="cal-event"><span class="cal-date">Apr-May</span><span class="cal-desc">Government: Best window for new IT projects and assessments</span><span class="cal-type cal-outreach">Outreach</span></div>
+                        <div class="cal-event"><span class="cal-date">May-Jun</span><span class="cal-desc">School divisions: IT planning for next school year</span><span class="cal-type cal-outreach">Outreach</span></div>
+                        <div class="cal-event"><span class="cal-date">Jun</span><span class="cal-desc">School divisions: Year-end spending, summer project planning</span><span class="cal-type cal-budget">Budget</span></div>
+                    </div>
+                    <div class="cal-month">
+                        <div class="cal-month-name">July – September (Q3)</div>
+                        <div class="cal-event"><span class="cal-date">Jul-Aug</span><span class="cal-desc">School divisions: Summer IT projects (network upgrades, endpoint refresh)</span><span class="cal-type cal-outreach">Outreach</span></div>
+                        <div class="cal-event"><span class="cal-date">Sep 1</span><span class="cal-desc">School division fiscal year starts</span><span class="cal-type cal-budget">Budget</span></div>
+                        <div class="cal-event"><span class="cal-date">Sep</span><span class="cal-desc">Government mid-year review — assess remaining budget</span><span class="cal-type cal-budget">Budget</span></div>
+                        <div class="cal-event"><span class="cal-date">Q3</span><span class="cal-desc">Hardware refresh cycle — Dell/HPE/Lenovo new product launches</span><span class="cal-type cal-renewal">Renewal</span></div>
+                    </div>
+                    <div class="cal-month">
+                        <div class="cal-month-name">October – December (Q4)</div>
+                        <div class="cal-event"><span class="cal-date">Oct-Nov</span><span class="cal-desc">Government & Crown Corp — year-end budget pushes</span><span class="cal-type cal-budget">Budget</span></div>
+                        <div class="cal-event"><span class="cal-date">Oct-Nov</span><span class="cal-desc">School divisions: Mid-year IT projects, winter planning</span><span class="cal-type cal-outreach">Outreach</span></div>
+                        <div class="cal-event"><span class="cal-date">Nov-Dec</span><span class="cal-desc">Credit unions: Budget planning for next year (Jan 1 start)</span><span class="cal-type cal-budget">Budget</span></div>
+                        <div class="cal-event"><span class="cal-date">Dec</span><span class="cal-desc">Software renewal season — VMware, Veeam, security subscriptions</span><span class="cal-type cal-renewal">Renewal</span></div>
+                        <div class="cal-event"><span class="cal-date">Q4</span><span class="cal-desc">Year-end hardware deals — vendor incentives and special pricing</span><span class="cal-type cal-outreach">Outreach</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUICK NOTES -->
+        <div id="t-notes" class="section-content">
+            <div class="calc-grid">
+                <div class="calc-panel">
+                    <h3>Weekly Focus / To-Do</h3>
+                    <textarea class="notes-area" id="notesWeekly" placeholder="What are you focused on this week? Key meetings, follow-ups, priorities..."></textarea>
+                    <div class="notes-saved" id="notesSavedWeekly">Saved</div>
+                </div>
+                <div class="calc-panel">
+                    <h3>Hot Prospects / Pipeline Notes</h3>
+                    <textarea class="notes-area" id="notesPipeline" placeholder="Deals in motion, proposals out, next steps..."></textarea>
+                    <div class="notes-saved" id="notesSavedPipeline">Saved</div>
+                </div>
+            </div>
+            <div class="calc-grid" style="margin-top:14px;">
+                <div class="calc-panel" style="grid-column: span 2;">
+                    <h3>General Notes & Ideas</h3>
+                    <textarea class="notes-area" id="notesGeneral" placeholder="Account intel, competitor sightings, product updates, ideas..." style="min-height:180px;"></textarea>
+                    <div class="notes-saved" id="notesSavedGeneral">Saved</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== CALENDAR ==================== -->
+<div id="calendar" class="page">
+    <div class="container">
+        <div class="sec-header">
+            <h2>Calendar</h2>
+            <p>Your synced calendar from mike@mountainthirteen.ca. If the calendar doesn't load, ensure sharing settings allow embed access.</p>
+        </div>
+        <iframe class="cal-embed" src="https://calendar.google.com/calendar/embed?src=acg8pj4a64i43uqga1hnd0lhfc8ete3n%40import.calendar.google.com&ctz=America%2FRegina&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showCalendars=0&showTz=0" style="border:0"></iframe>
+    </div>
+</div>
+
+</div><!-- end app -->
+
+<!-- ACCOUNT DETAIL MODAL -->
+<div class="modal-overlay hidden" id="acctModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="modalAcctName">Account Name</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-section">
+                <div class="modal-section-title">Opportunity Tracking</div>
+                <div class="modal-row">
+                    <div class="modal-field">
+                        <label>Deal Stage</label>
+                        <select id="m-stage">
+                            <option value="Fresh">Fresh</option>
+                            <option value="Discovery">Discovery</option>
+                            <option value="Qualifying">Qualifying</option>
+                            <option value="Proposal">Proposal</option>
+                            <option value="Negotiation">Negotiation</option>
+                            <option value="Closed Won">Closed Won</option>
+                            <option value="Closed Lost">Closed Lost</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label>Est. Deal Value ($)</label>
+                        <input type="number" id="m-value" placeholder="50000">
+                    </div>
+                    <div class="modal-field">
+                        <label>Probability</label>
+                        <select id="m-prob">
+                            <option value="">—</option>
+                            <option value="10">10%</option>
+                            <option value="25">25%</option>
+                            <option value="50">50%</option>
+                            <option value="75">75%</option>
+                            <option value="90">90%</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label>Expected Close</label>
+                        <select id="m-close-q">
+                            <option value="">—</option>
+                            <option value="Q1 2026">Q1 2026</option>
+                            <option value="Q2 2026">Q2 2026</option>
+                            <option value="Q3 2026">Q3 2026</option>
+                            <option value="Q4 2026">Q4 2026</option>
+                            <option value="2027+">2027+</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label>IT Incumbent</label>
+                        <select id="m-incumbent">
+                            <option value="">— None —</option>
+                            <option value="WBM">WBM</option>
+                            <option value="Horizon">Horizon</option>
+                            <option value="PC Place">PC Place</option>
+                            <option value="Wolf Strata">Wolf Strata</option>
+                            <option value="Compugen">Compugen</option>
+                            <option value="Internal IT">Internal IT</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">Pillar Opportunities</div>
+                <div class="check-grid" id="m-pillars">
+                    <label class="check-item" data-val="Cloud"><input type="checkbox">Cloud</label>
+                    <label class="check-item" data-val="Virtualization"><input type="checkbox">Virtualization</label>
+                    <label class="check-item" data-val="Infrastructure"><input type="checkbox">Infrastructure</label>
+                    <label class="check-item" data-val="Endpoint"><input type="checkbox">Endpoint</label>
+                    <label class="check-item" data-val="Security"><input type="checkbox">Security</label>
+                    <label class="check-item" data-val="Data Protection"><input type="checkbox">Data Protection</label>
+                    <label class="check-item" data-val="Print/Doc Mgmt"><input type="checkbox">Print/Doc Mgmt</label>
+                    <label class="check-item" data-val="Network"><input type="checkbox">Network</label>
+                    <label class="check-item" data-val="AI/Copilot"><input type="checkbox">AI/Copilot</label>
+                    <label class="check-item" data-val="Managed IT"><input type="checkbox">Managed IT</label>
+                    <label class="check-item" data-val="Prof Services"><input type="checkbox">Prof Services</label>
+                    <label class="check-item" data-val="Support Svc"><input type="checkbox">Support Svc</label>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">Flags</div>
+                <div class="check-grid" id="m-flags">
+                    <label class="check-item" data-val="rfp"><input type="checkbox">Active RFP</label>
+                    <label class="check-item" data-val="expiring"><input type="checkbox">Contract Expiring</label>
+                    <label class="check-item" data-val="budget"><input type="checkbox">Budget Approved</label>
+                    <label class="check-item" data-val="dm"><input type="checkbox">Decision Maker ID'd</label>
+                    <label class="check-item" data-val="proposal"><input type="checkbox">Proposal Sent</label>
+                    <label class="check-item" data-val="competitor"><input type="checkbox">Competitor Incumbent</label>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">Key Contact</div>
+                <div class="modal-row">
+                    <div class="modal-field"><label>Name</label><input id="m-cname" placeholder="Jane Smith"></div>
+                    <div class="modal-field"><label>Title</label><input id="m-ctitle" placeholder="CIO"></div>
+                </div>
+                <div class="modal-row">
+                    <div class="modal-field"><label>Email</label><input id="m-cemail" type="email" placeholder="jane@company.com"></div>
+                    <div class="modal-field"><label>Phone</label><input id="m-cphone" placeholder="306-555-1234"></div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">Key Dates</div>
+                <div class="modal-row">
+                    <div class="modal-field"><label>Next Follow-Up</label><input id="m-followup" type="date"></div>
+                    <div class="modal-field"><label>Contract Expiry</label><input id="m-expiry" type="date"></div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">Notes</div>
+                <textarea class="modal-notes" id="m-notes" placeholder="Meeting notes, intel, next steps..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="modal-btn modal-btn-primary" onclick="saveModal()">Save & Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- CALENDAR SETUP MODAL -->
+<div class="modal-overlay hidden" id="calSetupModal">
+    <div class="modal-card" style="max-width:540px;">
+        <div class="modal-header">
+            <h2>Connect Google Calendar</h2>
+            <button class="modal-close" onclick="document.getElementById('calSetupModal').classList.add('hidden')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-section">
+                <div class="modal-section-title">One-Time Setup</div>
+                <div style="font-size:12px;color:var(--text2);line-height:1.6;">
+                    <strong>1.</strong> <a href="https://console.cloud.google.com/projectcreate" target="_blank" style="color:var(--accent);">Create a Google Cloud project</a> (free)<br>
+                    <strong>2.</strong> <a href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank" style="color:var(--accent);">Enable the Calendar API</a><br>
+                    <strong>3.</strong> <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--accent);">Create an API key</a> (+ Create Credentials → API key)<br>
+                    <strong>4.</strong> In Google Calendar → Settings → your calendar → <strong>Make available to public</strong><br>
+                    <strong>5.</strong> Copy your <strong>Calendar ID</strong> from Settings → Integrate calendar
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">Your Credentials</div>
+                <div class="modal-row">
+                    <div class="modal-field" style="flex:1;">
+                        <label>API Key</label>
+                        <input type="text" id="calApiKey" placeholder="AIzaSyB..." style="width:100%;">
+                    </div>
+                </div>
+                <div class="modal-row" style="margin-top:6px;">
+                    <div class="modal-field" style="flex:1;">
+                        <label>Calendar ID</label>
+                        <input type="text" id="calCalId" placeholder="mike@mountainthirteen.ca or long-id@group.calendar.google.com" style="width:100%;">
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:10px;">
+                    <button class="mtg-add-btn" onclick="saveCalApi()">Save & Connect</button>
+                    <button class="mtg-add-btn" style="background:var(--border);color:var(--text3);" onclick="clearCalApi()">Disconnect</button>
+                </div>
+                <div id="calTestResult" style="font-size:11px;margin-top:8px;color:var(--text3);"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DIGEST MODAL -->
+<div class="modal-overlay hidden" id="digestModal">
+    <div class="modal-card" style="max-width:600px;">
+        <div class="modal-header">
+            <h2>End of Day Digest</h2>
+            <button class="modal-close" onclick="document.getElementById('digestModal').classList.add('hidden')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="digestContent" style="font-family:var(--mono);font-size:11px;line-height:1.7;white-space:pre-wrap;max-height:400px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-ghost" onclick="document.getElementById('digestModal').classList.add('hidden')">Close</button>
+            <button class="modal-btn modal-btn-primary" onclick="copyDigest()">Copy to Clipboard</button>
+        </div>
+    </div>
+</div>
+
+<div style="height:60px;"></div>
+
+<script>
+// ===== AUTH =====
+const ACCESS_CODE = 'xits2026';
+const authOverlay = document.getElementById('authOverlay');
+const app = document.getElementById('app');
+const authPass = document.getElementById('authPass');
+const authBtn = document.getElementById('authBtn');
+const authError = document.getElementById('authError');
+
+if (localStorage.getItem('xits_auth') === 'true') {
+    authOverlay.classList.add('hidden');
+    app.classList.add('visible');
+}
+
+function tryAuth() {
+    if (authPass.value === ACCESS_CODE) {
+        localStorage.setItem('xits_auth', 'true');
+        authOverlay.classList.add('hidden');
+        app.classList.add('visible');
+    } else {
+        authError.style.display = 'block';
+        authPass.value = '';
+        authPass.focus();
+    }
+}
+authBtn.addEventListener('click', tryAuth);
+authPass.addEventListener('keydown', e => { if (e.key === 'Enter') tryAuth(); });
+
+// ===== ENT ACCOUNTS DATA =====
+const entAccounts = [
+    // Original 20 enterprise accounts
+    {name:"Government of Saskatchewan",sector:"Government",emp:30000,city:"Regina/Province-wide",priority:"A",incumbent:"WBM",contact:"",source:"Tracker"},
+    {name:"Nutrien Ltd",sector:"Mining",emp:3944,city:"Saskatoon",priority:"A",incumbent:"WBM",contact:"",source:"Tracker"},
+    {name:"SaskTel",sector:"Crown Corp",emp:3136,city:"Regina",priority:"A",incumbent:"—",contact:"",source:"Tracker"},
+    {name:"Federated Co-operatives (FCL)",sector:"Retail",emp:2309,city:"Saskatoon",priority:"B",incumbent:"—",contact:"",source:"Tracker"},
+    {name:"SGI Canada",sector:"Crown Corp",emp:2012,city:"Regina",priority:"B",incumbent:"—",contact:"",source:"Tracker"},
+    {name:"The Mosaic Company",sector:"Mining",emp:1984,city:"Saskatoon/Esterhazy",priority:"A",incumbent:"Konica Minolta",contact:"Geoff Cole",source:"Tracker"},
+    {name:"SIGA",sector:"Government",emp:1882,city:"Saskatoon",priority:"B",incumbent:"Xerox Dealer AB",contact:"Ryan G",source:"Tracker"},
+    {name:"Brandt Group",sector:"Manufacturing",emp:1413,city:"Regina",priority:"B",incumbent:"Calgary Agency",contact:"",source:"Tracker"},
+    {name:"SaskEnergy",sector:"Crown Corp",emp:1169,city:"Regina",priority:"B",incumbent:"WBM",contact:"",source:"Tracker"},
+    {name:"Cameco Corporation",sector:"Mining",emp:1089,city:"Saskatoon",priority:"A",incumbent:"WBM",contact:"Mark (VP Tech)",source:"Tracker"},
+    {name:"Pharma Choice Canada",sector:"Healthcare",emp:1080,city:"Saskatoon",priority:"C",incumbent:"—",contact:"",source:"Tracker"},
+    {name:"Conexus Credit Union",sector:"Financial",emp:891,city:"Regina",priority:"B",incumbent:"Unknown",contact:"CMO",source:"Tracker"},
+    {name:"Affinity Credit Union",sector:"Financial",emp:802,city:"Saskatoon",priority:"B",incumbent:"Unknown",contact:"",source:"Tracker"},
+    {name:"SARCAN Recycling",sector:"Government",emp:790,city:"Saskatoon",priority:"C",incumbent:"—",contact:"",source:"Tracker"},
+    {name:"Viterra",sector:"Agriculture",emp:726,city:"Regina",priority:"C",incumbent:"—",contact:"",source:"Tracker"},
+    {name:"SLGA",sector:"Crown Corp",emp:682,city:"Regina",priority:"C",incumbent:"—",contact:"",source:"Tracker"},
+    {name:"Co-op Life Insurance",sector:"Financial",emp:598,city:"Regina",priority:"C",incumbent:"—",contact:"",source:"Tracker"},
+    {name:"Saskatchewan WCB",sector:"Crown Corp",emp:505,city:"Regina",priority:"B",incumbent:"Unknown",contact:"",source:"Tracker"},
+    {name:"City of Saskatoon",sector:"Government",emp:0,city:"Saskatoon",priority:"A",incumbent:"—",contact:"",source:"Tracker"},
+    {name:"City of Regina",sector:"Government",emp:0,city:"Regina",priority:"A",incumbent:"—",contact:"",source:"Tracker"},
+    // New from SK Company Database (500+ emp)
+    {name:"Regina General Hospital",sector:"Healthcare",emp:8000,city:"Regina",priority:"A",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Sun Country Regional Health",sector:"Healthcare",emp:2400,city:"Weyburn",priority:"B",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Maple Leaf Consumer Foods",sector:"Manufacturing",emp:1500,city:"Saskatoon",priority:"B",incumbent:"—",contact:"Gord Macfarlane",source:"SK DB"},
+    {name:"Five Hills Health Region",sector:"Healthcare",emp:1200,city:"Moose Jaw",priority:"B",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Saskatchewan Gaming Corporation",sector:"Gaming",emp:1001,city:"Regina",priority:"B",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"St Paul's Hospital",sector:"Healthcare",emp:1000,city:"Saskatoon",priority:"B",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Wascana Rehabilitation Centre",sector:"Healthcare",emp:1000,city:"Regina",priority:"B",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Trans Gas Ltd",sector:"Energy",emp:900,city:"Regina",priority:"C",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Potash Corp of SK (Lanigan)",sector:"Mining",emp:700,city:"Lanigan",priority:"B",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Commissionaires Saskatchewan",sector:"Security",emp:700,city:"Regina",priority:"C",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Dominion Pro-Vac Inc",sector:"Industrial",emp:687,city:"Regina",priority:"C",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Kelsey Trail Health Region",sector:"Healthcare",emp:600,city:"Nipawin",priority:"C",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Yorkton Regional Health Centre",sector:"Healthcare",emp:600,city:"Yorkton",priority:"C",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Consumers' Co-Op Refineries",sector:"Energy",emp:600,city:"Regina",priority:"B",incumbent:"—",contact:"",source:"SK DB"},
+    {name:"Ranch Ehrlo Society",sector:"Social Services",emp:600,city:"Regina",priority:"C",incumbent:"—",contact:"",source:"SK DB"},
+];
+
+// ===== SMB DATA =====
+const smbAccounts = [
+    {name:"Potash Corp of SK (Rocanville)",industry:"Mining",emp:480,sales:618200000,city:"Rocanville",contact:"",title:""},
+    {name:"Farm Credit Canada",industry:"Finance",emp:463,sales:0,city:"Regina",contact:"Wes Anderson",title:"Regional VP"},
+    {name:"Canadian Pacific Railway",industry:"Transportation",emp:460,sales:167400000,city:"Moose Jaw",contact:"",title:""},
+    {name:"Northern Lights Casino",industry:"Gaming",emp:420,sales:51700000,city:"Prince Albert",contact:"",title:""},
+    {name:"Bombardier Aerospace",industry:"Manufacturing",emp:413,sales:0,city:"Moose Jaw",contact:"",title:""},
+    {name:"Vecima Networks Inc",industry:"Technology",emp:400,sales:134400000,city:"Saskatoon",contact:"Dr. Surinder Kumar",title:"CEO"},
+    {name:"Westmoreland Coal",industry:"Mining",emp:400,sales:86400000,city:"Estevan",contact:"",title:""},
+    {name:"Bourgault Industries",industry:"Manufacturing",emp:390,sales:236300000,city:"St Brieux",contact:"Gerry Bourgault",title:"President"},
+    {name:"Gold Eagle Casino",industry:"Gaming",emp:380,sales:46700000,city:"North Battleford",contact:"",title:""},
+    {name:"CGI",industry:"Technology",emp:375,sales:90400000,city:"Saskatoon",contact:"",title:""},
+    {name:"Prince Albert Grand Council",industry:"Government",emp:350,sales:0,city:"Prince Albert",contact:"",title:""},
+    {name:"Geoanalytical Laboratories",industry:"Technology",emp:350,sales:0,city:"Saskatoon",contact:"",title:""},
+    {name:"Leader-Post / Postmedia",industry:"Media",emp:310,sales:67300000,city:"Regina",contact:"",title:""},
+    {name:"Ray's Transport Ltd",industry:"Transportation",emp:301,sales:56000000,city:"Saskatoon",contact:"",title:""},
+    {name:"Boundary Dam Power Station",industry:"Energy",emp:300,sales:315000000,city:"Estevan",contact:"",title:""},
+    {name:"Battleford's Union Hospital",industry:"Healthcare",emp:300,sales:46500000,city:"North Battleford",contact:"",title:""},
+    {name:"Cypress Regional Hospital",industry:"Healthcare",emp:300,sales:46500000,city:"Swift Current",contact:"",title:""},
+    {name:"Prairie North Health (Meadow Lake)",industry:"Healthcare",emp:300,sales:45600000,city:"Meadow Lake",contact:"",title:""},
+    {name:"Painted Hand Casino",industry:"Gaming",emp:300,sales:36900000,city:"Yorkton",contact:"",title:""},
+    {name:"Transwest Air",industry:"Transportation",emp:300,sales:132900000,city:"Saskatoon",contact:"",title:""},
+    {name:"Dream Development",industry:"Construction",emp:300,sales:150300000,city:"Saskatoon",contact:"",title:""},
+    {name:"Broda Construction Group",industry:"Construction",emp:300,sales:0,city:"Prince Albert",contact:"",title:""},
+    {name:"ISM Canada",industry:"Technology",emp:300,sales:72300000,city:"Regina",contact:"",title:""},
+    {name:"Husky Lloydminster Upgrader",industry:"Energy",emp:300,sales:69000000,city:"Lloydminster",contact:"",title:""},
+    {name:"Saskatoon Star Phoenix",industry:"Media",emp:300,sales:65100000,city:"Saskatoon",contact:"",title:""},
+    {name:"WorleyParsons Canada",industry:"Engineering",emp:280,sales:64700000,city:"Saskatoon",contact:"",title:""},
+    {name:"Claude Resources Inc",industry:"Mining",emp:260,sales:75100000,city:"La Ronge",contact:"",title:""},
+    {name:"Agrium Inc (Vanscoy)",industry:"Manufacturing",emp:500,sales:561000000,city:"Vanscoy",contact:"",title:""},
+    {name:"Dakota Dunes Community Dev",industry:"Government",emp:250,sales:0,city:"Whitecap",contact:"",title:""},
+    {name:"Loraas Disposal Services",industry:"Industrial",emp:200,sales:30000000,city:"Saskatoon",contact:"",title:""},
+];
+
+// ===== K-12 DATA =====
+const k12 = [
+    {name:"Saskatoon Public SD 13",type:"Public",region:"Saskatoon",students:28924,incumbent:"KM (2023, 5yr)",cfo:"Daniel Burke (CFO)",it:"Jason Dunk (CTO)",priority:"A"},
+    {name:"Regina Public SD 4",type:"Public",region:"Regina",students:26000,incumbent:"KM (5yr, 2025?)",cfo:"Ashley Kuntz",it:"Aaron Baumgartner",priority:"A"},
+    {name:"Greater Saskatoon Catholic 20",type:"Catholic",region:"Saskatoon",students:20000,incumbent:"KM (lost fleet 2025)",cfo:"Joel Lloyd (CFO)",it:"Kalyn Kist (CIO)",priority:"A"},
+    {name:"Regina Catholic SD 81",type:"Catholic",region:"Regina",students:14000,incumbent:"Toshiba",cfo:"Josh Kramer (CFO)",it:"S. Fossenier (CIO)",priority:"A"},
+    {name:"Saskatchewan Rivers SD 119",type:"Public",region:"",students:9500,incumbent:"—",cfo:"Jerrold Pidborochynski",it:"IT under CFO",priority:"C"},
+    {name:"Prairie Valley SD 208",type:"Public",region:"Regina Beach",students:8858,incumbent:"Konica Minolta",cfo:"Brent Nadon (CFO)",it:"Ashton Calder",priority:"B"},
+    {name:"South East Cornerstone SD 209",type:"Public",region:"Weyburn",students:8305,incumbent:"Konica Minolta",cfo:"Shelley Toth (CFO)",it:"Michael Graham",priority:"C"},
+    {name:"Prairie Spirit SD 206",type:"Public",region:"",students:7231,incumbent:"Toshiba (2024, 3-5yr)",cfo:"Ron Purdy (CFO)",it:"Dustin Swanson",priority:"C"},
+    {name:"Horizon SD 205",type:"Public",region:"Humboldt",students:6701,incumbent:"Konica Minolta",cfo:"Sarah Reding",it:"Ken Sogge",priority:"C"},
+    {name:"Chinook SD 211",type:"Public",region:"Swift Current",students:6000,incumbent:"—",cfo:"Sherie Sloman (CFO)",it:"",priority:"C"},
+    {name:"Living Sky SD 202",type:"Public",region:"NW Central SK",students:5300,incumbent:"Konica Minolta",cfo:"Lonny Darroch (CFO)",it:"Ryan Kobelsky",priority:"C"},
+    {name:"Sun West SD 207",type:"Public",region:"West Central SK",students:4700,incumbent:"Konica Minolta",cfo:"Ryan Smith (CFO)",it:"Michael Zummack",priority:"C"},
+    {name:"Northwest SD 203",type:"Public",region:"Meadow Lake",students:4530,incumbent:"—",cfo:"Michelle Pickett (CFO)",it:"Al Maier",priority:"C"},
+    {name:"Northern Lights SD 113",type:"Public",region:"La Ronge",students:4129,incumbent:"—",cfo:"Tom Harrington (CFO)",it:"",priority:"C"},
+    {name:"Prince Albert RCSSD 6",type:"Catholic",region:"Prince Albert",students:3198,incumbent:"—",cfo:"Greg McEwen (CFO)",it:"",priority:"C"},
+    {name:"Lloydminster RCSSD 89",type:"Catholic",region:"Lloydminster",students:2827,incumbent:"Konica Minolta",cfo:"Melanie Stelmaschuk (CFO)",it:"Armand Brockhoff",priority:"C"},
+    {name:"Holy Trinity RCSSD 22",type:"Catholic",region:"Moose Jaw",students:2467,incumbent:"Konica Minolta",cfo:"Curt Van Parys (CFO)",it:"Ryan MacLachlan",priority:"C"},
+    {name:"Conseil des écoles fransaskoises",type:"Francophone",region:"Regina/Saskatoon",students:2000,incumbent:"Xerox",cfo:"Vacant",it:"Sébastien Fillion",priority:"B"},
+    {name:"Christ the Teacher RCSSD 212",type:"Catholic",region:"Melville/Yorkton",students:1750,incumbent:"—",cfo:"Delmar Zwirsky (CFO)",it:"Trent Davenport",priority:"C"},
+    {name:"Holy Family RCSSD 140",type:"Catholic",region:"Weyburn",students:1321,incumbent:"—",cfo:"Georgia Hanwell (CFO)",it:"Kyle Hambly",priority:"C"},
+    {name:"Prairie South SD 210",type:"Public",region:"Around Regina",students:0,incumbent:"Toshiba",cfo:"",it:"",priority:"B"},
+    {name:"Good Spirit SD 204",type:"Public",region:"Yorkton",students:0,incumbent:"Konica Minolta",cfo:"Keith Gervais (CFO)",it:"Jonas Prysliak",priority:"C"},
+    {name:"North East SD 200",type:"Public",region:"",students:0,incumbent:"—",cfo:"Donna Eberle",it:"Keith Chapman",priority:"C"},
+    {name:"Light of Christ RCSSD 16",type:"Catholic",region:"North Battleford",students:0,incumbent:"—",cfo:"Jordan Kist (CFO)",it:"Joanne Lloyd",priority:"C"},
+    {name:"Lloydminster SD 99",type:"Public",region:"Lloydminster",students:0,incumbent:"Konica Minolta",cfo:"Matthew Read (CFO)",it:"Randy Finlay",priority:"C"},
+    {name:"Creighton SD 111",type:"Public",region:"Creighton",students:579,incumbent:"—",cfo:"Sheola Jansen",it:"Kevin Mackay",priority:"C"},
+    {name:"Ile a la Crosse SD 112",type:"Public",region:"Ile a la Crosse",students:380,incumbent:"—",cfo:"",it:"",priority:"C"},
+];
+
+// ===== HIGHER ED DATA =====
+const higherEd = [
+    {name:"University of Saskatchewan",type:"University",city:"Saskatoon",priority:"A",mps:"TBD",cloud:"TBD",mit:"TBD",stage:"Prospecting"},
+    {name:"University of Regina",type:"University",city:"Regina",priority:"A",mps:"TBD",cloud:"TBD",mit:"TBD",stage:"New Lead"},
+    {name:"Saskatchewan Polytechnic",type:"Polytechnic",city:"Saskatoon/Regina/PA/MJ",priority:"A",mps:"TBD",cloud:"TBD",mit:"TBD",stage:"New Lead"},
+    {name:"Saskatchewan Indian Institute of Technologies",type:"Indigenous",city:"Saskatoon",priority:"B",mps:"TBD",cloud:"TBD",mit:"TBD",stage:"New Lead"},
+    {name:"First Nations University of Canada",type:"Indigenous",city:"Regina",priority:"B",mps:"TBD",cloud:"TBD",mit:"TBD",stage:"New Lead"},
+];
+
+// ===== CREDIT UNIONS DATA =====
+const creditUnions = [
+    {name:"Affinity Credit Union",rank:10,assets:7724897316,members:132506,locations:50,city:"Saskatoon",priority:"A"},
+    {name:"Conexus Credit Union",rank:14,assets:6893630239,members:141028,locations:30,city:"Regina",priority:"A"},
+    {name:"Innovation Credit Union",rank:23,assets:3788005213,members:62297,locations:25,city:"Swift Current",priority:"B"},
+    {name:"Cornerstone Credit Union",rank:32,assets:2011765000,members:29056,locations:15,city:"Yorkton",priority:"B"},
+    {name:"Synergy Credit Union",rank:33,assets:1925545000,members:27086,locations:12,city:"Lloydminster",priority:"B"},
+    {name:"Prairie Centre Credit Union",rank:43,assets:1180579340,members:17132,locations:16,city:"",priority:"C"},
+    {name:"TCU Financial Group",rank:59,assets:710454487,members:14527,locations:5,city:"Saskatoon",priority:"C"},
+    {name:"Weyburn Credit Union",rank:60,assets:709732972,members:7987,locations:3,city:"Weyburn",priority:"C"},
+    {name:"Diamond North Credit Union",rank:64,assets:683472000,members:12093,locations:8,city:"Nipawin",priority:"C"},
+    {name:"Radius Credit Union",rank:66,assets:583417023,members:5758,locations:8,city:"",priority:"C"},
+    {name:"Crossroads Credit Union",rank:87,assets:348681101,members:6529,locations:4,city:"",priority:"C"},
+    {name:"Unity Credit Union",rank:88,assets:348643237,members:4423,locations:1,city:"Unity",priority:"C"},
+    {name:"Accent Credit Union",rank:94,assets:310131516,members:4602,locations:3,city:"",priority:"C"},
+    {name:"Biggar & District CU",rank:96,assets:306097670,members:3902,locations:3,city:"Biggar",priority:"C"},
+];
+
+// ===== HELPERS =====
+function ptag(p) {
+    if (p==='A') return '<span class="tag tag-a">A</span>';
+    if (p==='B') return '<span class="tag tag-b">B</span>';
+    return '<span class="tag tag-c">C</span>';
+}
+function fmt(n) { return n ? n.toLocaleString() : '—'; }
+function fmtSales(n) { return n >= 1e9 ? '$'+(n/1e9).toFixed(1)+'B' : n >= 1e6 ? '$'+(n/1e6).toFixed(0)+'M' : n >= 1e3 ? '$'+(n/1e3).toFixed(0)+'K' : n > 0 ? '$'+n : '—'; }
+
+// ===== ACCOUNT DATA (localStorage) =====
+function acctKey(name) { return 'xits_acct_' + name.replace(/[^a-zA-Z0-9]/g,'_').toLowerCase(); }
+function getAcctData(name) {
+    try { return JSON.parse(localStorage.getItem(acctKey(name))) || {}; } catch { return {}; }
+}
+function setAcctData(name, data) { localStorage.setItem(acctKey(name), JSON.stringify(data)); }
+
+function stageTag(stage) {
+    const cls = {
+        'Fresh':'tag-fresh','Discovery':'tag-discovery','Qualifying':'tag-qualifying',
+        'Proposal':'tag-proposal','Negotiation':'tag-negotiation',
+        'Closed Won':'tag-won','Closed Lost':'tag-lost'
+    };
+    return `<span class="tag ${cls[stage]||'tag-fresh'}">${stage||'Fresh'}</span>`;
+}
+
+function pillarDots(pillars) {
+    if (!pillars || !pillars.length) return '<span style="color:var(--text3);font-size:10px;">—</span>';
+    const abbrev = {'Cloud':'CLD','Virtualization':'VRT','Infrastructure':'INF','Endpoint':'END','Security':'SEC',
+        'Data Protection':'BKP','Print/Doc Mgmt':'PRT','Network':'NET','AI/Copilot':'AI','Managed IT':'MIT',
+        'Prof Services':'PRO','Support Svc':'SUP'};
+    return '<div class="pillar-dots">' + pillars.map(p => `<span class="pdot">${abbrev[p]||p.slice(0,3)}</span>`).join('') + '</div>';
+}
+
+function flagIcons(flags) {
+    if (!flags || !flags.length) return '';
+    const icons = {rfp:'&#128196;',expiring:'&#9200;',budget:'&#128176;',dm:'&#128100;',proposal:'&#128233;',competitor:'&#9876;'};
+    return '<div class="flag-icons">' + flags.map(f => `<span class="flag-icon" title="${f}">${icons[f]||''}</span>`).join('') + '</div>';
+}
+
+// ===== RENDER: ENT =====
+function renderEnt(f='',p='',s='') {
+    const fl = f.toLowerCase();
+    const filtered = entAccounts.filter(a => {
+        if (fl && !JSON.stringify(a).toLowerCase().includes(fl)) return false;
+        if (p && a.priority !== p) return false;
+        if (s && a.sector !== s) return false;
+        return true;
+    });
+    document.getElementById('entCount').textContent = filtered.length;
+    document.querySelector('#entTable tbody').innerHTML = filtered.map(a => {
+        const d = getAcctData(a.name);
+        return `<tr onclick="openModal('${a.name.replace(/'/g,"\\'")}','ent')">
+        <td><strong style="color:var(--text)">${a.name}</strong></td>
+        <td style="font-size:11px;">${a.sector}</td>
+        <td style="font-family:var(--mono);font-size:11px;">${a.emp ? fmt(a.emp) : '—'}</td>
+        <td style="font-size:11px;">${a.city}</td>
+        <td>${ptag(a.priority)}</td>
+        <td>${stageTag(d.stage)}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent2);">${d.value ? '$'+Number(d.value).toLocaleString() : '—'}</td>
+        <td>${pillarDots(d.pillars)}</td>
+        <td>${flagIcons(d.flags)}</td>
+    </tr>`;}).join('');
+}
+
+// ===== RENDER: SMB =====
+function renderSmb(f='',ind='') {
+    const fl = f.toLowerCase();
+    const filtered = smbAccounts.filter(a => {
+        if (fl && !JSON.stringify(a).toLowerCase().includes(fl)) return false;
+        if (ind && a.industry !== ind) return false;
+        return true;
+    });
+    document.getElementById('smbCount').textContent = filtered.length;
+    document.querySelector('#smbTable tbody').innerHTML = filtered.map(a => {
+        const d = getAcctData(a.name);
+        return `<tr onclick="openModal('${a.name.replace(/'/g,"\\'")}','smb')">
+        <td><strong style="color:var(--text)">${a.name}</strong></td>
+        <td style="font-size:11px;">${a.industry}</td>
+        <td style="font-family:var(--mono);font-size:11px;">${a.emp ? fmt(a.emp) : '—'}</td>
+        <td style="font-size:11px;">${a.city}</td>
+        <td>${stageTag(d.stage)}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--accent2);">${d.value ? '$'+Number(d.value).toLocaleString() : '—'}</td>
+        <td>${pillarDots(d.pillars)}</td>
+        <td>${flagIcons(d.flags)}</td>
+    </tr>`;}).join('');
+}
+
+// ===== RENDER: K-12 =====
+function renderK12(f='',p='') {
+    const fl = f.toLowerCase();
+    document.querySelector('#k12Table tbody').innerHTML = k12.filter(a => {
+        if (fl && !JSON.stringify(a).toLowerCase().includes(fl)) return false;
+        if (p && a.priority !== p) return false;
+        return true;
+    }).map(a => `<tr>
+        <td><strong style="color:var(--text)">${a.name}</strong></td>
+        <td>${a.type}</td>
+        <td>${a.region || '—'}</td>
+        <td style="font-family:var(--mono);font-size:11px;">${a.students ? fmt(a.students) : '—'}</td>
+        <td style="font-size:11px;">${a.incumbent}</td>
+        <td style="font-size:11px;">${a.cfo || '—'}</td>
+        <td style="font-size:11px;">${a.it || '—'}</td>
+        <td>${ptag(a.priority)}</td>
+    </tr>`).join('');
+}
+
+// ===== RENDER: HIGHER ED =====
+function renderHigherEd() {
+    document.querySelector('#higheredTable tbody').innerHTML = higherEd.map(a => `<tr>
+        <td><strong style="color:var(--text)">${a.name}</strong></td>
+        <td>${a.type}</td>
+        <td>${a.city}</td>
+        <td>${ptag(a.priority)}</td>
+        <td style="font-size:11px;">${a.mps}</td>
+        <td style="font-size:11px;">${a.cloud}</td>
+        <td style="font-size:11px;">${a.mit}</td>
+        <td><span class="tag tag-new">${a.stage}</span></td>
+    </tr>`).join('');
+}
+
+// ===== RENDER: CREDIT UNIONS =====
+function renderCU(f='') {
+    const fl = f.toLowerCase();
+    document.querySelector('#cuTable tbody').innerHTML = creditUnions.filter(a => {
+        if (fl && !JSON.stringify(a).toLowerCase().includes(fl)) return false;
+        return true;
+    }).map(a => `<tr>
+        <td><strong style="color:var(--text)">${a.name}</strong></td>
+        <td style="font-family:var(--mono);font-size:11px;">#${a.rank}</td>
+        <td style="font-family:var(--mono);font-size:11px;">$${(a.assets/1e9).toFixed(1)}B</td>
+        <td style="font-family:var(--mono);font-size:11px;">${fmt(a.members)}</td>
+        <td style="font-family:var(--mono);font-size:11px;">${a.locations}</td>
+        <td>${a.city || '—'}</td>
+        <td>${ptag(a.priority)}</td>
+    </tr>`).join('');
+}
+
+// ===== NAV =====
+document.querySelectorAll('.topbar-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.topbar-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.page).classList.add('active');
+        window.scrollTo(0, 0);
+    });
+});
+
+// ===== FILTERS =====
+document.getElementById('entSearch').addEventListener('input', e => renderEnt(e.target.value, document.getElementById('entPriority').value, document.getElementById('entSector').value));
+document.getElementById('entPriority').addEventListener('change', e => renderEnt(document.getElementById('entSearch').value, e.target.value, document.getElementById('entSector').value));
+document.getElementById('entSector').addEventListener('change', e => renderEnt(document.getElementById('entSearch').value, document.getElementById('entPriority').value, e.target.value));
+document.getElementById('smbSearch').addEventListener('input', e => renderSmb(e.target.value, document.getElementById('smbIndustry').value));
+document.getElementById('smbIndustry').addEventListener('change', e => renderSmb(document.getElementById('smbSearch').value, e.target.value));
+document.getElementById('k12Search').addEventListener('input', e => renderK12(e.target.value, document.getElementById('k12Priority').value));
+document.getElementById('k12Priority').addEventListener('change', e => renderK12(document.getElementById('k12Search').value, e.target.value));
+document.getElementById('cuSearch').addEventListener('input', e => renderCU(e.target.value));
+
+// ===== INIT =====
+renderEnt(); renderSmb(); renderK12(); renderHigherEd(); renderCU();
+
+// Monthly calc
+const now = new Date();
+const monthsLeft = 12 - now.getMonth();
+const remaining = 2976000;
+document.getElementById('monthsLeft').textContent = monthsLeft;
+document.getElementById('monthlyNeeded').textContent = '$' + Math.round(remaining / monthsLeft / 1000) + 'K/mo needed';
+document.getElementById('calcMonthly').textContent = '$' + Math.round(remaining / monthsLeft / 1000) + 'K';
+const pct = (24000 / 3000000 * 100).toFixed(1);
+document.getElementById('targetPct').textContent = pct + '%';
+document.getElementById('targetBar').style.width = pct + '%';
+
+// ===== SECTION TABS (Playbook & Tools sub-navigation) =====
+document.querySelectorAll('.section-tabs').forEach(tabGroup => {
+    tabGroup.querySelectorAll('.section-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const parent = tab.closest('.page');
+            parent.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+            parent.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.sec).classList.add('active');
+        });
+    });
+});
+
+// ===== COPY EMAIL =====
+function copyEmail(btn) {
+    const body = btn.previousElementSibling.textContent || btn.parentElement.querySelector('.email-body').textContent;
+    navigator.clipboard.writeText(body.trim()).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy to clipboard', 2000);
+    });
+}
+
+// ===== DEAL CALCULATOR =====
+function calcDeal() {
+    const name = document.getElementById('dc-name').value || 'Unnamed Deal';
+    const mitPrice = parseFloat(document.getElementById('dc-mit-price').value) || 0;
+    const seats = parseFloat(document.getElementById('dc-seats').value) || 0;
+    const csp = parseFloat(document.getElementById('dc-csp').value) || 0;
+    const security = parseFloat(document.getElementById('dc-security').value) || 0;
+    const hw = parseFloat(document.getElementById('dc-hw').value) || 0;
+    const mps = parseFloat(document.getElementById('dc-mps').value) || 0;
+    const other = parseFloat(document.getElementById('dc-other').value) || 0;
+
+    const mitMonthly = mitPrice * seats;
+    const cspMonthly = csp * seats;
+    const mpsMonthly = mps;
+    const totalMRR = mitMonthly + cspMonthly + mpsMonthly;
+    const totalARR = (totalMRR * 12) + security + other;
+    const totalYear1 = totalARR + hw;
+    const total3yr = (totalARR * 3) + hw;
+    const pctOfTarget = ((totalYear1 / 3000000) * 100).toFixed(1);
+
+    document.getElementById('dealResult').innerHTML = `
+        <h3 style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px;">${name}</h3>
+        <div class="deal-result">
+            <div class="dr-row"><span class="dr-label">Managed IT (${seats} seats × $${mitPrice}/mo)</span><span class="dr-val">$${mitMonthly.toLocaleString()}/mo</span></div>
+            <div class="dr-row"><span class="dr-label">M365 CSP (${seats} users × $${csp}/mo)</span><span class="dr-val">$${cspMonthly.toLocaleString()}/mo</span></div>
+            <div class="dr-row"><span class="dr-label">GreenLake / as-a-Service</span><span class="dr-val">$${mpsMonthly.toLocaleString()}/mo</span></div>
+            <div class="dr-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px;">
+                <span class="dr-label" style="font-weight:700;">Total MRR</span>
+                <span class="dr-val" style="font-size:16px;">$${totalMRR.toLocaleString()}/mo</span>
+            </div>
+        </div>
+        <div class="deal-result" style="margin-top:8px;background:rgba(79,140,255,.06);border-color:rgba(79,140,255,.15);">
+            <div class="dr-row"><span class="dr-label">Recurring ARR (MRR × 12 + Security + Other)</span><span class="dr-val" style="color:var(--accent);">$${totalARR.toLocaleString()}</span></div>
+            <div class="dr-row"><span class="dr-label">Hardware / One-Time</span><span class="dr-val" style="color:var(--accent);">$${hw.toLocaleString()}</span></div>
+            <div class="dr-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px;">
+                <span class="dr-label" style="font-weight:700;">Year 1 Total Value</span>
+                <span class="dr-val" style="font-size:18px;color:var(--accent2);">$${totalYear1.toLocaleString()}</span>
+            </div>
+            <div class="dr-row"><span class="dr-label">3-Year Contract Value</span><span class="dr-val" style="color:var(--accent3);">$${total3yr.toLocaleString()}</span></div>
+            <div class="dr-row"><span class="dr-label">% of $3M Target</span><span class="dr-val" style="color:var(--accent2);">${pctOfTarget}%</span></div>
+        </div>
+    `;
+}
+
+// ===== NOTES (localStorage) =====
+['notesWeekly','notesPipeline','notesGeneral'].forEach(id => {
+    const el = document.getElementById(id);
+    const saved = localStorage.getItem('xits_' + id);
+    if (saved) el.value = saved;
+    let timer;
+    el.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            localStorage.setItem('xits_' + id, el.value);
+            const indicator = document.getElementById(id.replace('notes','notesSaved'));
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 1500);
+        }, 500);
+    });
+});
+
+// ===== ACCOUNT DETAIL MODAL =====
+let currentModalAcct = '';
+let currentModalType = '';
+
+// Checkbox toggle
+document.querySelectorAll('.check-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        const cb = item.querySelector('input');
+        cb.checked = !cb.checked;
+        item.classList.toggle('checked', cb.checked);
+    });
+    item.querySelector('input').addEventListener('change', () => {
+        item.classList.toggle('checked', item.querySelector('input').checked);
+    });
+});
+
+function openModal(name, type) {
+    currentModalAcct = name;
+    currentModalType = type;
+    const d = getAcctData(name);
+    document.getElementById('modalAcctName').textContent = name;
+
+    // Populate fields
+    document.getElementById('m-stage').value = d.stage || 'Fresh';
+    document.getElementById('m-value').value = d.value || '';
+    document.getElementById('m-prob').value = d.prob || '';
+    document.getElementById('m-close-q').value = d.closeQ || '';
+    document.getElementById('m-incumbent').value = d.incumbent || '';
+    document.getElementById('m-cname').value = d.contactName || '';
+    document.getElementById('m-ctitle').value = d.contactTitle || '';
+    document.getElementById('m-cemail').value = d.contactEmail || '';
+    document.getElementById('m-cphone').value = d.contactPhone || '';
+    document.getElementById('m-followup').value = d.followUp || '';
+    document.getElementById('m-expiry').value = d.expiry || '';
+    document.getElementById('m-notes').value = d.notes || '';
+
+    // Pillars
+    document.querySelectorAll('#m-pillars .check-item').forEach(item => {
+        const val = item.dataset.val;
+        const checked = d.pillars && d.pillars.includes(val);
+        item.querySelector('input').checked = checked;
+        item.classList.toggle('checked', checked);
+    });
+
+    // Flags
+    document.querySelectorAll('#m-flags .check-item').forEach(item => {
+        const val = item.dataset.val;
+        const checked = d.flags && d.flags.includes(val);
+        item.querySelector('input').checked = checked;
+        item.classList.toggle('checked', checked);
+    });
+
+    document.getElementById('acctModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('acctModal').classList.add('hidden');
+    currentModalAcct = '';
+}
+
+function saveModal() {
+    const pillars = [];
+    document.querySelectorAll('#m-pillars .check-item input:checked').forEach(cb => {
+        pillars.push(cb.closest('.check-item').dataset.val);
+    });
+    const flags = [];
+    document.querySelectorAll('#m-flags .check-item input:checked').forEach(cb => {
+        flags.push(cb.closest('.check-item').dataset.val);
+    });
+
+    const data = {
+        stage: document.getElementById('m-stage').value,
+        value: document.getElementById('m-value').value,
+        prob: document.getElementById('m-prob').value,
+        closeQ: document.getElementById('m-close-q').value,
+        incumbent: document.getElementById('m-incumbent').value,
+        pillars: pillars,
+        flags: flags,
+        contactName: document.getElementById('m-cname').value,
+        contactTitle: document.getElementById('m-ctitle').value,
+        contactEmail: document.getElementById('m-cemail').value,
+        contactPhone: document.getElementById('m-cphone').value,
+        followUp: document.getElementById('m-followup').value,
+        expiry: document.getElementById('m-expiry').value,
+        notes: document.getElementById('m-notes').value,
+    };
+
+    setAcctData(currentModalAcct, data);
+    closeModal();
+
+    // Re-render the table that was open
+    if (currentModalType === 'ent' || !currentModalType) {
+        renderEnt(document.getElementById('entSearch').value, document.getElementById('entPriority').value, document.getElementById('entSector').value);
+    }
+    if (currentModalType === 'smb' || !currentModalType) {
+        renderSmb(document.getElementById('smbSearch').value, document.getElementById('smbIndustry').value);
+    }
+    updateDashPipeline();
+    updateCompetitorFootprint();
+    updateDashFollowUps();
+    updateDashFlags();
+    syncPipelineToProxy();
+}
+
+// Close modal on overlay click
+document.getElementById('acctModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('acctModal')) closeModal();
+});
+// Close on Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeModal();
+        document.getElementById('calSetupModal').classList.add('hidden');
+        document.getElementById('digestModal').classList.add('hidden');
+    }
+});
+document.getElementById('calSetupModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('calSetupModal')) document.getElementById('calSetupModal').classList.add('hidden');
+});
+document.getElementById('digestModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('digestModal')) document.getElementById('digestModal').classList.add('hidden');
+});
+
+// ===== MEETINGS WIDGET (Live Calendar + Manual Fallback) =====
+document.getElementById('mtgToggleAdd').addEventListener('click', function() {
+    const form = document.getElementById('mtgAddForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    if (form.style.display === 'block') {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 60 - now.getMinutes() % 15);
+        document.getElementById('mtg-dt').value = now.toISOString().slice(0, 16);
+        document.getElementById('mtg-title').value = '';
+        document.getElementById('mtg-acct').value = '';
+        document.getElementById('mtg-title').focus();
+    }
+});
+
+function getMeetings() {
+    try { return JSON.parse(localStorage.getItem('xits_meetings')) || []; } catch { return []; }
+}
+function saveMeetings(m) { localStorage.setItem('xits_meetings', JSON.stringify(m)); }
+
+function addMeeting() {
+    const dt = document.getElementById('mtg-dt').value;
+    const title = document.getElementById('mtg-title').value.trim();
+    if (!dt || !title) return;
+    const meetings = getMeetings();
+    meetings.push({ id: Date.now(), dt, title, acct: document.getElementById('mtg-acct').value.trim(), source: 'manual' });
+    saveMeetings(meetings);
+    document.getElementById('mtgAddForm').style.display = 'none';
+    renderMeetings();
+}
+
+function deleteMeeting(id) {
+    const meetings = getMeetings().filter(m => m.id !== id);
+    saveMeetings(meetings);
+    renderMeetings();
+}
+
+function formatMtgItem(d, title, subtitle, extra) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const tmrw = new Date(today); tmrw.setDate(tmrw.getDate() + 1);
+    const mDate = new Date(d); mDate.setHours(0,0,0,0);
+    let dayLabel = d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
+    if (mDate.getTime() === today.getTime()) dayLabel = 'Today';
+    else if (mDate.getTime() === tmrw.getTime()) dayLabel = 'Tomorrow';
+    const timeStr = d.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const isToday = mDate.getTime() === today.getTime();
+    const timeColor = isToday ? 'var(--accent2)' : 'var(--accent)';
+    return `<div class="mtg-item">
+        <div class="mtg-time" style="color:${timeColor};">${timeStr}<div class="mtg-date">${dayLabel}</div></div>
+        <div class="mtg-info"><div class="mtg-title">${title}</div>${subtitle ? `<div class="mtg-acct">${subtitle}</div>` : ''}</div>
+        ${extra || ''}
+    </div>`;
+}
+
+// --- Live Calendar Fetch (Google API + Xerox ICS) ---
+let calApiKey = localStorage.getItem('xits_cal_apikey') || '';
+let calCalId = localStorage.getItem('xits_cal_id') || '';
+const xeroxProxyUrl = 'http://127.0.0.1:18790/';
+let calEvents = [];
+
+function calConnected() { return true; }
+
+function fetchCalendarEvents() {
+    const el = document.getElementById('dashMeetings');
+    el.innerHTML = '<div class="action-item" style="color:var(--text3);font-style:italic;">Fetching calendars...</div>';
+    const promises = [];
+
+    // Fetch Xerox calendar via local proxy (CORS-safe)
+    promises.push(
+        fetch(xeroxProxyUrl).then(r => {
+            if (!r.ok) throw new Error('Proxy ' + r.status);
+            return r.json();
+        }).then(data => data.map(ev => ({
+            dt: ev.dt,
+            title: ev.title || 'No title',
+            acct: ev.location || '',
+            source: 'xerox'
+        }))).catch(err => {
+            console.warn('Xerox calendar fetch failed:', err);
+            return [];
+        })
+    );
+
+    // Fetch Google Calendar API (if configured)
+    if (calApiKey && calCalId) {
+        const now = new Date().toISOString();
+        const end = new Date(Date.now() + 7*24*60*60*1000).toISOString();
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calCalId)}/events?key=${calApiKey}&timeMin=${now}&timeMax=${end}&maxResults=10&singleEvents=true&orderBy=startTime`;
+        promises.push(
+            fetch(url).then(r => {
+                if (!r.ok) throw new Error('GCal ' + r.status);
+                return r.json();
+            }).then(data => (data.items || []).map(ev => ({
+                dt: (ev.start && (ev.start.dateTime || ev.start.date)) || '',
+                title: ev.summary || 'No title',
+                acct: ev.location || '',
+                source: 'gcal'
+            }))).catch(err => {
+                console.warn('Google Calendar fetch failed:', err);
+                return [];
+            })
+        );
+    }
+
+    Promise.all(promises).then(results => {
+        // Merge & deduplicate (same title within 5 min = duplicate)
+        const all = results.flat();
+        const seen = new Set();
+        calEvents = [];
+        all.sort((a,b) => new Date(a.dt) - new Date(b.dt));
+        all.forEach(ev => {
+            const key = ev.title.toLowerCase().trim() + '|' + new Date(ev.dt).toISOString().slice(0, 15);
+            if (!seen.has(key)) {
+                seen.add(key);
+                calEvents.push(ev);
+            }
+        });
+        localStorage.setItem('xits_cal_cache', JSON.stringify({ ts: Date.now(), events: calEvents }));
+        document.getElementById('mtgLiveIndicator').style.display = 'inline';
+        document.getElementById('mtgLiveIndicator').textContent = 'LIVE';
+        document.getElementById('mtgLiveIndicator').style.color = '#34d399';
+        document.getElementById('mtgLiveIndicator').style.background = 'rgba(52,211,153,.15)';
+        document.getElementById('mtgRefreshBtn').style.display = 'inline';
+        document.getElementById('calSetupBtn').style.background = 'rgba(52,211,153,.15)';
+        document.getElementById('calSetupBtn').style.color = '#34d399';
+        renderMeetings();
+    });
+}
+
+function renderMeetings() {
+    const el = document.getElementById('dashMeetings');
+    if (!el) return;
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Combine live calendar events + manual meetings
+    let combined = [];
+
+    // Add calendar events
+    calEvents.forEach(ev => {
+        const d = new Date(ev.dt);
+        if (d >= todayStart) combined.push({ dt: d, title: ev.title, acct: ev.acct, source: 'gcal' });
+    });
+
+    // Add manual meetings
+    getMeetings().forEach(m => {
+        const d = new Date(m.dt);
+        if (d >= todayStart) combined.push({ dt: d, title: m.title, acct: m.acct, source: 'manual', id: m.id });
+    });
+
+    combined.sort((a, b) => a.dt - b.dt);
+
+    if (combined.length === 0) {
+        const msg = calConnected() ? 'No upcoming meetings on your calendar.' : 'No meetings yet. Hit + to add, or connect Google Calendar via the gear icon.';
+        el.innerHTML = `<div class="action-item" style="color:var(--text3);font-style:italic;">${msg}</div>`;
+        return;
+    }
+
+    el.innerHTML = combined.slice(0, 5).map(m => {
+        const delBtn = m.source === 'manual' ? `<span class="mtg-del" onclick="deleteMeeting(${m.id})" title="Remove">&times;</span>` : '';
+        return formatMtgItem(m.dt, m.title, m.acct, delBtn);
+    }).join('');
+    if (combined.length > 5) {
+        el.innerHTML += `<div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center;">+${combined.length - 5} more</div>`;
+    }
+}
+
+// --- Calendar Setup ---
+function showCalSetup() {
+    document.getElementById('calApiKey').value = calApiKey;
+    document.getElementById('calCalId').value = calCalId;
+    document.getElementById('calTestResult').textContent = '';
+    document.getElementById('calSetupModal').classList.remove('hidden');
+}
+function saveCalApi() {
+    const key = document.getElementById('calApiKey').value.trim();
+    const cid = document.getElementById('calCalId').value.trim();
+    if (!key || !cid) { document.getElementById('calTestResult').textContent = 'Both fields are required.'; return; }
+    localStorage.setItem('xits_cal_apikey', key);
+    localStorage.setItem('xits_cal_id', cid);
+    calApiKey = key;
+    calCalId = cid;
+    document.getElementById('calTestResult').innerHTML = '<span style="color:var(--accent);">Saved! Testing connection...</span>';
+    fetchCalendarEvents();
+    setTimeout(() => {
+        if (calEvents.length > 0) {
+            document.getElementById('calTestResult').innerHTML = '<span style="color:var(--accent2);">Connected! Found ' + calEvents.length + ' upcoming events.</span>';
+        } else {
+            document.getElementById('calTestResult').innerHTML = '<span style="color:var(--accent3);">Connected but 0 events in next 7 days. If this is wrong, check Calendar ID and that the calendar is public.</span>';
+        }
+    }, 3000);
+}
+function clearCalApi() {
+    localStorage.removeItem('xits_cal_apikey');
+    localStorage.removeItem('xits_cal_id');
+    localStorage.removeItem('xits_cal_cache');
+    calApiKey = '';
+    calCalId = '';
+    calEvents = [];
+    document.getElementById('calApiKey').value = '';
+    document.getElementById('calCalId').value = '';
+    document.getElementById('calTestResult').innerHTML = '<span style="color:var(--text3);">Disconnected.</span>';
+    document.getElementById('mtgLiveIndicator').style.display = 'none';
+    document.getElementById('mtgRefreshBtn').style.display = 'none';
+    document.getElementById('calSetupBtn').style.background = 'var(--border)';
+    document.getElementById('calSetupBtn').style.color = 'var(--text2)';
+    renderMeetings();
+}
+
+// --- End of Day Digest ---
+function generateDigest() {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name)];
+
+    let totalPipeline = 0; let dealCount = 0;
+    let activeDeals = []; let flaggedAccts = []; let followUps = [];
+    const incumbentCounts = {};
+
+    allAccts.forEach(name => {
+        const d = getAcctData(name);
+        if (d.stage && d.stage !== 'Fresh') {
+            if (d.value && d.stage !== 'Closed Lost') {
+                totalPipeline += Number(d.value) || 0;
+                dealCount++;
+                activeDeals.push({ name, stage: d.stage, value: Number(d.value) || 0, prob: d.prob || '—' });
+            }
+        }
+        if (d.flags && d.flags.length > 0) flaggedAccts.push({ name, flags: d.flags });
+        if (d.followUp) {
+            const diff = Math.round((new Date(d.followUp + 'T00:00:00') - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
+            if (diff <= 7) followUps.push({ name, date: d.followUp, diff });
+        }
+        if (d.incumbent) {
+            incumbentCounts[d.incumbent] = (incumbentCounts[d.incumbent] || 0) + 1;
+        }
+    });
+
+    activeDeals.sort((a, b) => b.value - a.value);
+    followUps.sort((a, b) => a.diff - b.diff);
+
+    let digest = `POWERLAND / XEROX IT SOLUTIONS — DAILY DIGEST\n${dateStr}\n${'='.repeat(50)}\n\n`;
+    digest += `PIPELINE SNAPSHOT\n`;
+    digest += `  Total Pipeline:  $${totalPipeline.toLocaleString()}\n`;
+    digest += `  Active Deals:    ${dealCount}\n`;
+    digest += `  Target:          $3,000,000\n`;
+    digest += `  Gap:             $${(3000000 - totalPipeline).toLocaleString()}\n\n`;
+
+    if (activeDeals.length > 0) {
+        digest += `TOP OPPORTUNITIES\n`;
+        activeDeals.slice(0, 8).forEach(d => {
+            digest += `  ${d.name.padEnd(35)} ${d.stage.padEnd(14)} $${d.value.toLocaleString().padStart(10)}  (${d.prob}%)\n`;
+        });
+        digest += '\n';
+    }
+
+    if (followUps.length > 0) {
+        digest += `FOLLOW-UPS THIS WEEK\n`;
+        followUps.forEach(f => {
+            const label = f.diff < 0 ? 'OVERDUE' : f.diff === 0 ? 'TODAY' : f.date;
+            digest += `  ${f.name.padEnd(35)} ${label}\n`;
+        });
+        digest += '\n';
+    }
+
+    if (flaggedAccts.length > 0) {
+        const flagLabels = { rfp:'RFP', expiring:'Expiring', budget:'Budget', dm:'Decision Maker', proposal:'Proposal', competitor:'Competitor' };
+        digest += `FLAGGED ACCOUNTS\n`;
+        flaggedAccts.forEach(f => {
+            digest += `  ${f.name.padEnd(35)} ${f.flags.map(fl => flagLabels[fl] || fl).join(', ')}\n`;
+        });
+        digest += '\n';
+    }
+
+    if (Object.keys(incumbentCounts).length > 0) {
+        digest += `IT INCUMBENT MAP\n`;
+        Object.entries(incumbentCounts).sort((a,b) => b[1] - a[1]).forEach(([k, v]) => {
+            digest += `  ${k.padEnd(20)} ${v} accounts\n`;
+        });
+        digest += '\n';
+    }
+
+    // Manual meetings
+    const manualMtgs = getMeetings().filter(m => {
+        const d = new Date(m.dt);
+        return d >= new Date(now.getFullYear(), now.getMonth(), now.getDate()) && d < new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
+    });
+    if (manualMtgs.length > 0 || calEvents.length > 0) {
+        digest += `TODAY'S MEETINGS\n`;
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const todayEnd = new Date(todayStart); todayEnd.setDate(todayEnd.getDate() + 1);
+        [...calEvents, ...manualMtgs].filter(m => {
+            const d = new Date(m.dt);
+            return d >= todayStart && d < todayEnd;
+        }).forEach(m => {
+            const d = new Date(m.dt);
+            const t = d.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit', hour12: true });
+            digest += `  ${t.padEnd(10)} ${m.title}${m.acct ? ' — ' + m.acct : ''}\n`;
+        });
+        digest += '\n';
+    }
+
+    // Quick Notes
+    const notes = {};
+    ['notesWeekly','notesPipeline','notesGeneral'].forEach(id => {
+        const v = localStorage.getItem('xits_' + id);
+        if (v && v.trim()) {
+            const label = id === 'notesWeekly' ? 'Weekly Focus' : id === 'notesPipeline' ? 'Pipeline Notes' : 'General Notes';
+            notes[label] = v.trim();
+        }
+    });
+    if (Object.keys(notes).length > 0) {
+        digest += `NOTES\n`;
+        Object.entries(notes).forEach(([label, text]) => {
+            digest += `  [${label}]\n  ${text.split('\n').join('\n  ')}\n\n`;
+        });
+    }
+
+    digest += `${'='.repeat(50)}\nGenerated ${now.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit', hour12: true })} — Powerland Prospecting Hub`;
+
+    document.getElementById('digestContent').textContent = digest;
+    document.getElementById('digestModal').classList.remove('hidden');
+}
+
+function copyDigest() {
+    const text = document.getElementById('digestContent').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('#digestModal .modal-btn-primary');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy to Clipboard', 1500);
+    });
+}
+
+// Init: Load cache for instant render, then fetch live
+const _calCache = localStorage.getItem('xits_cal_cache');
+if (_calCache) {
+    try {
+        const c = JSON.parse(_calCache);
+        calEvents = c.events || [];
+        document.getElementById('mtgLiveIndicator').style.display = 'inline';
+        document.getElementById('mtgRefreshBtn').style.display = 'inline';
+        document.getElementById('calSetupBtn').style.background = 'rgba(52,211,153,.15)';
+        document.getElementById('calSetupBtn').style.color = '#34d399';
+        renderMeetings();
+    } catch(e) {}
+}
+fetchCalendarEvents();
+
+// ===== DASHBOARD PIPELINE SUMMARY =====
+function updateDashPipeline() {
+    let totalPipeline = 0;
+    let dealCount = 0;
+    const allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name)];
+    allAccts.forEach(name => {
+        const d = getAcctData(name);
+        if (d.value && d.stage && d.stage !== 'Fresh' && d.stage !== 'Closed Lost') {
+            totalPipeline += Number(d.value) || 0;
+            dealCount++;
+        }
+    });
+    const el = document.getElementById('pipelineKpi');
+    if (el) {
+        el.querySelector('.kpi-value').textContent = totalPipeline >= 1e6 ? '$'+(totalPipeline/1e6).toFixed(1)+'M' : totalPipeline >= 1e3 ? '$'+(totalPipeline/1e3).toFixed(0)+'K' : '$'+totalPipeline;
+        el.querySelector('.kpi-sub').textContent = dealCount + ' active opportunities';
+    }
+}
+
+function updateCompetitorFootprint() {
+    const counts = { 'WBM':0, 'Horizon':0, 'PC Place':0, 'Wolf Strata':0, 'Compugen':0, 'Internal IT':0, 'Other':0, '':0 };
+    const allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name)];
+    let total = allAccts.length;
+    allAccts.forEach(name => {
+        const d = getAcctData(name);
+        const inc = d.incumbent || '';
+        if (inc in counts) counts[inc]++;
+        else counts['Other']++;
+    });
+    const unknown = counts[''] + counts['Other'] + counts['Internal IT'];
+    const mapping = [
+        { key:'WBM', bar:'cf-wbm-bar', ct:'cf-wbm-ct' },
+        { key:'Horizon', bar:'cf-horizon-bar', ct:'cf-horizon-ct' },
+        { key:'PC Place', bar:'cf-pcplace-bar', ct:'cf-pcplace-ct' },
+        { key:'Wolf Strata', bar:'cf-wolfstrata-bar', ct:'cf-wolfstrata-ct' },
+        { key:'Compugen', bar:'cf-compugen-bar', ct:'cf-compugen-ct' },
+    ];
+    mapping.forEach(m => {
+        const c = counts[m.key];
+        const pct = total > 0 ? Math.max(5, Math.round((c / total) * 100)) : 5;
+        const barEl = document.getElementById(m.bar);
+        const ctEl = document.getElementById(m.ct);
+        if (barEl) { barEl.style.width = (c > 0 ? pct : 5) + '%'; barEl.textContent = c > 0 ? c : '—'; }
+        if (ctEl) ctEl.textContent = c > 0 ? c : '—';
+    });
+    const unkBar = document.getElementById('cf-unknown-bar');
+    const unkCt = document.getElementById('cf-unknown-ct');
+    const unkPct = total > 0 ? Math.max(5, Math.round((unknown / total) * 100)) : 5;
+    if (unkBar) { unkBar.style.width = unkPct + '%'; unkBar.textContent = unknown > 0 ? unknown : '—'; }
+    if (unkCt) unkCt.textContent = unknown > 0 ? unknown : '—';
+}
+
+function updateDashFollowUps() {
+    const allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name)];
+    const today = new Date(); today.setHours(0,0,0,0);
+    const upcoming = [];
+    allAccts.forEach(name => {
+        const d = getAcctData(name);
+        if (d.followUp) {
+            const dt = new Date(d.followUp + 'T00:00:00');
+            const diff = Math.round((dt - today) / 86400000);
+            upcoming.push({ name, date: dt, diff, stage: d.stage || 'Fresh' });
+        }
+    });
+    upcoming.sort((a, b) => a.date - b.date);
+    const el = document.getElementById('dashFollowUps');
+    if (!el) return;
+    if (upcoming.length === 0) {
+        el.innerHTML = '<div class="action-item" style="color:var(--text3);font-style:italic;">No follow-ups scheduled yet. Set dates in account details.</div>';
+        return;
+    }
+    el.innerHTML = upcoming.slice(0, 7).map(f => {
+        let color = 'var(--text)';
+        let icon = '';
+        if (f.diff < 0) { color = 'var(--accent4)'; icon = '&#x26A0; '; }
+        else if (f.diff === 0) { color = 'var(--accent2)'; icon = '&#x25CF; '; }
+        else if (f.diff <= 3) { color = 'var(--accent3)'; icon = ''; }
+        const dateStr = f.date.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
+        const label = f.diff < 0 ? 'OVERDUE' : f.diff === 0 ? 'TODAY' : f.diff <= 3 ? 'Soon' : dateStr;
+        return `<div class="action-item" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>${icon}<strong style="color:${color};">${f.name}</strong> <span style="color:var(--text3);font-size:11px;">${f.stage}</span></span>
+            <span style="font-size:11px;font-family:var(--mono);color:${color};white-space:nowrap;margin-left:8px;">${label}</span>
+        </div>`;
+    }).join('');
+}
+
+function updateDashFlags() {
+    const allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name)];
+    const flagLabels = { rfp: 'Active RFP', expiring: 'Contract Expiring', budget: 'Budget Approved', dm: 'Decision Maker', proposal: 'Proposal Sent', competitor: 'Competitor Incumbent' };
+    const flagColors = { rfp: 'var(--accent4)', expiring: 'var(--accent3)', budget: 'var(--accent2)', dm: 'var(--accent)', proposal: '#a78bfa', competitor: 'var(--accent5)' };
+    const flagged = [];
+    allAccts.forEach(name => {
+        const d = getAcctData(name);
+        if (d.flags && d.flags.length > 0) {
+            d.flags.forEach(f => {
+                flagged.push({ name, flag: f, label: flagLabels[f] || f, color: flagColors[f] || 'var(--text)', stage: d.stage || 'Fresh' });
+            });
+        }
+    });
+    const el = document.getElementById('dashFlags');
+    if (!el) return;
+    if (flagged.length === 0) {
+        el.innerHTML = '<div class="action-item" style="color:var(--text3);font-style:italic;">No flags set yet. Flag accounts with RFPs, expiring contracts, etc.</div>';
+        return;
+    }
+    // Group by flag type, show most important first (rfp, expiring, budget, proposal, dm, competitor)
+    const order = ['rfp','expiring','budget','proposal','dm','competitor'];
+    flagged.sort((a, b) => order.indexOf(a.flag) - order.indexOf(b.flag));
+    el.innerHTML = flagged.slice(0, 8).map(f =>
+        `<div class="action-item" style="display:flex;justify-content:space-between;align-items:center;">
+            <span><strong style="color:var(--text);">${f.name}</strong></span>
+            <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:${f.color}22;color:${f.color};font-weight:600;white-space:nowrap;margin-left:8px;">${f.label}</span>
+        </div>`
+    ).join('');
+}
+
+// --- OpenClaw Inbox ---
+let ocNotes = [];
+function fetchOcNotes() {
+    fetch('http://127.0.0.1:18790/notes')
+        .then(r => r.json())
+        .then(notes => { ocNotes = notes; renderOcInbox(); })
+        .catch(() => {});
+}
+function renderOcInbox() {
+    const el = document.getElementById('dashOcInbox');
+    const badge = document.getElementById('ocInboxCount');
+    if (!el) return;
+    if (ocNotes.length === 0) {
+        el.innerHTML = '<div class="action-item" style="color:var(--text3);font-style:italic;">No notes yet. Message OpenClaw on Telegram to add notes here.</div>';
+        if (badge) badge.style.display = 'none';
+        return;
+    }
+    if (badge) { badge.textContent = ocNotes.length; badge.style.display = 'inline'; }
+    el.innerHTML = ocNotes.slice(0, 6).map(n => {
+        const d = new Date(n.dt);
+        const ago = timeAgo(d);
+        const acctStr = n.account ? `<strong>${n.account}</strong> — ` : '';
+        return `<div class="oc-note">
+            <span class="oc-note-type ${n.type || 'note'}">${n.type || 'note'}</span>
+            <div class="oc-note-body">
+                <div class="oc-note-text">${acctStr}${escHtml(n.text)}</div>
+                <div class="oc-note-meta">${ago}</div>
+            </div>
+            <span class="oc-note-dismiss" onclick="dismissOcNote(${n.id})" title="Dismiss">&times;</span>
+        </div>`;
+    }).join('');
+    if (ocNotes.length > 6) {
+        el.innerHTML += `<div style="font-size:10px;color:var(--text3);margin-top:6px;text-align:center;">+${ocNotes.length - 6} more</div>`;
+    }
+}
+function dismissOcNote(id) {
+    fetch('http://127.0.0.1:18790/notes/' + id, { method: 'DELETE' })
+        .then(() => { ocNotes = ocNotes.filter(n => n.id !== id); renderOcInbox(); })
+        .catch(() => {});
+}
+function timeAgo(d) {
+    const s = Math.floor((Date.now() - d.getTime()) / 1000);
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    return Math.floor(s / 86400) + 'd ago';
+}
+function escHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+// --- Pipeline Sync to Proxy (for Thursday email export) ---
+function syncPipelineToProxy() {
+    const allAccts = [...entAccounts.map(a=>({...a, tier:'ENT'})), ...smbAccounts.map(a=>({...a, tier:'SMB'}))];
+    const deals = [];
+    allAccts.forEach(a => {
+        const d = getAcctData(a.name);
+        if (d.stage && d.stage !== 'Fresh') {
+            deals.push({
+                account: a.name,
+                tier: a.tier,
+                sector: a.sector || a.industry || '',
+                stage: d.stage,
+                value: Number(d.value) || 0,
+                prob: d.prob || '',
+                closeQ: d.closeQ || '',
+                incumbent: d.incumbent || '',
+                contactName: d.contactName || '',
+                contactEmail: d.contactEmail || '',
+                followUp: d.followUp || '',
+                notes: d.notes || ''
+            });
+        }
+    });
+    deals.sort((a, b) => b.value - a.value);
+    const total = deals.reduce((s, d) => s + d.value, 0);
+    fetch('http://127.0.0.1:18790/pipeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deals, totalPipeline: total, dealCount: deals.length, target: 3000000 })
+    }).catch(() => {});
+}
+
+updateDashPipeline();
+updateCompetitorFootprint();
+updateDashFollowUps();
+updateDashFlags();
+fetchOcNotes();
+syncPipelineToProxy(); // Sync on load too
+setInterval(fetchOcNotes, 30000); // Poll every 30s for new notes
+</script>
+
+</body>
+</html>
