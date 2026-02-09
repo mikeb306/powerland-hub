@@ -797,6 +797,7 @@
         <div class="quick-actions">
             <button class="qa-btn" onclick="openQuickLog()"><span>+</span> Log a Call</button>
             <button class="qa-btn" onclick="openQuickDeal()"><span>+</span> Quick Add Deal</button>
+            <button class="qa-btn" onclick="openAddAccount()"><span>+</span> Add Account</button>
             <button class="qa-btn" onclick="showWeekPriorities()"><span>&#9776;</span> This Week</button>
         </div>
 
@@ -2170,6 +2171,84 @@ Sr Account Executive | Xerox IT Solutions
         <div class="qa-btns">
             <button class="modal-btn modal-btn-ghost" onclick="document.getElementById('qaDealModal').classList.add('hidden')">Cancel</button>
             <button class="modal-btn modal-btn-primary" onclick="saveQuickDeal()">Add Deal</button>
+        </div>
+    </div>
+</div>
+
+<!-- ADD ACCOUNT MODAL -->
+<div class="qa-modal hidden" id="qaAddAcctModal">
+    <div class="qa-box" style="width:520px;">
+        <h3>Add New Account</h3>
+        <div class="qa-field">
+            <label>Account Name</label>
+            <input id="qa-acct-name" placeholder="Company name...">
+        </div>
+        <div style="display:flex;gap:10px;">
+            <div class="qa-field" style="flex:1;">
+                <label>Type</label>
+                <select id="qa-acct-type" onchange="updateAddAcctSectors()">
+                    <option value="ent">Enterprise</option>
+                    <option value="smb">SMB</option>
+                </select>
+            </div>
+            <div class="qa-field" style="flex:1;">
+                <label>Sector / Industry</label>
+                <select id="qa-acct-sector">
+                    <option value="">—</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+            <div class="qa-field" style="flex:1;">
+                <label>City</label>
+                <input id="qa-acct-city" placeholder="Saskatoon">
+            </div>
+            <div class="qa-field" style="flex:1;">
+                <label>Priority</label>
+                <select id="qa-acct-priority">
+                    <option value="B">B — Target</option>
+                    <option value="A">A — Strategic</option>
+                    <option value="C">C — Opportunistic</option>
+                </select>
+            </div>
+        </div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:12px 0 6px;">First Contact</div>
+        <div style="display:flex;gap:10px;">
+            <div class="qa-field" style="flex:1;">
+                <label>Name</label>
+                <input id="qa-acct-cname" placeholder="Jane Smith">
+            </div>
+            <div class="qa-field" style="flex:1;">
+                <label>Title</label>
+                <input id="qa-acct-ctitle" placeholder="CIO">
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+            <div class="qa-field" style="flex:1;">
+                <label>Email</label>
+                <input id="qa-acct-cemail" type="email" placeholder="jane@company.com">
+            </div>
+            <div class="qa-field" style="flex:1;">
+                <label>Phone</label>
+                <input id="qa-acct-cphone" placeholder="306-555-1234">
+            </div>
+        </div>
+        <div class="qa-field">
+            <label>Buying Role</label>
+            <select id="qa-acct-crole">
+                <option value="">—</option>
+                <option value="Champion">Champion</option>
+                <option value="Economic Buyer">Economic Buyer</option>
+                <option value="Technical Buyer">Technical Buyer</option>
+                <option value="User Buyer">User Buyer</option>
+                <option value="Influencer">Influencer</option>
+                <option value="Gatekeeper">Gatekeeper</option>
+                <option value="Coach">Coach</option>
+            </select>
+        </div>
+        <div class="qa-btns">
+            <button class="modal-btn modal-btn-ghost" onclick="document.getElementById('qaAddAcctModal').classList.add('hidden')">Cancel</button>
+            <button class="modal-btn modal-btn-primary" onclick="saveNewAccount()">Add Account</button>
         </div>
     </div>
 </div>
@@ -3564,6 +3643,85 @@ function saveQuickDeal() {
     renderEnt(document.getElementById('entSearch').value, document.getElementById('entPriority').value, document.getElementById('entSector').value);
     renderSmb(document.getElementById('smbSearch').value, document.getElementById('smbIndustry').value);
     syncPipelineToProxy();
+}
+
+// --- Add Account ---
+const ENT_SECTORS = ['Agriculture','Crown Corp','Energy','Financial','Gaming','Government','Healthcare','Industrial','Manufacturing','Mining','Retail','Security','Social Services'];
+const SMB_INDUSTRIES = ['Agriculture','Education','Finance','Gaming','Government','Healthcare','Industrial','Manufacturing','Mining','Technology'];
+
+function openAddAccount() {
+    document.getElementById('qaAddAcctModal').classList.remove('hidden');
+    document.getElementById('qa-acct-name').value = '';
+    document.getElementById('qa-acct-city').value = '';
+    document.getElementById('qa-acct-priority').value = 'B';
+    document.getElementById('qa-acct-cname').value = '';
+    document.getElementById('qa-acct-ctitle').value = '';
+    document.getElementById('qa-acct-cemail').value = '';
+    document.getElementById('qa-acct-cphone').value = '';
+    document.getElementById('qa-acct-crole').value = '';
+    updateAddAcctSectors();
+    document.getElementById('qa-acct-name').focus();
+}
+
+function updateAddAcctSectors() {
+    const type = document.getElementById('qa-acct-type').value;
+    const sel = document.getElementById('qa-acct-sector');
+    const options = type === 'ent' ? ENT_SECTORS : SMB_INDUSTRIES;
+    sel.innerHTML = '<option value="">—</option>' + options.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+function saveNewAccount() {
+    const name = document.getElementById('qa-acct-name').value.trim();
+    if (!name) { showToast('error', 'Account name is required.'); return; }
+    // Check for duplicates
+    const allNames = [...entAccounts.map(a=>a.name.toLowerCase()), ...smbAccounts.map(a=>a.name.toLowerCase())];
+    if (allNames.includes(name.toLowerCase())) { showToast('error', 'Account "' + name + '" already exists.'); return; }
+
+    const type = document.getElementById('qa-acct-type').value;
+    const sector = document.getElementById('qa-acct-sector').value;
+    const city = document.getElementById('qa-acct-city').value.trim();
+    const priority = document.getElementById('qa-acct-priority').value;
+    const cName = document.getElementById('qa-acct-cname').value.trim();
+    const cTitle = document.getElementById('qa-acct-ctitle').value.trim();
+    const cEmail = document.getElementById('qa-acct-cemail').value.trim();
+    const cPhone = document.getElementById('qa-acct-cphone').value.trim();
+    const cRole = document.getElementById('qa-acct-crole').value;
+
+    // Build account object and push to the appropriate array
+    if (type === 'ent') {
+        entAccounts.push({ name, sector: sector || 'Other', emp: 0, city: city || '', priority: priority || 'B', incumbent: '—', contact: cName, source: 'Manual' });
+    } else {
+        smbAccounts.push({ name, industry: sector || 'Other', emp: 0, sales: 0, city: city || '', contact: cName, title: cTitle });
+    }
+
+    // Save contact + initial data to localStorage
+    const contacts = [];
+    if (cName) {
+        contacts.push({
+            id: 'c_' + Date.now(),
+            name: cName, title: cTitle, email: cEmail, phone: cPhone,
+            buyingRole: cRole, influenceLevel: '', relationshipStance: 0,
+            lastActivity: new Date().toISOString().slice(0, 10), notes: ''
+        });
+    }
+    setAcctData(name, {
+        stage: 'Fresh',
+        contacts: contacts,
+        contactName: cName, contactTitle: cTitle, contactEmail: cEmail, contactPhone: cPhone,
+        activities: [],
+        meddpicc: {}
+    });
+
+    document.getElementById('qaAddAcctModal').classList.add('hidden');
+
+    // Re-render the tables and update the datalist
+    populateAccountsList();
+    renderEnt(document.getElementById('entSearch').value, document.getElementById('entPriority').value, document.getElementById('entSector').value);
+    renderSmb(document.getElementById('smbSearch').value, document.getElementById('smbIndustry').value);
+    updateDashPipeline();
+    updateKPICards();
+    renderKanban();
+    showToast('success', name + ' added to ' + (type === 'ent' ? 'Enterprise' : 'SMB') + ' accounts.');
 }
 
 function showWeekPriorities() {
