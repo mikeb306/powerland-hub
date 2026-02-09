@@ -787,33 +787,113 @@
         @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(40px); } }
 
+        /* ===== BOTTOM NAV (mobile) ===== */
+        .bottom-nav {
+            display: none; position: fixed; bottom: 0; left: 0; right: 0;
+            z-index: 300; background: rgba(11,13,17,.97); backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border2);
+            padding: 4px 0 env(safe-area-inset-bottom, 4px);
+        }
+        .bottom-nav-inner {
+            display: flex; justify-content: space-around; align-items: center;
+            max-width: 500px; margin: 0 auto;
+        }
+        .bottom-nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 1px;
+            padding: 6px 8px; border: none; background: none; cursor: pointer;
+            font-family: var(--font); transition: color .15s;
+        }
+        .bottom-nav-icon { font-size: 20px; line-height: 1; }
+        .bottom-nav-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+        .bottom-nav-item { color: var(--text3); }
+        .bottom-nav-item.active { color: var(--accent); }
+        .bottom-nav-item:hover { color: var(--text); }
+        .bottom-nav-item.bnav-log { color: var(--accent5); }
+        .bottom-nav-item.bnav-log .bottom-nav-icon {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: #6366f1; color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 22px; margin-top: -14px; box-shadow: 0 2px 12px rgba(99,102,241,.4);
+        }
+        .bottom-nav-item.bnav-log .bottom-nav-label { color: var(--accent5); }
+
+        /* ===== BREAKPOINT 1: Tablet landscape (≤1000px) ===== */
         @media (max-width: 1000px) {
             .kpi-row, .pillar-grid, .kpi-metrics { grid-template-columns: repeat(2, 1fr); }
-            .grid-2, .grid-3, .grid-4, .grid-insights, .calc-grid { grid-template-columns: 1fr; }
+            .grid-2, .grid-3, .grid-4, .grid-insights, .calc-grid, .analytics-row { grid-template-columns: 1fr; }
             .topbar-center { display: none; }
             .topbar-header { padding: 0 12px; }
             .topbar-nav { padding: 0 12px; }
         }
-        @media (max-width: 600px) {
+
+        /* ===== BREAKPOINT 2: Tablet portrait / large phone (≤768px) ===== */
+        @media (max-width: 768px) {
+            .bottom-nav { display: block; }
+            body { padding-bottom: 72px; }
+            .topbar-nav { display: none; }
+            .fab-container { bottom: 88px; }
+            .kpi-row { grid-template-columns: repeat(3, 1fr); }
+            .kanban-column { min-width: 180px; max-width: 200px; }
+            .topbar-name { display: none; }
+            .topbar-target { font-size: 9px; }
+            .dash-header h1 { font-size: 20px; }
+            .quick-actions { flex-wrap: wrap; }
+            table { font-size: 12px; }
+            th, td { padding: 6px 8px; }
+            .whitespace-table { font-size: 10px; }
+            .whitespace-table th, .whitespace-table td { padding: 4px 3px; }
+            .map-container { height: 400px; }
+        }
+
+        /* ===== BREAKPOINT 3: Phone (≤480px) ===== */
+        @media (max-width: 480px) {
             .kpi-row, .pillar-grid, .kpi-metrics { grid-template-columns: 1fr; }
             .bar-label { width: 80px; font-size: 11px; }
-            .topbar-name { display: none; }
             .topbar-tab { padding: 8px 10px; font-size: 11px; }
-            .container { padding: 0 12px; }
+            .container { padding: 0 10px; }
             .kpi { padding: 12px 10px; }
             .kpi-value { font-size: 20px; }
-            .modal { width: 100%; margin: 10px; }
+            .modal { width: 100%; margin: 8px; }
             .modal-body { padding: 12px 14px; }
             .modal-row { flex-direction: column; gap: 8px; }
             .modal-field { min-width: 100%; }
             table { font-size: 11px; }
-            th, td { padding: 6px 6px; }
+            th, td { padding: 5px 5px; }
             .quick-actions { gap: 6px; }
             .qa-btn { padding: 6px 10px; font-size: 10px; }
-            .qa-box { width: 100%; margin: 10px; }
-            .dash-header h1 { font-size: 18px; }
+            .qa-box { width: 100%; margin: 8px; }
+            .dash-header h1 { font-size: 17px; }
             .panel { padding: 12px; }
+            .fab-container { bottom: 82px; right: 16px; }
+            .fab-main { width: 48px; height: 48px; font-size: 24px; line-height: 48px; }
+            .kanban-column { min-width: 160px; max-width: 180px; }
+            .deal-card { padding: 8px; font-size: 12px; }
+            .map-container { height: 300px; }
+            .velocity-grid { grid-template-columns: 1fr 1fr; gap: 4px; }
+            .velocity-value { font-size: 18px; }
+            .contact-card { padding: 8px; }
+            .topbar-header { height: 36px; }
+            .topbar-xerox { font-size: 12px; }
+            .topbar-its { font-size: 10px; }
+            .topbar-restore { font-size: 10px; padding: 2px 6px; }
         }
+
+        /* ===== BOTTOM NAV MORE SHEET ===== */
+        .bottom-nav-more { position: fixed; inset: 0; z-index: 350; display: flex; align-items: flex-end; }
+        .bottom-nav-more.hidden { display: none; }
+        .bnav-more-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+        .bnav-more-sheet {
+            position: relative; width: 100%; background: var(--bg2);
+            border-top-left-radius: 16px; border-top-right-radius: 16px;
+            padding: 16px 16px calc(72px + env(safe-area-inset-bottom, 4px));
+            max-height: 60vh; overflow-y: auto;
+        }
+        .bnav-more-title { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; padding: 0 4px; }
+        .bnav-more-item {
+            display: block; width: 100%; text-align: left; padding: 12px 12px;
+            border: none; background: none; color: var(--text); font-size: 14px;
+            font-family: var(--font); cursor: pointer; border-radius: 8px; transition: background .15s;
+        }
+        .bnav-more-item:hover { background: rgba(255,255,255,.05); }
     </style>
 </head>
 <body>
@@ -2918,6 +2998,50 @@ document.querySelectorAll('.topbar-tab').forEach(tab => {
         window.scrollTo(0, 0);
     });
 });
+
+// ===== BOTTOM NAV =====
+function switchPage(page) {
+    document.querySelectorAll('.topbar-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const topTab = document.querySelector('.topbar-tab[data-page="' + page + '"]');
+    if (topTab) topTab.classList.add('active');
+    document.getElementById(page).classList.add('active');
+    if (page === 'pillars') renderWhitespaceHeatmap();
+    if (page === 'territory') { initTerritoryMap(); setTimeout(() => { if (territoryMap) territoryMap.invalidateSize(); }, 100); }
+    // Sync bottom nav active state
+    document.querySelectorAll('.bottom-nav-item[data-bnav]').forEach(b => b.classList.remove('active'));
+    const bnavBtn = document.querySelector('.bottom-nav-item[data-bnav="' + page + '"]');
+    if (bnavBtn) bnavBtn.classList.add('active');
+    window.scrollTo(0, 0);
+}
+
+document.querySelectorAll('.bottom-nav-item[data-bnav]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        closeBnavMore();
+        switchPage(btn.dataset.bnav);
+    });
+});
+document.querySelectorAll('.bnav-more-item[data-bnav]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        closeBnavMore();
+        switchPage(btn.dataset.bnav);
+    });
+});
+
+// Bottom nav Log button — toggles FAB
+document.getElementById('bnavLogBtn').addEventListener('click', () => {
+    closeBnavMore();
+    toggleFAB();
+});
+
+// Bottom nav More menu
+document.getElementById('bnavMoreBtn').addEventListener('click', () => {
+    const menu = document.getElementById('bnavMoreMenu');
+    menu.classList.toggle('hidden');
+});
+function closeBnavMore() {
+    document.getElementById('bnavMoreMenu').classList.add('hidden');
+}
 
 // ===== FILTERS =====
 document.getElementById('entSearch').addEventListener('input', e => renderEnt(e.target.value, document.getElementById('entPriority').value, document.getElementById('entSector').value));
@@ -5280,6 +5404,49 @@ function restoreFromBackup() {
     });
 }
 </script>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav" id="bottomNav">
+    <div class="bottom-nav-inner">
+        <button class="bottom-nav-item active" data-bnav="dashboard">
+            <span class="bottom-nav-icon">&#127968;</span>
+            <span class="bottom-nav-label">Home</span>
+        </button>
+        <button class="bottom-nav-item" data-bnav="pipeline">
+            <span class="bottom-nav-icon">&#128202;</span>
+            <span class="bottom-nav-label">Pipeline</span>
+        </button>
+        <button class="bottom-nav-item bnav-log" id="bnavLogBtn">
+            <span class="bottom-nav-icon">+</span>
+            <span class="bottom-nav-label">Log</span>
+        </button>
+        <button class="bottom-nav-item" data-bnav="ent">
+            <span class="bottom-nav-icon">&#127970;</span>
+            <span class="bottom-nav-label">Accounts</span>
+        </button>
+        <button class="bottom-nav-item" id="bnavMoreBtn">
+            <span class="bottom-nav-icon">&#9776;</span>
+            <span class="bottom-nav-label">More</span>
+        </button>
+    </div>
+</nav>
+
+<!-- BOTTOM NAV MORE MENU -->
+<div class="bottom-nav-more hidden" id="bnavMoreMenu">
+    <div class="bnav-more-backdrop" onclick="closeBnavMore()"></div>
+    <div class="bnav-more-sheet">
+        <div class="bnav-more-title">More Pages</div>
+        <button class="bnav-more-item" data-bnav="smb">SMB Accounts</button>
+        <button class="bnav-more-item" data-bnav="k12">K-12</button>
+        <button class="bnav-more-item" data-bnav="highered">Higher Ed</button>
+        <button class="bnav-more-item" data-bnav="creditunions">Credit Unions</button>
+        <button class="bnav-more-item" data-bnav="pillars">Pillars</button>
+        <button class="bnav-more-item" data-bnav="territory">Territory Map</button>
+        <button class="bnav-more-item" data-bnav="playbook">Playbook</button>
+        <button class="bnav-more-item" data-bnav="tools">Tools</button>
+        <button class="bnav-more-item" data-bnav="calendar">Calendar</button>
+    </div>
+</div>
 
 </body>
 </html>
