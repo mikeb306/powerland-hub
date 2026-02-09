@@ -419,6 +419,7 @@
         .tbl-clickable tbody tr { cursor: pointer; }
         .tbl-clickable tbody tr:hover td { background: rgba(79,140,255,.04); }
         .tag-discovery { background: rgba(79,140,255,.12); color: var(--accent); }
+        .tag-needs-analysis { background: rgba(99,102,241,.12); color: #818cf8; }
         .tag-qualifying { background: rgba(167,139,250,.12); color: var(--accent5); }
         .tag-proposal { background: rgba(245,158,11,.12); color: var(--accent3); }
         .tag-negotiation { background: rgba(239,68,68,.12); color: var(--accent4); }
@@ -457,6 +458,51 @@
         .oc-note-dismiss { font-size: 10px; color: var(--text3); cursor: pointer; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
         .oc-note-dismiss:hover { color: var(--accent4); background: rgba(239,68,68,.1); }
 
+        /* QUICK ACTIONS */
+        .quick-actions { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .qa-btn {
+            padding: 8px 16px; border-radius: 8px; font-size: 11px; font-weight: 600;
+            cursor: pointer; border: 1px solid var(--border); background: var(--card);
+            color: var(--text2); transition: all .15s; font-family: var(--font);
+        }
+        .qa-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,140,255,.06); }
+        .qa-btn span { margin-right: 4px; }
+
+        /* STALE/HOT */
+        .stale-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+        .stale-row:last-child { border-bottom: none; }
+        .stale-name { color: var(--text); font-weight: 500; }
+        .stale-days { color: var(--accent4); font-family: var(--mono); font-size: 10px; }
+        .hot-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+        .hot-row:last-child { border-bottom: none; }
+        .hot-name { color: var(--text); font-weight: 500; }
+        .hot-val { color: var(--accent2); font-family: var(--mono); font-size: 10px; }
+
+        /* STAGE BREAKDOWN */
+        .stage-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 11px; }
+        .stage-label { color: var(--text2); }
+        .stage-count { font-family: var(--mono); color: var(--text); }
+        .stage-value { font-family: var(--mono); color: var(--accent2); font-size: 10px; }
+
+        /* QUICK ADD MODAL */
+        .qa-modal { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; }
+        .qa-modal.hidden { display: none; }
+        .qa-box { background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; padding: 24px; width: 440px; max-width: 95%; }
+        .qa-box h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+        .qa-field { margin-bottom: 10px; }
+        .qa-field label { display: block; font-size: 10px; color: var(--text3); margin-bottom: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+        .qa-field input, .qa-field select, .qa-field textarea {
+            width: 100%; padding: 8px 10px; border-radius: 8px;
+            background: var(--bg); border: 1px solid var(--border); color: var(--text);
+            font-family: var(--font); font-size: 12px; outline: none;
+        }
+        .qa-field textarea { min-height: 60px; resize: vertical; }
+        .qa-field input:focus, .qa-field select:focus, .qa-field textarea:focus { border-color: var(--accent); }
+        .qa-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+        /* HIGH-VALUE DEAL HIGHLIGHT */
+        tr.deal-hot td:first-child { border-left: 3px solid var(--accent2); }
+
         @media (max-width: 1000px) {
             .kpi-row, .pillar-grid { grid-template-columns: repeat(2, 1fr); }
             .grid-2, .grid-3, .grid-4, .calc-grid { grid-template-columns: 1fr; }
@@ -467,6 +513,22 @@
             .kpi-row, .pillar-grid { grid-template-columns: 1fr; }
             .bar-label { width: 80px; font-size: 11px; }
             .topbar-brand { flex-direction: column; gap: 2px; }
+            .topbar-name { display: none; }
+            .topbar-sep { display: none; }
+            .container { padding: 0 12px; }
+            .kpi { padding: 12px 10px; }
+            .kpi-value { font-size: 20px; }
+            .modal { width: 100%; margin: 10px; }
+            .modal-body { padding: 12px 14px; }
+            .modal-row { flex-direction: column; gap: 8px; }
+            .modal-field { min-width: 100%; }
+            table { font-size: 11px; }
+            th, td { padding: 6px 6px; }
+            .quick-actions { gap: 6px; }
+            .qa-btn { padding: 6px 10px; font-size: 10px; }
+            .qa-box { width: 100%; margin: 10px; }
+            .dash-header h1 { font-size: 18px; }
+            .panel { padding: 12px; }
         }
     </style>
 </head>
@@ -542,6 +604,12 @@
             </div>
         </div>
 
+        <div class="quick-actions">
+            <button class="qa-btn" onclick="openQuickLog()"><span>+</span> Log a Call</button>
+            <button class="qa-btn" onclick="openQuickDeal()"><span>+</span> Quick Add Deal</button>
+            <button class="qa-btn" onclick="showWeekPriorities()"><span>&#9776;</span> This Week</button>
+        </div>
+
         <div class="kpi-row">
             <div class="kpi kpi-green">
                 <div class="kpi-label">Closed Revenue</div>
@@ -596,6 +664,27 @@
                     <div class="bar-row"><div class="bar-label">Other / Unknown</div><div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--text3);" id="cf-unknown-bar">—</div></div><div class="bar-count" id="cf-unknown-ct">—</div></div>
                 </div>
                 <p style="font-size:10px;color:var(--text3);margin-top:8px;">Auto-updated from account IT Incumbent data</p>
+            </div>
+        </div>
+
+        <div class="grid-3" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="panel">
+                <div class="panel-title">Pipeline by Stage</div>
+                <div id="dashStageBreakdown">
+                    <div style="color:var(--text3);font-style:italic;font-size:11px;">No active deals yet.</div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title" style="display:flex;align-items:center;gap:6px;">Stale Accounts <span style="font-size:9px;color:var(--accent4);font-weight:400;">(14+ days no contact)</span></div>
+                <div id="dashStale">
+                    <div style="color:var(--text3);font-style:italic;font-size:11px;">No stale accounts detected.</div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title" style="display:flex;align-items:center;gap:6px;">Hot Deals <span style="font-size:9px;color:var(--accent2);font-weight:400;">(75%+ this quarter)</span></div>
+                <div id="dashHotDeals">
+                    <div style="color:var(--text3);font-style:italic;font-size:11px;">No hot deals yet.</div>
+                </div>
             </div>
         </div>
 
@@ -1579,8 +1668,9 @@ Sr Account Executive | Xerox IT Solutions
                         <select id="m-stage">
                             <option value="Fresh">Fresh</option>
                             <option value="Discovery">Discovery</option>
+                            <option value="Needs Analysis">Needs Analysis</option>
                             <option value="Qualifying">Qualifying</option>
-                            <option value="Proposal">Proposal</option>
+                            <option value="Proposal">Proposal / Quote</option>
                             <option value="Negotiation">Negotiation</option>
                             <option value="Closed Won">Closed Won</option>
                             <option value="Closed Lost">Closed Lost</option>
@@ -1623,6 +1713,33 @@ Sr Account Executive | Xerox IT Solutions
                             <option value="Compugen">Compugen</option>
                             <option value="Internal IT">Internal IT</option>
                             <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">Activity & Next Steps</div>
+                <div class="modal-row">
+                    <div class="modal-field">
+                        <label>Last Contact Date</label>
+                        <input id="m-lastcontact" type="date">
+                    </div>
+                    <div class="modal-field" style="flex:2;">
+                        <label>Next Action</label>
+                        <input id="m-nextaction" placeholder="Send SOW, Book demo, Meet CFO, Follow up...">
+                    </div>
+                    <div class="modal-field">
+                        <label>Deal Source</label>
+                        <select id="m-source">
+                            <option value="">--</option>
+                            <option value="Cold Outreach">Cold Outreach</option>
+                            <option value="Referral">Referral</option>
+                            <option value="RFP Response">RFP Response</option>
+                            <option value="Existing Relationship">Existing Relationship</option>
+                            <option value="Xerox Print Bridge">Xerox Print Bridge</option>
+                            <option value="Inbound">Inbound</option>
+                            <option value="Event / Conference">Event / Conference</option>
                         </select>
                     </div>
                 </div>
@@ -1751,6 +1868,73 @@ Sr Account Executive | Xerox IT Solutions
 
 <div style="height:60px;"></div>
 
+<!-- QUICK LOG A CALL MODAL -->
+<div class="qa-modal hidden" id="qaLogModal">
+    <div class="qa-box">
+        <h3>Log a Call</h3>
+        <div class="qa-field">
+            <label>Account</label>
+            <input id="qa-log-acct" list="allAccountsList" placeholder="Start typing account name...">
+        </div>
+        <div class="qa-field">
+            <label>Notes</label>
+            <textarea id="qa-log-notes" placeholder="What was discussed? Key takeaways..."></textarea>
+        </div>
+        <div class="qa-field">
+            <label>Next Action</label>
+            <input id="qa-log-next" placeholder="Send SOW, Book demo, Follow up in 2 weeks...">
+        </div>
+        <div class="qa-btns">
+            <button class="modal-btn modal-btn-ghost" onclick="document.getElementById('qaLogModal').classList.add('hidden')">Cancel</button>
+            <button class="modal-btn modal-btn-primary" onclick="saveQuickLog()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- QUICK ADD DEAL MODAL -->
+<div class="qa-modal hidden" id="qaDealModal">
+    <div class="qa-box">
+        <h3>Quick Add Deal</h3>
+        <div class="qa-field">
+            <label>Account</label>
+            <input id="qa-deal-acct" list="allAccountsList" placeholder="Start typing account name...">
+        </div>
+        <div style="display:flex;gap:10px;">
+            <div class="qa-field" style="flex:1;">
+                <label>Deal Value ($)</label>
+                <input type="number" id="qa-deal-value" placeholder="50000">
+            </div>
+            <div class="qa-field" style="flex:1;">
+                <label>Stage</label>
+                <select id="qa-deal-stage">
+                    <option value="Discovery">Discovery</option>
+                    <option value="Needs Analysis">Needs Analysis</option>
+                    <option value="Qualifying">Qualifying</option>
+                    <option value="Proposal">Proposal</option>
+                </select>
+            </div>
+        </div>
+        <div class="qa-btns">
+            <button class="modal-btn modal-btn-ghost" onclick="document.getElementById('qaDealModal').classList.add('hidden')">Cancel</button>
+            <button class="modal-btn modal-btn-primary" onclick="saveQuickDeal()">Add Deal</button>
+        </div>
+    </div>
+</div>
+
+<!-- WEEK PRIORITIES MODAL -->
+<div class="qa-modal hidden" id="qaWeekModal">
+    <div class="qa-box" style="width:560px;">
+        <h3>This Week's Priorities</h3>
+        <div id="qaWeekContent" style="font-size:12px;color:var(--text2);line-height:1.7;max-height:400px;overflow-y:auto;"></div>
+        <div class="qa-btns" style="margin-top:14px;">
+            <button class="modal-btn modal-btn-ghost" onclick="document.getElementById('qaWeekModal').classList.add('hidden')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- DATALIST for account autocomplete -->
+<datalist id="allAccountsList"></datalist>
+
 <!-- RESTORE FROM BACKUP MODAL -->
 <div class="restore-modal hidden" id="restoreModal">
     <div class="restore-box">
@@ -1801,7 +1985,7 @@ const entAccounts = [
     {name:"Federated Co-operatives (FCL)",sector:"Retail",emp:2309,city:"Saskatoon",priority:"B",incumbent:"—",contact:"",source:"Tracker"},
     {name:"SGI Canada",sector:"Crown Corp",emp:2012,city:"Regina",priority:"B",incumbent:"—",contact:"",source:"Tracker"},
     {name:"The Mosaic Company",sector:"Mining",emp:1984,city:"Saskatoon/Esterhazy",priority:"A",incumbent:"Konica Minolta",contact:"Geoff Cole",source:"Tracker"},
-    {name:"SIGA",sector:"Government",emp:1882,city:"Saskatoon",priority:"B",incumbent:"Xerox Dealer AB",contact:"Ryan G",source:"Tracker"},
+    {name:"SIGA",sector:"Gaming",emp:1882,city:"Saskatoon",priority:"B",incumbent:"Xerox Dealer AB",contact:"Ryan G",source:"Tracker"},
     {name:"Brandt Group",sector:"Manufacturing",emp:1413,city:"Regina",priority:"B",incumbent:"Calgary Agency",contact:"",source:"Tracker"},
     {name:"SaskEnergy",sector:"Crown Corp",emp:1169,city:"Regina",priority:"B",incumbent:"WBM",contact:"",source:"Tracker"},
     {name:"Cameco Corporation",sector:"Mining",emp:1089,city:"Saskatoon",priority:"A",incumbent:"WBM",contact:"Mark (VP Tech)",source:"Tracker"},
@@ -1831,6 +2015,13 @@ const entAccounts = [
     {name:"Yorkton Regional Health Centre",sector:"Healthcare",emp:600,city:"Yorkton",priority:"C",incumbent:"—",contact:"",source:"SK DB"},
     {name:"Consumers' Co-Op Refineries",sector:"Energy",emp:600,city:"Regina",priority:"B",incumbent:"—",contact:"",source:"SK DB"},
     {name:"Ranch Ehrlo Society",sector:"Social Services",emp:600,city:"Regina",priority:"C",incumbent:"—",contact:"",source:"SK DB"},
+    // Key missing accounts
+    {name:"Saskatchewan Health Authority",sector:"Healthcare",emp:44000,city:"Saskatoon/Regina",priority:"A",incumbent:"—",contact:"",source:"Territory"},
+    {name:"eHealth Saskatchewan",sector:"Healthcare",emp:1200,city:"Regina",priority:"A",incumbent:"—",contact:"",source:"Territory"},
+    {name:"SaskPower",sector:"Crown Corp",emp:3300,city:"Regina",priority:"A",incumbent:"—",contact:"",source:"Territory"},
+    {name:"Bunge Canada",sector:"Agriculture",emp:900,city:"Saskatoon",priority:"B",incumbent:"—",contact:"",source:"Territory"},
+    {name:"K+S Potash Canada",sector:"Mining",emp:600,city:"Bethune",priority:"B",incumbent:"—",contact:"",source:"Territory"},
+    {name:"GSCS (Greater Saskatoon Catholic Schools)",sector:"Government",emp:2500,city:"Saskatoon",priority:"A",incumbent:"—",contact:"Laurier Langlois",source:"Tracker"},
 ];
 
 // ===== SMB DATA =====
@@ -1943,8 +2134,8 @@ function setAcctData(name, data) { localStorage.setItem(acctKey(name), JSON.stri
 
 function stageTag(stage) {
     const cls = {
-        'Fresh':'tag-fresh','Discovery':'tag-discovery','Qualifying':'tag-qualifying',
-        'Proposal':'tag-proposal','Negotiation':'tag-negotiation',
+        'Fresh':'tag-fresh','Discovery':'tag-discovery','Needs Analysis':'tag-needs-analysis',
+        'Qualifying':'tag-qualifying','Proposal':'tag-proposal','Negotiation':'tag-negotiation',
         'Closed Won':'tag-won','Closed Lost':'tag-lost'
     };
     return `<span class="tag ${cls[stage]||'tag-fresh'}">${stage||'Fresh'}</span>`;
@@ -2215,6 +2406,9 @@ function openModal(name, type) {
     document.getElementById('m-cphone').value = d.contactPhone || '';
     document.getElementById('m-followup').value = d.followUp || '';
     document.getElementById('m-expiry').value = d.expiry || '';
+    document.getElementById('m-lastcontact').value = d.lastContact || '';
+    document.getElementById('m-nextaction').value = d.nextAction || '';
+    document.getElementById('m-source').value = d.dealSource || '';
     document.getElementById('m-notes').value = d.notes || '';
 
     // Pillars
@@ -2277,6 +2471,9 @@ function saveModal() {
         contactPhone: document.getElementById('m-cphone').value,
         followUp: document.getElementById('m-followup').value,
         expiry: document.getElementById('m-expiry').value,
+        lastContact: document.getElementById('m-lastcontact').value,
+        nextAction: document.getElementById('m-nextaction').value,
+        dealSource: document.getElementById('m-source').value,
         notes: document.getElementById('m-notes').value,
     };
 
@@ -2294,6 +2491,9 @@ function saveModal() {
     updateCompetitorFootprint();
     updateDashFollowUps();
     updateDashFlags();
+    updateStageBreakdown();
+    updateStaleAccounts();
+    updateHotDeals();
     syncPipelineToProxy();
 }
 
@@ -2904,10 +3104,206 @@ function safePipelineSync() {
     });
 }
 
+// --- Pipeline by Stage Breakdown ---
+function updateStageBreakdown() {
+    const stages = {};
+    const allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name)];
+    allAccts.forEach(name => {
+        const d = getAcctData(name);
+        if (d.stage && d.stage !== 'Fresh' && d.stage !== 'Closed Won' && d.stage !== 'Closed Lost') {
+            if (!stages[d.stage]) stages[d.stage] = { count: 0, value: 0 };
+            stages[d.stage].count++;
+            stages[d.stage].value += Number(d.value) || 0;
+        }
+    });
+    const el = document.getElementById('dashStageBreakdown');
+    const order = ['Discovery','Needs Analysis','Qualifying','Proposal','Negotiation'];
+    const rows = order.filter(s => stages[s]).map(s =>
+        `<div class="stage-row">
+            <span class="stage-label">${stageTag(s)}</span>
+            <span class="stage-count">${stages[s].count}</span>
+            <span class="stage-value">$${stages[s].value.toLocaleString()}</span>
+        </div>`
+    );
+    el.innerHTML = rows.length ? rows.join('') : '<div style="color:var(--text3);font-style:italic;font-size:11px;">No active deals yet.</div>';
+}
+
+// --- Stale Accounts (14+ days since last contact) ---
+function updateStaleAccounts() {
+    const stale = [];
+    const now = new Date();
+    const allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name)];
+    allAccts.forEach(name => {
+        const d = getAcctData(name);
+        if (d.stage && d.stage !== 'Fresh' && d.stage !== 'Closed Won' && d.stage !== 'Closed Lost' && d.lastContact) {
+            const last = new Date(d.lastContact + 'T00:00:00');
+            const days = Math.floor((now - last) / 86400000);
+            if (days >= 14) stale.push({ name, days, stage: d.stage });
+        }
+    });
+    stale.sort((a, b) => b.days - a.days);
+    const el = document.getElementById('dashStale');
+    el.innerHTML = stale.length ? stale.slice(0, 6).map(s =>
+        `<div class="stale-row">
+            <span class="stale-name">${s.name}</span>
+            <span>${stageTag(s.stage)}</span>
+            <span class="stale-days">${s.days}d ago</span>
+        </div>`
+    ).join('') : '<div style="color:var(--text3);font-style:italic;font-size:11px;">No stale accounts. (Set Last Contact dates in account details)</div>';
+}
+
+// --- Hot Deals (75%+ probability, close this quarter) ---
+function updateHotDeals() {
+    const hot = [];
+    const now = new Date();
+    const currentQ = 'Q' + (Math.floor(now.getMonth() / 3) + 1) + ' ' + now.getFullYear();
+    const allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name)];
+    allAccts.forEach(name => {
+        const d = getAcctData(name);
+        if (d.stage && d.stage !== 'Fresh' && d.stage !== 'Closed Won' && d.stage !== 'Closed Lost') {
+            const prob = parseInt(d.prob) || 0;
+            if (prob >= 75 || (d.closeQ && d.closeQ === currentQ && prob >= 50)) {
+                hot.push({ name, value: Number(d.value) || 0, prob, stage: d.stage, closeQ: d.closeQ || '' });
+            }
+        }
+    });
+    hot.sort((a, b) => b.value - a.value);
+    const el = document.getElementById('dashHotDeals');
+    el.innerHTML = hot.length ? hot.slice(0, 6).map(h =>
+        `<div class="hot-row">
+            <span class="hot-name">${h.name}</span>
+            <span>${stageTag(h.stage)}</span>
+            <span class="hot-val">$${h.value.toLocaleString()} (${h.prob}%)</span>
+        </div>`
+    ).join('') : '<div style="color:var(--text3);font-style:italic;font-size:11px;">No hot deals yet. Set probability + close quarter in account details.</div>';
+}
+
+// --- Quick Actions ---
+function populateAccountsList() {
+    const dl = document.getElementById('allAccountsList');
+    const all = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name)];
+    dl.innerHTML = all.map(n => `<option value="${n}">`).join('');
+}
+populateAccountsList();
+
+function openQuickLog() {
+    document.getElementById('qa-log-acct').value = '';
+    document.getElementById('qa-log-notes').value = '';
+    document.getElementById('qa-log-next').value = '';
+    document.getElementById('qaLogModal').classList.remove('hidden');
+    document.getElementById('qa-log-acct').focus();
+}
+
+function saveQuickLog() {
+    const acct = document.getElementById('qa-log-acct').value.trim();
+    const notes = document.getElementById('qa-log-notes').value.trim();
+    const next = document.getElementById('qa-log-next').value.trim();
+    if (!acct) return;
+    const d = getAcctData(acct);
+    const today = new Date().toISOString().slice(0, 10);
+    d.lastContact = today;
+    if (next) d.nextAction = next;
+    if (notes) d.notes = (d.notes ? d.notes + '\n\n' : '') + '[' + today + '] ' + notes;
+    setAcctData(acct, d);
+    document.getElementById('qaLogModal').classList.add('hidden');
+    updateStaleAccounts();
+    updateDashFollowUps();
+}
+
+function openQuickDeal() {
+    document.getElementById('qa-deal-acct').value = '';
+    document.getElementById('qa-deal-value').value = '';
+    document.getElementById('qa-deal-stage').value = 'Discovery';
+    document.getElementById('qaDealModal').classList.remove('hidden');
+    document.getElementById('qa-deal-acct').focus();
+}
+
+function saveQuickDeal() {
+    const acct = document.getElementById('qa-deal-acct').value.trim();
+    const value = document.getElementById('qa-deal-value').value;
+    const stage = document.getElementById('qa-deal-stage').value;
+    if (!acct) return;
+    const d = getAcctData(acct);
+    d.stage = stage;
+    if (value) d.value = value;
+    d.lastContact = new Date().toISOString().slice(0, 10);
+    setAcctData(acct, d);
+    document.getElementById('qaDealModal').classList.add('hidden');
+    updateDashPipeline();
+    updateStageBreakdown();
+    updateHotDeals();
+    renderEnt(document.getElementById('entSearch').value, document.getElementById('entPriority').value, document.getElementById('entSector').value);
+    renderSmb(document.getElementById('smbSearch').value, document.getElementById('smbIndustry').value);
+    syncPipelineToProxy();
+}
+
+function showWeekPriorities() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+    const allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name)];
+    let followUps = [], overdueFollowUps = [], nextActions = [], staleDeals = [];
+
+    allAccts.forEach(name => {
+        const d = getAcctData(name);
+        if (d.followUp) {
+            const fDate = new Date(d.followUp + 'T00:00:00');
+            if (fDate < today) overdueFollowUps.push({ name, date: d.followUp, stage: d.stage || 'Fresh' });
+            else if (fDate <= weekEnd) followUps.push({ name, date: d.followUp, stage: d.stage || 'Fresh' });
+        }
+        if (d.nextAction && d.stage && d.stage !== 'Fresh' && d.stage !== 'Closed Won' && d.stage !== 'Closed Lost') {
+            nextActions.push({ name, action: d.nextAction, stage: d.stage });
+        }
+        if (d.stage && d.stage !== 'Fresh' && d.stage !== 'Closed Won' && d.stage !== 'Closed Lost' && d.lastContact) {
+            const days = Math.floor((now - new Date(d.lastContact + 'T00:00:00')) / 86400000);
+            if (days >= 14) staleDeals.push({ name, days, stage: d.stage });
+        }
+    });
+
+    let html = '';
+    if (overdueFollowUps.length) {
+        html += '<div style="margin-bottom:12px;"><strong style="color:var(--accent4);font-size:11px;text-transform:uppercase;">OVERDUE</strong>';
+        overdueFollowUps.forEach(f => { html += `<div style="padding:3px 0;border-bottom:1px solid var(--border);">${f.name} <span style="color:var(--accent4);font-size:10px;">— was ${f.date}</span></div>`; });
+        html += '</div>';
+    }
+    if (followUps.length) {
+        html += '<div style="margin-bottom:12px;"><strong style="color:var(--accent);font-size:11px;text-transform:uppercase;">Follow-ups This Week</strong>';
+        followUps.forEach(f => { html += `<div style="padding:3px 0;border-bottom:1px solid var(--border);">${f.name} <span style="color:var(--text3);font-size:10px;">— ${f.date}</span></div>`; });
+        html += '</div>';
+    }
+    if (nextActions.length) {
+        html += '<div style="margin-bottom:12px;"><strong style="color:var(--accent2);font-size:11px;text-transform:uppercase;">Pending Next Actions</strong>';
+        nextActions.slice(0, 10).forEach(a => { html += `<div style="padding:3px 0;border-bottom:1px solid var(--border);">${a.name} <span style="color:var(--text3);font-size:10px;">— ${a.action}</span></div>`; });
+        html += '</div>';
+    }
+    if (staleDeals.length) {
+        html += '<div style="margin-bottom:12px;"><strong style="color:var(--accent3);font-size:11px;text-transform:uppercase;">Stale Deals (14+ days)</strong>';
+        staleDeals.forEach(s => { html += `<div style="padding:3px 0;border-bottom:1px solid var(--border);">${s.name} <span style="color:var(--accent4);font-size:10px;">— ${s.days}d since last contact</span></div>`; });
+        html += '</div>';
+    }
+    if (!html) html = '<div style="color:var(--text3);font-style:italic;">No follow-ups, overdue items, or next actions found. Set dates and next actions in account details.</div>';
+
+    document.getElementById('qaWeekContent').innerHTML = html;
+    document.getElementById('qaWeekModal').classList.remove('hidden');
+}
+
+// Close quick modals on overlay click + escape
+['qaLogModal','qaDealModal','qaWeekModal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', e => {
+        if (e.target.id === id) document.getElementById(id).classList.add('hidden');
+    });
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') ['qaLogModal','qaDealModal','qaWeekModal'].forEach(id => document.getElementById(id).classList.add('hidden'));
+});
+
 updateDashPipeline();
 updateCompetitorFootprint();
 updateDashFollowUps();
 updateDashFlags();
+updateStageBreakdown();
+updateStaleAccounts();
+updateHotDeals();
 fetchOcNotes();
 safePipelineSync(); // Safe sync on load — never overwrites cal-proxy with empty data
 setInterval(fetchOcNotes, 30000); // Poll every 30s for new notes
