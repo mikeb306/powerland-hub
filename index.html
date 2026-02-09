@@ -569,6 +569,13 @@
         .kanban-stat { font-size: 12px; color: var(--text2); }
         .kanban-stat strong { color: var(--text); font-family: var(--mono); }
 
+        /* ACCOUNT TIER BADGES */
+        .tier-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+        .tier-platinum { background: rgba(167,139,250,.18); color: #c4b5fd; }
+        .tier-gold { background: rgba(245,158,11,.18); color: #fbbf24; }
+        .tier-silver { background: rgba(156,163,175,.18); color: #d1d5db; }
+        .tier-bronze { background: rgba(180,130,90,.18); color: #c8a06e; }
+
         /* TERRITORY MAP */
         .map-container { height: 520px; border-radius: 10px; border: 1px solid var(--border); overflow: hidden; }
         .map-controls { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
@@ -1077,7 +1084,7 @@
         <div class="panel" style="padding:0;">
             <div class="tbl-wrap tbl-scroll">
                 <table id="entTable" class="tbl-clickable"><thead><tr>
-                    <th>Account</th><th>Sector</th><th>Emp</th><th>City</th><th>Pri</th><th>Stage</th><th>Value</th><th style="text-align:center;">HP</th><th>Pillars</th><th>Flags</th>
+                    <th>Account</th><th>Tier</th><th>Sector</th><th>Emp</th><th>City</th><th>Pri</th><th>Stage</th><th>Value</th><th style="text-align:center;">HP</th><th>Pillars</th><th>Flags</th>
                 </tr></thead><tbody></tbody></table>
             </div>
         </div>
@@ -1112,7 +1119,7 @@
         <div class="panel" style="padding:0;">
             <div class="tbl-wrap tbl-scroll">
                 <table id="smbTable" class="tbl-clickable"><thead><tr>
-                    <th>Company</th><th>Industry</th><th>Emp</th><th>City</th><th>Stage</th><th>Value</th><th style="text-align:center;">HP</th><th>Pillars</th><th>Flags</th>
+                    <th>Company</th><th>Tier</th><th>Industry</th><th>Emp</th><th>City</th><th>Stage</th><th>Value</th><th style="text-align:center;">HP</th><th>Pillars</th><th>Flags</th>
                 </tr></thead><tbody></tbody></table>
             </div>
         </div>
@@ -2767,6 +2774,7 @@ function renderEnt(f='',p='',s='') {
         const d = getAcctData(a.name);
         return `<tr onclick="openModal('${a.name.replace(/'/g,"\\'")}','ent')">
         <td><strong style="color:var(--text)">${a.name}</strong></td>
+        <td>${tierBadge(a, d)}</td>
         <td style="font-size:11px;">${a.sector}</td>
         <td style="font-family:var(--mono);font-size:11px;">${a.emp ? fmt(a.emp) : '—'}</td>
         <td style="font-size:11px;">${a.city}</td>
@@ -2792,6 +2800,7 @@ function renderSmb(f='',ind='') {
         const d = getAcctData(a.name);
         return `<tr onclick="openModal('${a.name.replace(/'/g,"\\'")}','smb')">
         <td><strong style="color:var(--text)">${a.name}</strong></td>
+        <td>${tierBadge(a, d)}</td>
         <td style="font-size:11px;">${a.industry}</td>
         <td style="font-family:var(--mono);font-size:11px;">${a.emp ? fmt(a.emp) : '—'}</td>
         <td style="font-size:11px;">${a.city}</td>
@@ -4502,6 +4511,41 @@ function dealHealthDot(deal) {
     if (age === 'critical' || mScore < 20) return '<span title="At Risk">&#128308;</span>';
     if (age === 'warning' || mScore < 40) return '<span title="Needs Attention">&#128993;</span>';
     return '<span title="Healthy">&#128994;</span>';
+}
+
+// ===== ACCOUNT TIERING =====
+function calculateAccountTier(acct, acctData) {
+    // Revenue potential: based on deal value + employee count as proxy (0-40)
+    const value = Number(acctData.value) || 0;
+    const emp = acct.emp || 0;
+    const revScore = Math.min(40, (value / 200000) * 20 + (emp / 5000) * 20);
+
+    // Strategic value: priority weighting (0-20)
+    const priorityScore = acct.priority === 'A' ? 20 : acct.priority === 'B' ? 12 : 5;
+
+    // Competitive position: no incumbent or weak incumbent = opportunity (0-20)
+    const inc = acctData.incumbent || acct.incumbent || '';
+    const compScore = (!inc || inc === '—' || inc === '') ? 18 : inc === 'Unknown' ? 14 : 8;
+
+    // Engagement: health score + pillar breadth (0-20)
+    const health = calculateHealthScore(acctData).total;
+    const pillars = (acctData.pillars || []).length;
+    const engScore = Math.min(20, (health / 100) * 12 + (pillars / 12) * 8);
+
+    const total = Math.round(revScore + priorityScore + compScore + engScore);
+    let tier;
+    if (total >= 70) tier = 'Platinum';
+    else if (total >= 50) tier = 'Gold';
+    else if (total >= 30) tier = 'Silver';
+    else tier = 'Bronze';
+
+    return { tier, score: total };
+}
+
+function tierBadge(acct, acctData) {
+    const { tier } = calculateAccountTier(acct, acctData);
+    const cls = 'tier-' + tier.toLowerCase();
+    return `<span class="tier-badge ${cls}">${tier}</span>`;
 }
 
 // ===== MULTI-CONTACT MANAGEMENT =====
