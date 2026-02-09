@@ -615,6 +615,14 @@
         }
         .fab-log-tpl:hover { border-color: var(--accent); color: var(--accent); }
 
+        /* HEALTH SCORE */
+        .health-dot { font-size: 11px; cursor: help; }
+        .at-risk-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+        .at-risk-row:last-child { border-bottom: none; }
+        .at-risk-name { color: var(--text); font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .at-risk-score { font-family: var(--mono); font-size: 10px; font-weight: 700; margin: 0 6px; }
+        .at-risk-val { color: var(--accent2); font-family: var(--mono); font-size: 10px; flex-shrink: 0; }
+
         /* KPI METRIC CARDS */
         .kpi-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
         .kpi-metric {
@@ -647,7 +655,7 @@
 
         @media (max-width: 1000px) {
             .kpi-row, .pillar-grid, .kpi-metrics { grid-template-columns: repeat(2, 1fr); }
-            .grid-2, .grid-3, .grid-4, .calc-grid { grid-template-columns: 1fr; }
+            .grid-2, .grid-3, .grid-4, .grid-insights, .calc-grid { grid-template-columns: 1fr; }
             .topbar-tabs { overflow-x: auto; flex-wrap: nowrap; }
             .topbar-inner { flex-direction: column; gap: 8px; }
         }
@@ -834,7 +842,7 @@
             </div>
         </div>
 
-        <div class="grid-3" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:16px;" class="grid-insights">
             <div class="panel">
                 <div class="panel-title">Pipeline by Stage</div>
                 <div id="dashStageBreakdown">
@@ -842,15 +850,21 @@
                 </div>
             </div>
             <div class="panel">
-                <div class="panel-title" style="display:flex;align-items:center;gap:6px;">Stale Accounts <span style="font-size:9px;color:var(--accent4);font-weight:400;">(14+ days no contact)</span></div>
+                <div class="panel-title" style="display:flex;align-items:center;gap:6px;">Stale Accounts <span style="font-size:9px;color:var(--accent4);font-weight:400;">(14+ days)</span></div>
                 <div id="dashStale">
                     <div style="color:var(--text3);font-style:italic;font-size:11px;">No stale accounts detected.</div>
                 </div>
             </div>
             <div class="panel">
-                <div class="panel-title" style="display:flex;align-items:center;gap:6px;">Hot Deals <span style="font-size:9px;color:var(--accent2);font-weight:400;">(75%+ this quarter)</span></div>
+                <div class="panel-title" style="display:flex;align-items:center;gap:6px;">Hot Deals <span style="font-size:9px;color:var(--accent2);font-weight:400;">(75%+ this Q)</span></div>
                 <div id="dashHotDeals">
                     <div style="color:var(--text3);font-style:italic;font-size:11px;">No hot deals yet.</div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title" style="display:flex;align-items:center;gap:6px;">At Risk <span style="font-size:9px;color:var(--accent4);font-weight:400;">(health &lt;40)</span></div>
+                <div id="dashAtRisk">
+                    <div style="color:var(--text3);font-style:italic;font-size:11px;">No at-risk accounts.</div>
                 </div>
             </div>
         </div>
@@ -953,7 +967,7 @@
         <div class="panel" style="padding:0;">
             <div class="tbl-wrap tbl-scroll">
                 <table id="entTable" class="tbl-clickable"><thead><tr>
-                    <th>Account</th><th>Sector</th><th>Emp</th><th>City</th><th>Pri</th><th>Stage</th><th>Value</th><th>Pillars</th><th>Flags</th>
+                    <th>Account</th><th>Sector</th><th>Emp</th><th>City</th><th>Pri</th><th>Stage</th><th>Value</th><th style="text-align:center;">HP</th><th>Pillars</th><th>Flags</th>
                 </tr></thead><tbody></tbody></table>
             </div>
         </div>
@@ -988,7 +1002,7 @@
         <div class="panel" style="padding:0;">
             <div class="tbl-wrap tbl-scroll">
                 <table id="smbTable" class="tbl-clickable"><thead><tr>
-                    <th>Company</th><th>Industry</th><th>Emp</th><th>City</th><th>Stage</th><th>Value</th><th>Pillars</th><th>Flags</th>
+                    <th>Company</th><th>Industry</th><th>Emp</th><th>City</th><th>Stage</th><th>Value</th><th style="text-align:center;">HP</th><th>Pillars</th><th>Flags</th>
                 </tr></thead><tbody></tbody></table>
             </div>
         </div>
@@ -2432,6 +2446,7 @@ function renderEnt(f='',p='',s='') {
         <td>${ptag(a.priority)}</td>
         <td>${stageTag(d.stage)}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--accent2);">${d.value ? '$'+Number(d.value).toLocaleString() : '—'}</td>
+        <td style="text-align:center;">${healthDot(d)}</td>
         <td>${pillarDots(d.pillars)}</td>
         <td>${flagIcons(d.flags)}</td>
     </tr>`;}).join('');
@@ -2455,6 +2470,7 @@ function renderSmb(f='',ind='') {
         <td style="font-size:11px;">${a.city}</td>
         <td>${stageTag(d.stage)}</td>
         <td style="font-family:var(--mono);font-size:11px;color:var(--accent2);">${d.value ? '$'+Number(d.value).toLocaleString() : '—'}</td>
+        <td style="text-align:center;">${healthDot(d)}</td>
         <td>${pillarDots(d.pillars)}</td>
         <td>${flagIcons(d.flags)}</td>
     </tr>`;}).join('');
@@ -2775,6 +2791,7 @@ function saveModal() {
     updateStaleAccounts();
     updateHotDeals();
     updateKPICards();
+    updateAtRiskPanel();
     renderKanban();
     syncPipelineToProxy();
 }
@@ -3754,6 +3771,91 @@ function dealHealthDot(deal) {
     return '<span title="Healthy">&#128994;</span>';
 }
 
+// ===== RELATIONSHIP HEALTH SCORING =====
+function calculateHealthScore(acctData) {
+    const activities = acctData.activities || [];
+    const now = Date.now();
+
+    // Use lastContact field as fallback if no activities have dates
+    let daysSinceLastContact = 999;
+    if (activities.length > 0) {
+        const lastDate = [...activities].reverse().find(a => a.date);
+        if (lastDate) daysSinceLastContact = Math.floor((now - new Date(lastDate.date).getTime()) / 86400000);
+    }
+    if (daysSinceLastContact === 999 && acctData.lastContact) {
+        daysSinceLastContact = Math.floor((now - new Date(acctData.lastContact).getTime()) / 86400000);
+    }
+
+    // Recency (0-30)
+    let recency = daysSinceLastContact <= 7 ? 30 :
+                  daysSinceLastContact <= 14 ? 25 :
+                  daysSinceLastContact <= 30 ? 20 :
+                  daysSinceLastContact <= 60 ? 10 :
+                  daysSinceLastContact <= 90 ? 5 : 0;
+
+    // Frequency: touchpoints in last 90 days (0-25)
+    const last90 = activities.filter(a => a.date && (now - new Date(a.date).getTime()) < 90 * 86400000);
+    let frequency = last90.length >= 12 ? 25 :
+                    last90.length >= 6 ? 20 :
+                    last90.length >= 3 ? 15 :
+                    last90.length >= 1 ? 8 : 0;
+
+    // Depth: weighted by interaction type (0-25)
+    const depthWeights = { meeting: 10, call: 5, email_out: 2, email_in: 3, note: 1, stage_change: 1 };
+    let depth = Math.min(25, last90.reduce((sum, a) => sum + (depthWeights[a.type] || 1), 0));
+
+    // Breadth: contacts engaged in last 30 days (0-20)
+    // Multi-contact is Phase 3 — for now, score based on whether contact info exists + pillars engaged
+    const hasPrimaryContact = acctData.contactName ? 1 : 0;
+    const pillarCount = (acctData.pillars || []).length;
+    let breadth = 0;
+    if (hasPrimaryContact && pillarCount >= 3) breadth = 20;
+    else if (hasPrimaryContact && pillarCount >= 2) breadth = 15;
+    else if (hasPrimaryContact && pillarCount >= 1) breadth = 10;
+    else if (hasPrimaryContact) breadth = 5;
+
+    const total = recency + frequency + depth + breadth;
+    return { total, recency, frequency, depth, breadth };
+}
+
+function healthDot(acctData) {
+    const score = calculateHealthScore(acctData);
+    const t = score.total;
+    if (t >= 80) return `<span class="health-dot" title="Health: ${t}/100 (R:${score.recency} F:${score.frequency} D:${score.depth} B:${score.breadth})">&#128994;</span>`;
+    if (t >= 40) return `<span class="health-dot" title="Health: ${t}/100 (R:${score.recency} F:${score.frequency} D:${score.depth} B:${score.breadth})">&#128993;</span>`;
+    return `<span class="health-dot" title="Health: ${t}/100 (R:${score.recency} F:${score.frequency} D:${score.depth} B:${score.breadth})">&#128308;</span>`;
+}
+
+function updateAtRiskPanel() {
+    const atRisk = [];
+    const allAccts = [
+        ...entAccounts.map(a => a.name),
+        ...smbAccounts.map(a => a.name),
+        ...(typeof k12Accounts !== 'undefined' ? k12Accounts.map(a => a.name) : []),
+        ...(typeof higherEdAccounts !== 'undefined' ? higherEdAccounts.map(a => a.name) : []),
+        ...(typeof cuAccounts !== 'undefined' ? cuAccounts.map(a => a.name) : [])
+    ];
+    allAccts.forEach(name => {
+        const d = getAcctData(name);
+        if (d.stage && d.stage !== 'Fresh' && d.stage !== 'Closed Won' && d.stage !== 'Closed Lost') {
+            const score = calculateHealthScore(d);
+            if (score.total < 40) {
+                atRisk.push({ name, value: Number(d.value) || 0, score: score.total, stage: d.stage });
+            }
+        }
+    });
+    atRisk.sort((a, b) => b.value - a.value);
+    const el = document.getElementById('dashAtRisk');
+    if (!el) return;
+    el.innerHTML = atRisk.length ? atRisk.slice(0, 8).map(a =>
+        `<div class="at-risk-row">
+            <span class="at-risk-name">${a.name}</span>
+            <span class="at-risk-score" style="color:${a.score < 20 ? 'var(--accent4)' : 'var(--accent3)'}">${a.score}</span>
+            <span class="at-risk-val">${a.value ? '$' + a.value.toLocaleString() : '—'}</span>
+        </div>`
+    ).join('') : '<div style="color:var(--text3);font-style:italic;font-size:11px;">No at-risk accounts. Nice work!</div>';
+}
+
 function renderKanban() {
     const board = document.getElementById('kanbanBoard');
     const summary = document.getElementById('kanbanSummary');
@@ -3854,6 +3956,7 @@ function initKanbanDrag() {
                 updateStageBreakdown();
                 updateHotDeals();
                 updateKPICards();
+                updateAtRiskPanel();
                 renderEnt(document.getElementById('entSearch').value, document.getElementById('entPriority').value, document.getElementById('entSector').value);
                 renderSmb(document.getElementById('smbSearch').value, document.getElementById('smbIndustry').value);
                 syncPipelineToProxy();
@@ -3941,6 +4044,7 @@ function saveFabActivity() {
     showToast('success', fabCurrentType.charAt(0).toUpperCase() + fabCurrentType.slice(1) + ' logged for ' + acct);
     updateStaleAccounts();
     updateDashFollowUps();
+    updateAtRiskPanel();
     renderKanban();
 }
 
@@ -3974,6 +4078,7 @@ updateStageBreakdown();
 updateStaleAccounts();
 updateHotDeals();
 updateKPICards();
+updateAtRiskPanel();
 renderKanban();
 fetchOcNotes();
 safePipelineSync(); // Safe sync on load — never overwrites cal-proxy with empty data
