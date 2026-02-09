@@ -6,6 +6,7 @@
     <title>SK Command Center — Mike Bernhardt | Xerox IT Solutions</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
         :root {
             --bg: #0b0d11;
@@ -503,6 +504,131 @@
         /* HIGH-VALUE DEAL HIGHLIGHT */
         tr.deal-hot td:first-child { border-left: 3px solid var(--accent2); }
 
+        /* KANBAN BOARD */
+        .kanban-board {
+            display: flex; gap: 8px; overflow-x: auto; padding: 16px 0; min-height: 420px;
+            scrollbar-width: thin; scrollbar-color: var(--text3) transparent;
+        }
+        .kanban-board::-webkit-scrollbar { height: 6px; }
+        .kanban-board::-webkit-scrollbar-thumb { background: var(--text3); border-radius: 3px; }
+        .kanban-column {
+            min-width: 210px; max-width: 240px; flex-shrink: 0;
+            background: rgba(255,255,255,0.02); border-radius: 10px; padding: 0;
+            display: flex; flex-direction: column;
+        }
+        .kanban-column-header {
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 10px 10px 8px; border-bottom: 2px solid var(--stage-color, var(--accent));
+            display: flex; justify-content: space-between; align-items: center;
+            color: var(--text2);
+        }
+        .kanban-column-header .col-total { font-family: var(--mono); font-size: 10px; color: var(--accent2); font-weight: 600; }
+        .kanban-column-body { flex: 1; padding: 6px; min-height: 60px; }
+        .deal-card {
+            background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px 10px 8px;
+            margin-bottom: 6px; cursor: grab; border-left: 3px solid var(--stage-color, var(--accent));
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .deal-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .deal-card.sortable-ghost { opacity: 0.4; }
+        .deal-card.sortable-chosen { box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+        .deal-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .deal-card-account { font-size: 12px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+        .deal-card-health { font-size: 12px; flex-shrink: 0; margin-left: 4px; }
+        .deal-card-value { font-size: 17px; font-weight: 700; color: var(--accent2); font-family: var(--mono); }
+        .deal-card-meta { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
+        .deal-card-days { font-size: 10px; color: var(--text3); }
+        .deal-card-meddpicc {
+            font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 4px;
+            font-family: var(--mono);
+        }
+        .deal-card-meddpicc.mred { background: rgba(239,68,68,.2); color: #f87171; }
+        .deal-card-meddpicc.myellow { background: rgba(245,158,11,.2); color: #fbbf24; }
+        .deal-card-meddpicc.mgreen { background: rgba(52,211,153,.2); color: #34d399; }
+        .deal-card-next { font-size: 10px; color: var(--text3); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .deal-card-age-warning { border-left-color: var(--accent3) !important; }
+        .deal-card-age-critical { border-left-color: var(--accent4) !important; }
+        .kanban-summary { display: flex; gap: 16px; margin-bottom: 8px; flex-wrap: wrap; }
+        .kanban-stat { font-size: 12px; color: var(--text2); }
+        .kanban-stat strong { color: var(--text); font-family: var(--mono); }
+
+        /* MEDDPICC PANEL */
+        .meddpicc-panel { background: rgba(99,102,241,.04); border: 1px solid rgba(99,102,241,.12); border-radius: 10px; padding: 14px; }
+        .meddpicc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+        .meddpicc-item { display: flex; align-items: center; gap: 8px; }
+        .meddpicc-item label { font-size: 10px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .03em; width: 70px; flex-shrink: 0; }
+        .meddpicc-item input[type="range"] { flex: 1; accent-color: #6366f1; height: 4px; cursor: pointer; }
+        .meddpicc-item .meddpicc-score { font-size: 11px; font-family: var(--mono); color: var(--accent5); font-weight: 700; width: 20px; text-align: right; }
+        .meddpicc-total { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(99,102,241,.12); }
+        .meddpicc-total-label { font-size: 11px; font-weight: 600; color: var(--text2); }
+        .meddpicc-total-pct { font-size: 16px; font-weight: 700; font-family: var(--mono); }
+        .meddpicc-total-pct.mred { color: #f87171; }
+        .meddpicc-total-pct.myellow { color: #fbbf24; }
+        .meddpicc-total-pct.mgreen { color: #34d399; }
+        .meddpicc-bar { flex: 1; height: 6px; background: rgba(255,255,255,.06); border-radius: 3px; overflow: hidden; }
+        .meddpicc-fill { height: 100%; border-radius: 3px; transition: width .3s, background .3s; }
+
+        /* STAGE TAGS - UPDATED */
+        .tag-prospecting { background: rgba(99,102,241,.12); color: #818cf8; }
+        .tag-solution-design { background: rgba(14,165,233,.12); color: #38bdf8; }
+        .tag-verbal-commit { background: rgba(34,197,94,.12); color: #4ade80; }
+
+        /* FAB */
+        .fab-container { position: fixed; bottom: 24px; right: 24px; z-index: 200; }
+        .fab-main {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: #6366f1; color: white; font-size: 28px; line-height: 56px; text-align: center;
+            border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .fab-main:hover { box-shadow: 0 6px 24px rgba(99,102,241,0.5); transform: scale(1.05); }
+        .fab-main.open { transform: rotate(45deg); }
+        .fab-menu {
+            display: none; flex-direction: column; gap: 8px;
+            position: absolute; bottom: 66px; right: 0;
+        }
+        .fab-menu.show { display: flex; }
+        .fab-item {
+            padding: 10px 16px; border-radius: 24px;
+            background: rgba(22,26,36,0.96); color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer; white-space: nowrap; font-size: 13px; font-family: var(--font);
+            transition: all .15s; backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .fab-item:hover { border-color: var(--accent); background: rgba(22,26,36,1); }
+
+        /* FAB LOG MODAL */
+        .fab-log-modal { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .fab-log-modal.hidden { display: none; }
+        .fab-log-box {
+            background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px;
+            padding: 24px; width: 460px; max-width: 95%;
+        }
+        .fab-log-box h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+        .fab-log-type { font-size: 12px; color: var(--accent5); margin-bottom: 14px; }
+        .fab-log-templates { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+        .fab-log-tpl {
+            padding: 5px 10px; border-radius: 6px; font-size: 10px; font-weight: 600;
+            background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--text2);
+            cursor: pointer; font-family: var(--font); transition: all .15s;
+        }
+        .fab-log-tpl:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* TOAST */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+        .toast {
+            padding: 12px 18px; border-radius: 10px; font-size: 12px; font-weight: 500;
+            color: #fff; pointer-events: auto; animation: toastIn .3s ease;
+            max-width: 380px; box-shadow: 0 4px 16px rgba(0,0,0,.3);
+        }
+        .toast.info { background: rgba(99,102,241,.95); }
+        .toast.success { background: rgba(34,197,94,.95); }
+        .toast.warning { background: rgba(245,158,11,.95); }
+        .toast.error { background: rgba(239,68,68,.95); }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(40px); } }
+
         @media (max-width: 1000px) {
             .kpi-row, .pillar-grid { grid-template-columns: repeat(2, 1fr); }
             .grid-2, .grid-3, .grid-4, .calc-grid { grid-template-columns: 1fr; }
@@ -559,6 +685,7 @@
             </div>
             <div class="topbar-tabs">
                 <button class="topbar-tab active" data-page="dashboard">Dashboard</button>
+                <button class="topbar-tab" data-page="pipeline">Pipeline</button>
                 <button class="topbar-tab" data-page="ent">ENT Accounts</button>
                 <button class="topbar-tab" data-page="smb">SMB</button>
                 <button class="topbar-tab" data-page="k12">K-12</button>
@@ -737,6 +864,20 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- ==================== PIPELINE KANBAN ==================== -->
+<div id="pipeline" class="page">
+    <div class="container">
+        <div class="sec-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div>
+                <h2>Pipeline Board</h2>
+                <p>Drag deals between stages. MEDDPICC gates enforce qualification.</p>
+            </div>
+            <div class="kanban-summary" id="kanbanSummary"></div>
+        </div>
+        <div class="kanban-board" id="kanbanBoard"></div>
     </div>
 </div>
 
@@ -1667,11 +1808,12 @@ Sr Account Executive | Xerox IT Solutions
                         <label>Deal Stage</label>
                         <select id="m-stage">
                             <option value="Fresh">Fresh</option>
+                            <option value="Prospecting">Prospecting</option>
                             <option value="Discovery">Discovery</option>
-                            <option value="Needs Analysis">Needs Analysis</option>
-                            <option value="Qualifying">Qualifying</option>
-                            <option value="Proposal">Proposal / Quote</option>
+                            <option value="Solution Design">Solution Design</option>
+                            <option value="Proposal">Proposal</option>
                             <option value="Negotiation">Negotiation</option>
+                            <option value="Verbal Commit">Verbal Commit</option>
                             <option value="Closed Won">Closed Won</option>
                             <option value="Closed Lost">Closed Lost</option>
                         </select>
@@ -1714,6 +1856,27 @@ Sr Account Executive | Xerox IT Solutions
                             <option value="Internal IT">Internal IT</option>
                             <option value="Other">Other</option>
                         </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">MEDDPICC Qualification</div>
+                <div class="meddpicc-panel" id="meddpiccPanel">
+                    <div class="meddpicc-grid">
+                        <div class="meddpicc-item"><label>Metrics</label><input type="range" min="0" max="10" value="0" data-meddpicc="metrics" oninput="updateMEDDPICC()"><span class="meddpicc-score">0</span></div>
+                        <div class="meddpicc-item"><label>Econ Buyer</label><input type="range" min="0" max="10" value="0" data-meddpicc="economicBuyer" oninput="updateMEDDPICC()"><span class="meddpicc-score">0</span></div>
+                        <div class="meddpicc-item"><label>Dec Criteria</label><input type="range" min="0" max="10" value="0" data-meddpicc="decisionCriteria" oninput="updateMEDDPICC()"><span class="meddpicc-score">0</span></div>
+                        <div class="meddpicc-item"><label>Dec Process</label><input type="range" min="0" max="10" value="0" data-meddpicc="decisionProcess" oninput="updateMEDDPICC()"><span class="meddpicc-score">0</span></div>
+                        <div class="meddpicc-item"><label>Pain</label><input type="range" min="0" max="10" value="0" data-meddpicc="identifiedPain" oninput="updateMEDDPICC()"><span class="meddpicc-score">0</span></div>
+                        <div class="meddpicc-item"><label>Champion</label><input type="range" min="0" max="10" value="0" data-meddpicc="champion" oninput="updateMEDDPICC()"><span class="meddpicc-score">0</span></div>
+                        <div class="meddpicc-item"><label>Paper Proc</label><input type="range" min="0" max="10" value="0" data-meddpicc="paperProcess" oninput="updateMEDDPICC()"><span class="meddpicc-score">0</span></div>
+                        <div class="meddpicc-item"><label>Competition</label><input type="range" min="0" max="10" value="0" data-meddpicc="competition" oninput="updateMEDDPICC()"><span class="meddpicc-score">0</span></div>
+                    </div>
+                    <div class="meddpicc-total">
+                        <span class="meddpicc-total-label">Score:</span>
+                        <span class="meddpicc-total-pct" id="meddpiccPct">0%</span>
+                        <div class="meddpicc-bar"><div class="meddpicc-fill" id="meddpiccFill" style="width:0%;background:#ef4444;"></div></div>
                     </div>
                 </div>
             </div>
@@ -1907,9 +2070,9 @@ Sr Account Executive | Xerox IT Solutions
             <div class="qa-field" style="flex:1;">
                 <label>Stage</label>
                 <select id="qa-deal-stage">
+                    <option value="Prospecting">Prospecting</option>
                     <option value="Discovery">Discovery</option>
-                    <option value="Needs Analysis">Needs Analysis</option>
-                    <option value="Qualifying">Qualifying</option>
+                    <option value="Solution Design">Solution Design</option>
                     <option value="Proposal">Proposal</option>
                 </select>
             </div>
@@ -1934,6 +2097,47 @@ Sr Account Executive | Xerox IT Solutions
 
 <!-- DATALIST for account autocomplete -->
 <datalist id="allAccountsList"></datalist>
+
+<!-- FAB (Floating Action Button) -->
+<div class="fab-container" id="fabContainer">
+    <button class="fab-main" id="fabMain" onclick="toggleFAB()">+</button>
+    <div class="fab-menu" id="fabMenu">
+        <button class="fab-item" onclick="logActivity('call')">&#128222; Log Call</button>
+        <button class="fab-item" onclick="logActivity('email')">&#128231; Log Email</button>
+        <button class="fab-item" onclick="logActivity('meeting')">&#129309; Meeting</button>
+        <button class="fab-item" onclick="logActivity('note')">&#128221; Note</button>
+    </div>
+</div>
+
+<!-- FAB QUICK LOG MODAL -->
+<div class="fab-log-modal hidden" id="fabLogModal">
+    <div class="fab-log-box">
+        <h3 id="fabLogTitle">Log Activity</h3>
+        <div class="fab-log-type" id="fabLogType"></div>
+        <div class="qa-field">
+            <label>Account</label>
+            <input id="fab-log-acct" list="allAccountsList" placeholder="Start typing account name...">
+        </div>
+        <div class="fab-log-templates" id="fabLogTemplates">
+            <button class="fab-log-tpl" onclick="setFabTemplate('discovery')">Discovery Call</button>
+            <button class="fab-log-tpl" onclick="setFabTemplate('demo')">Demo Follow-up</button>
+            <button class="fab-log-tpl" onclick="setFabTemplate('proposal')">Proposal Review</button>
+            <button class="fab-log-tpl" onclick="setFabTemplate('site')">Site Visit</button>
+        </div>
+        <div class="qa-field">
+            <label>Notes</label>
+            <textarea id="fab-log-notes" placeholder="Quick note (optional)" maxlength="280" style="min-height:50px;"></textarea>
+            <div style="text-align:right;font-size:10px;color:var(--text3);margin-top:2px;"><span id="fabCharCount">0</span>/280</div>
+        </div>
+        <div class="qa-btns">
+            <button class="modal-btn modal-btn-ghost" onclick="closeFabLog()">Cancel</button>
+            <button class="modal-btn modal-btn-primary" onclick="saveFabActivity()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
 
 <!-- RESTORE FROM BACKUP MODAL -->
 <div class="restore-modal hidden" id="restoreModal">
@@ -2132,11 +2336,24 @@ function getAcctData(name) {
 }
 function setAcctData(name, data) { localStorage.setItem(acctKey(name), JSON.stringify(data)); }
 
+// ===== STAGE CONFIG (7-stage pipeline) =====
+const STAGE_CONFIG = {
+    'Prospecting':     { prob: 5,   minDays: 14, maxDays: 42,  color: '#6366f1', order: 0 },
+    'Discovery':       { prob: 20,  minDays: 21, maxDays: 70,  color: '#3b82f6', order: 1 },
+    'Solution Design': { prob: 35,  minDays: 28, maxDays: 98,  color: '#0ea5e9', order: 2 },
+    'Proposal':        { prob: 50,  minDays: 21, maxDays: 70,  color: '#14b8a6', order: 3 },
+    'Negotiation':     { prob: 75,  minDays: 28, maxDays: 98,  color: '#f59e0b', order: 4 },
+    'Verbal Commit':   { prob: 90,  minDays: 7,  maxDays: 42,  color: '#22c55e', order: 5 },
+    'Closed Won':      { prob: 100, minDays: 0,  maxDays: 0,   color: '#10b981', order: 6 }
+};
+const KANBAN_STAGES = Object.keys(STAGE_CONFIG);
+
 function stageTag(stage) {
     const cls = {
-        'Fresh':'tag-fresh','Discovery':'tag-discovery','Needs Analysis':'tag-needs-analysis',
+        'Fresh':'tag-fresh','Prospecting':'tag-prospecting','Discovery':'tag-discovery',
+        'Solution Design':'tag-solution-design','Needs Analysis':'tag-needs-analysis',
         'Qualifying':'tag-qualifying','Proposal':'tag-proposal','Negotiation':'tag-negotiation',
-        'Closed Won':'tag-won','Closed Lost':'tag-lost'
+        'Verbal Commit':'tag-verbal-commit','Closed Won':'tag-won','Closed Lost':'tag-lost'
     };
     return `<span class="tag ${cls[stage]||'tag-fresh'}">${stage||'Fresh'}</span>`;
 }
@@ -2414,6 +2631,15 @@ function openModal(name, type) {
     document.getElementById('m-source').value = d.dealSource || '';
     document.getElementById('m-notes').value = d.notes || '';
 
+    // MEDDPICC
+    const meddpicc = d.meddpicc || {};
+    document.querySelectorAll('#meddpiccPanel input[type="range"]').forEach(slider => {
+        const val = meddpicc[slider.dataset.meddpicc] || 0;
+        slider.value = val;
+        slider.nextElementSibling.textContent = val;
+    });
+    updateMEDDPICC();
+
     // Pillars
     document.querySelectorAll('#m-pillars .check-item').forEach(item => {
         const val = item.dataset.val;
@@ -2448,8 +2674,20 @@ function saveModal() {
         flags.push(cb.closest('.check-item').dataset.val);
     });
 
+    // Collect MEDDPICC scores
+    const meddpicc = {};
+    document.querySelectorAll('#meddpiccPanel input[type="range"]').forEach(slider => {
+        meddpicc[slider.dataset.meddpicc] = parseInt(slider.value) || 0;
+    });
+
+    const newStage = document.getElementById('m-stage').value;
+    const oldData = getAcctData(currentModalAcct);
+    // Track stage changes
+    const stageChanged = oldData.stage !== newStage;
+    const stageEnteredDate = stageChanged ? new Date().toISOString().slice(0, 10) : (oldData.stageEnteredDate || new Date().toISOString().slice(0, 10));
+
     const data = {
-        stage: document.getElementById('m-stage').value,
+        stage: newStage,
         value: document.getElementById('m-value').value,
         prob: document.getElementById('m-prob').value,
         closeQ: document.getElementById('m-close-q').value,
@@ -2466,7 +2704,15 @@ function saveModal() {
         nextAction: document.getElementById('m-nextaction').value,
         dealSource: document.getElementById('m-source').value,
         notes: document.getElementById('m-notes').value,
+        meddpicc: meddpicc,
+        stageEnteredDate: stageEnteredDate,
+        activities: oldData.activities || [],
     };
+
+    // Auto-set probability from stage config if user didn't manually set it
+    if (STAGE_CONFIG[newStage] && (!data.prob || stageChanged)) {
+        data.prob = String(STAGE_CONFIG[newStage].prob);
+    }
 
     setAcctData(currentModalAcct, data);
     closeModal();
@@ -2478,6 +2724,9 @@ function saveModal() {
     if (currentModalType === 'smb' || !currentModalType) {
         renderSmb(document.getElementById('smbSearch').value, document.getElementById('smbIndustry').value);
     }
+    renderK12(document.getElementById('k12Search') ? document.getElementById('k12Search').value : '', document.getElementById('k12Priority') ? document.getElementById('k12Priority').value : '');
+    renderHigherEd();
+    renderCU(document.getElementById('cuSearch') ? document.getElementById('cuSearch').value : '');
     updateDashPipeline();
     updateCompetitorFootprint();
     updateDashFollowUps();
@@ -2485,6 +2734,7 @@ function saveModal() {
     updateStageBreakdown();
     updateStaleAccounts();
     updateHotDeals();
+    renderKanban();
     syncPipelineToProxy();
 }
 
@@ -3108,7 +3358,7 @@ function updateStageBreakdown() {
         }
     });
     const el = document.getElementById('dashStageBreakdown');
-    const order = ['Discovery','Needs Analysis','Qualifying','Proposal','Negotiation'];
+    const order = ['Prospecting','Discovery','Solution Design','Proposal','Negotiation','Verbal Commit'];
     const rows = order.filter(s => stages[s]).map(s =>
         `<div class="stage-row">
             <span class="stage-label">${stageTag(s)}</span>
@@ -3288,6 +3538,313 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') ['qaLogModal','qaDealModal','qaWeekModal'].forEach(id => document.getElementById(id).classList.add('hidden'));
 });
 
+// ===== DATA MIGRATION =====
+function migrateAllAccounts() {
+    const stageMap = { 'Needs Analysis': 'Solution Design', 'Qualifying': 'Solution Design' };
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith('xits_acct_')) continue;
+        try {
+            const acct = JSON.parse(localStorage.getItem(key));
+            if (!acct) continue;
+            let changed = false;
+            // Migrate old stage names
+            if (acct.stage && stageMap[acct.stage]) {
+                acct.stage = stageMap[acct.stage];
+                changed = true;
+            }
+            // Ensure new fields exist
+            if (!acct.meddpicc) { acct.meddpicc = {}; changed = true; }
+            if (!acct.activities) { acct.activities = []; changed = true; }
+            if (!acct.stageEnteredDate && acct.stage && acct.stage !== 'Fresh') {
+                acct.stageEnteredDate = new Date().toISOString().slice(0, 10);
+                changed = true;
+            }
+            if (changed) localStorage.setItem(key, JSON.stringify(acct));
+        } catch(e) {}
+    }
+}
+migrateAllAccounts();
+
+// ===== MEDDPICC FUNCTIONS =====
+function getMEDDPICCScore(meddpicc) {
+    if (!meddpicc) return 0;
+    const fields = ['metrics','economicBuyer','decisionCriteria','decisionProcess','identifiedPain','champion','paperProcess','competition'];
+    const total = fields.reduce((sum, f) => sum + (parseInt(meddpicc[f]) || 0), 0);
+    return Math.round(total / 80 * 100);
+}
+
+function updateMEDDPICC() {
+    let total = 0;
+    document.querySelectorAll('#meddpiccPanel input[type="range"]').forEach(slider => {
+        const val = parseInt(slider.value) || 0;
+        slider.nextElementSibling.textContent = val;
+        total += val;
+    });
+    const pct = Math.round(total / 80 * 100);
+    const pctEl = document.getElementById('meddpiccPct');
+    const fillEl = document.getElementById('meddpiccFill');
+    pctEl.textContent = pct + '%';
+    pctEl.className = 'meddpicc-total-pct ' + (pct >= 60 ? 'mgreen' : pct >= 30 ? 'myellow' : 'mred');
+    fillEl.style.width = pct + '%';
+    fillEl.style.background = pct >= 60 ? '#22c55e' : pct >= 30 ? '#f59e0b' : '#ef4444';
+}
+
+function meddpiccBadge(meddpicc) {
+    const pct = getMEDDPICCScore(meddpicc);
+    const cls = pct >= 60 ? 'mgreen' : pct >= 30 ? 'myellow' : 'mred';
+    return `<span class="deal-card-meddpicc ${cls}">M${pct}</span>`;
+}
+
+// ===== KANBAN BOARD =====
+function getAllPipelineDeals() {
+    const allAccts = [...entAccounts.map(a=>({name:a.name,type:'ent'})), ...smbAccounts.map(a=>({name:a.name,type:'smb'})),
+        ...k12.map(a=>({name:a.name,type:'k12'})), ...higherEd.map(a=>({name:a.name,type:'highered'})),
+        ...creditUnions.map(a=>({name:a.name,type:'cu'}))];
+    const deals = [];
+    allAccts.forEach(a => {
+        const d = getAcctData(a.name);
+        if (d.stage && d.stage !== 'Fresh' && d.stage !== 'Closed Lost') {
+            const daysInStage = d.stageEnteredDate ? Math.floor((Date.now() - new Date(d.stageEnteredDate + 'T00:00:00').getTime()) / 86400000) : 0;
+            deals.push({
+                account: a.name, type: a.type, stage: d.stage,
+                value: Number(d.value) || 0, prob: d.prob || '',
+                nextAction: d.nextAction || '', meddpicc: d.meddpicc || {},
+                daysInStage, stageEnteredDate: d.stageEnteredDate || '',
+                lastContact: d.lastContact || ''
+            });
+        }
+    });
+    return deals;
+}
+
+function getDealAgeStatus(deal) {
+    const config = STAGE_CONFIG[deal.stage];
+    if (!config || !deal.daysInStage) return 'normal';
+    if (deal.daysInStage > config.maxDays) return 'critical';
+    if (deal.daysInStage > config.minDays * 1.5) return 'warning';
+    return 'normal';
+}
+
+function dealHealthDot(deal) {
+    const mScore = getMEDDPICCScore(deal.meddpicc);
+    const age = getDealAgeStatus(deal);
+    if (age === 'critical' || mScore < 20) return '<span title="At Risk">&#128308;</span>';
+    if (age === 'warning' || mScore < 40) return '<span title="Needs Attention">&#128993;</span>';
+    return '<span title="Healthy">&#128994;</span>';
+}
+
+function renderKanban() {
+    const board = document.getElementById('kanbanBoard');
+    const summary = document.getElementById('kanbanSummary');
+    if (!board) return;
+    const deals = getAllPipelineDeals();
+    const byStage = {};
+    KANBAN_STAGES.forEach(s => byStage[s] = []);
+    deals.forEach(d => {
+        if (byStage[d.stage]) byStage[d.stage].push(d);
+    });
+
+    // Summary
+    const totalValue = deals.filter(d => d.stage !== 'Closed Won').reduce((s,d) => s + d.value, 0);
+    const weighted = deals.filter(d => d.stage !== 'Closed Won').reduce((s,d) => s + d.value * (STAGE_CONFIG[d.stage]?.prob || 0) / 100, 0);
+    const closedWon = deals.filter(d => d.stage === 'Closed Won').reduce((s,d) => s + d.value, 0);
+    summary.innerHTML = `
+        <span class="kanban-stat">Open Pipeline: <strong>$${totalValue.toLocaleString()}</strong></span>
+        <span class="kanban-stat">Weighted: <strong>$${Math.round(weighted).toLocaleString()}</strong></span>
+        <span class="kanban-stat">Won: <strong style="color:var(--accent2);">$${closedWon.toLocaleString()}</strong></span>
+        <span class="kanban-stat">Deals: <strong>${deals.length}</strong></span>
+    `;
+
+    // Render columns
+    board.innerHTML = KANBAN_STAGES.map(stage => {
+        const config = STAGE_CONFIG[stage];
+        const stageDeals = byStage[stage] || [];
+        const stageTotal = stageDeals.reduce((s,d) => s + d.value, 0);
+        const cards = stageDeals.sort((a,b) => b.value - a.value).map(deal => {
+            const age = getDealAgeStatus(deal);
+            const ageClass = age === 'critical' ? ' deal-card-age-critical' : age === 'warning' ? ' deal-card-age-warning' : '';
+            return `<div class="deal-card${ageClass}" data-account="${deal.account.replace(/"/g,'&quot;')}" style="--stage-color:${config.color};" onclick="openModal('${deal.account.replace(/'/g,"\\'")}','${deal.type}')">
+                <div class="deal-card-header">
+                    <span class="deal-card-account">${deal.account}</span>
+                    <span class="deal-card-health">${dealHealthDot(deal)}</span>
+                </div>
+                <div class="deal-card-value">${deal.value ? '$'+deal.value.toLocaleString() : '—'}</div>
+                <div class="deal-card-meta">
+                    <span class="deal-card-days">${deal.daysInStage}d</span>
+                    ${meddpiccBadge(deal.meddpicc)}
+                </div>
+                ${deal.nextAction ? `<div class="deal-card-next">&#128203; ${deal.nextAction}</div>` : ''}
+            </div>`;
+        }).join('');
+
+        return `<div class="kanban-column" style="--stage-color:${config.color};">
+            <div class="kanban-column-header" style="border-bottom-color:${config.color};">
+                <span>${stage} <span style="opacity:.5;font-weight:400;">(${stageDeals.length})</span></span>
+                <span class="col-total">${stageTotal ? '$'+stageTotal.toLocaleString() : ''}</span>
+            </div>
+            <div class="kanban-column-body" data-stage="${stage}">${cards}</div>
+        </div>`;
+    }).join('');
+
+    // Init SortableJS on each column
+    initKanbanDrag();
+}
+
+function initKanbanDrag() {
+    document.querySelectorAll('.kanban-column-body').forEach(col => {
+        if (col._sortable) col._sortable.destroy();
+        col._sortable = new Sortable(col, {
+            group: 'pipeline',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: function(evt) {
+                const account = evt.item.dataset.account;
+                const newStage = evt.to.dataset.stage;
+                if (!account || !newStage) return;
+                const d = getAcctData(account);
+                const mScore = getMEDDPICCScore(d.meddpicc);
+
+                // MEDDPICC gate enforcement
+                if (newStage === 'Proposal' && mScore < 50) {
+                    showToast('warning', 'MEDDPICC ' + mScore + '% — need 50%+ to advance to Proposal. Score Economic Buyer and Champion first.');
+                    renderKanban(); // Revert
+                    return;
+                }
+                if (newStage === 'Negotiation' && mScore < 70) {
+                    showToast('warning', 'MEDDPICC ' + mScore + '% — need 70%+ to advance to Negotiation.');
+                    renderKanban(); // Revert
+                    return;
+                }
+
+                d.stage = newStage;
+                d.stageEnteredDate = new Date().toISOString().slice(0, 10);
+                if (STAGE_CONFIG[newStage]) d.prob = String(STAGE_CONFIG[newStage].prob);
+                // Log stage change as activity
+                if (!d.activities) d.activities = [];
+                d.activities.push({ type: 'stage_change', date: new Date().toISOString(), note: 'Moved to ' + newStage });
+                setAcctData(account, d);
+
+                if (newStage === 'Closed Won') showToast('success', account + ' — Closed Won! Congratulations!');
+                else showToast('info', account + ' moved to ' + newStage + ' (' + (STAGE_CONFIG[newStage]?.prob || 0) + '%)');
+
+                renderKanban();
+                updateDashPipeline();
+                updateStageBreakdown();
+                updateHotDeals();
+                renderEnt(document.getElementById('entSearch').value, document.getElementById('entPriority').value, document.getElementById('entSector').value);
+                renderSmb(document.getElementById('smbSearch').value, document.getElementById('smbIndustry').value);
+                syncPipelineToProxy();
+            }
+        });
+    });
+}
+
+// ===== TOAST NOTIFICATIONS =====
+function showToast(type, message, duration) {
+    duration = duration || 4000;
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = 'toastOut .3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// ===== FAB (Floating Action Button) =====
+let fabOpen = false;
+let fabCurrentType = 'call';
+
+function toggleFAB() {
+    fabOpen = !fabOpen;
+    document.getElementById('fabMain').classList.toggle('open', fabOpen);
+    document.getElementById('fabMenu').classList.toggle('show', fabOpen);
+}
+
+function logActivity(type) {
+    fabCurrentType = type;
+    toggleFAB(); // Close menu
+    const titles = { call: 'Log Call', email: 'Log Email', meeting: 'Log Meeting', note: 'Add Note' };
+    const icons = { call: '&#128222;', email: '&#128231;', meeting: '&#129309;', note: '&#128221;' };
+    document.getElementById('fabLogTitle').innerHTML = icons[type] + ' ' + titles[type];
+    document.getElementById('fabLogType').textContent = type.charAt(0).toUpperCase() + type.slice(1);
+    document.getElementById('fab-log-acct').value = '';
+    document.getElementById('fab-log-notes').value = '';
+    document.getElementById('fabCharCount').textContent = '0';
+    // Show/hide templates based on type
+    document.getElementById('fabLogTemplates').style.display = (type === 'call' || type === 'meeting') ? 'flex' : 'none';
+    document.getElementById('fabLogModal').classList.remove('hidden');
+    document.getElementById('fab-log-acct').focus();
+}
+
+function setFabTemplate(tpl) {
+    const templates = {
+        discovery: 'Discovery call — discussed current environment, pain points, and upcoming initiatives.',
+        demo: 'Demo follow-up — reviewed solution capabilities, addressed technical questions.',
+        proposal: 'Proposal review — walked through SOW, pricing, and implementation timeline.',
+        site: 'Site visit — toured facility, met stakeholders, assessed current infrastructure.'
+    };
+    document.getElementById('fab-log-notes').value = templates[tpl] || '';
+    document.getElementById('fabCharCount').textContent = (templates[tpl] || '').length;
+}
+
+function closeFabLog() {
+    document.getElementById('fabLogModal').classList.add('hidden');
+}
+
+function saveFabActivity() {
+    const acct = document.getElementById('fab-log-acct').value.trim();
+    const notes = document.getElementById('fab-log-notes').value.trim();
+    if (!acct) { showToast('error', 'Select an account first.'); return; }
+
+    const d = getAcctData(acct);
+    const today = new Date().toISOString().slice(0, 10);
+    d.lastContact = today;
+    if (!d.activities) d.activities = [];
+    d.activities.push({ type: fabCurrentType, date: new Date().toISOString(), note: notes || fabCurrentType });
+    if (notes) d.notes = (d.notes ? d.notes + '\n\n' : '') + '[' + today + ' ' + fabCurrentType + '] ' + notes;
+    setAcctData(acct, d);
+
+    // Also post to cal-proxy notes
+    fetch('http://127.0.0.1:18790/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: notes || fabCurrentType, account: acct, type: 'note', source: 'hub-fab' })
+    }).catch(() => {});
+
+    closeFabLog();
+    showToast('success', fabCurrentType.charAt(0).toUpperCase() + fabCurrentType.slice(1) + ' logged for ' + acct);
+    updateStaleAccounts();
+    updateDashFollowUps();
+    renderKanban();
+}
+
+// FAB char counter
+document.getElementById('fab-log-notes').addEventListener('input', function() {
+    document.getElementById('fabCharCount').textContent = this.value.length;
+});
+
+// Close FAB log on overlay click / escape
+document.getElementById('fabLogModal').addEventListener('click', e => {
+    if (e.target.id === 'fabLogModal') closeFabLog();
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeFabLog();
+});
+
+// Close FAB menu on click outside
+document.addEventListener('click', e => {
+    if (fabOpen && !e.target.closest('.fab-container')) {
+        fabOpen = false;
+        document.getElementById('fabMain').classList.remove('open');
+        document.getElementById('fabMenu').classList.remove('show');
+    }
+});
+
 updateDashPipeline();
 updateCompetitorFootprint();
 updateDashFollowUps();
@@ -3295,6 +3852,7 @@ updateDashFlags();
 updateStageBreakdown();
 updateStaleAccounts();
 updateHotDeals();
+renderKanban();
 fetchOcNotes();
 safePipelineSync(); // Safe sync on load — never overwrites cal-proxy with empty data
 setInterval(fetchOcNotes, 30000); // Poll every 30s for new notes
