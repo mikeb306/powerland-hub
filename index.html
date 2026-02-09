@@ -555,6 +555,42 @@
         .kanban-stat { font-size: 12px; color: var(--text2); }
         .kanban-stat strong { color: var(--text); font-family: var(--mono); }
 
+        /* MULTI-CONTACT */
+        .contacts-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .contact-add-btn { font-size: 11px; font-weight: 600; color: var(--accent); background: rgba(79,140,255,.1); border: 1px solid rgba(79,140,255,.2); border-radius: 6px; padding: 4px 10px; cursor: pointer; transition: all .15s; }
+        .contact-add-btn:hover { background: rgba(79,140,255,.18); }
+        .contact-list { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; }
+        .contact-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; transition: border-color .15s; }
+        .contact-card:hover { border-color: var(--border2); }
+        .contact-card-info { flex: 1; min-width: 0; }
+        .contact-card-name { font-size: 12px; font-weight: 600; color: var(--text); }
+        .contact-card-title { font-size: 10px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .contact-card-detail { font-size: 10px; color: var(--text3); margin-top: 2px; }
+        .contact-role { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; white-space: nowrap; text-transform: uppercase; letter-spacing: .03em; }
+        .contact-role.r-champion { background: rgba(52,211,153,.15); color: #34d399; }
+        .contact-role.r-economic-buyer { background: rgba(79,140,255,.15); color: #4f8cff; }
+        .contact-role.r-technical-buyer { background: rgba(167,139,250,.15); color: #a78bfa; }
+        .contact-role.r-user-buyer { background: rgba(14,165,233,.15); color: #0ea5e9; }
+        .contact-role.r-influencer { background: rgba(245,158,11,.15); color: #f59e0b; }
+        .contact-role.r-gatekeeper { background: rgba(156,163,175,.15); color: #9ca3af; }
+        .contact-role.r-blocker { background: rgba(239,68,68,.15); color: #f87171; }
+        .contact-role.r-coach { background: rgba(34,197,94,.15); color: #22c55e; }
+        .contact-influence { font-size: 9px; font-weight: 600; color: var(--text3); }
+        .contact-influence.inf-high { color: var(--accent2); }
+        .contact-influence.inf-medium { color: var(--accent3); }
+        .contact-stance-dots { display: flex; gap: 2px; margin-top: 2px; }
+        .contact-stance-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+        .contact-stance-dot.neg { background: var(--accent4); }
+        .contact-stance-dot.pos { background: var(--accent2); }
+        .contact-stance-dot.neutral { background: var(--text3); }
+        .contact-card-actions { display: flex; gap: 4px; flex-shrink: 0; }
+        .contact-card-actions button { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border); background: none; color: var(--text3); font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .contact-card-actions button:hover { color: var(--text); border-color: var(--border2); }
+        .contact-form { background: var(--bg); border: 1px solid var(--accent); border-radius: 8px; padding: 10px; margin-top: 6px; }
+        .contact-form .modal-row { margin-bottom: 6px; }
+        .contact-form-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 8px; }
+        .contact-empty { text-align: center; padding: 16px 0; color: var(--text3); font-size: 11px; font-style: italic; }
+
         /* MEDDPICC PANEL */
         .meddpicc-panel { background: rgba(99,102,241,.04); border: 1px solid rgba(99,102,241,.12); border-radius: 10px; padding: 14px; }
         .meddpicc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
@@ -1996,15 +2032,12 @@ Sr Account Executive | Xerox IT Solutions
             </div>
 
             <div class="modal-section">
-                <div class="modal-section-title">Key Contact</div>
-                <div class="modal-row">
-                    <div class="modal-field"><label>Name</label><input id="m-cname" placeholder="Jane Smith"></div>
-                    <div class="modal-field"><label>Title</label><input id="m-ctitle" placeholder="CIO"></div>
+                <div class="contacts-header">
+                    <div class="modal-section-title" style="margin-bottom:0;">Contacts</div>
+                    <button class="contact-add-btn" onclick="showContactForm()">+ Add Contact</button>
                 </div>
-                <div class="modal-row">
-                    <div class="modal-field"><label>Email</label><input id="m-cemail" type="email" placeholder="jane@company.com"></div>
-                    <div class="modal-field"><label>Phone</label><input id="m-cphone" placeholder="306-555-1234"></div>
-                </div>
+                <div id="contactList" class="contact-list"></div>
+                <div id="contactFormWrap"></div>
             </div>
 
             <div class="modal-section">
@@ -2679,10 +2712,7 @@ function openModal(name, type) {
     document.getElementById('m-prob').value = d.prob || '';
     document.getElementById('m-close-q').value = d.closeQ || '';
     document.getElementById('m-incumbent').value = d.incumbent || '';
-    document.getElementById('m-cname').value = d.contactName || '';
-    document.getElementById('m-ctitle').value = d.contactTitle || '';
-    document.getElementById('m-cemail').value = d.contactEmail || '';
-    document.getElementById('m-cphone').value = d.contactPhone || '';
+    renderModalContacts(d.contacts || []);
     document.getElementById('m-followup').value = d.followUp || '';
     document.getElementById('m-expiry').value = d.expiry || '';
     document.getElementById('m-lastcontact').value = d.lastContact || '';
@@ -2753,10 +2783,7 @@ function saveModal() {
         incumbent: document.getElementById('m-incumbent').value,
         pillars: pillars,
         flags: flags,
-        contactName: document.getElementById('m-cname').value,
-        contactTitle: document.getElementById('m-ctitle').value,
-        contactEmail: document.getElementById('m-cemail').value,
-        contactPhone: document.getElementById('m-cphone').value,
+        contacts: oldData.contacts || [],
         followUp: document.getElementById('m-followup').value,
         expiry: document.getElementById('m-expiry').value,
         lastContact: document.getElementById('m-lastcontact').value,
@@ -3621,6 +3648,19 @@ function migrateAllAccounts() {
                 acct.stageEnteredDate = new Date().toISOString().slice(0, 10);
                 changed = true;
             }
+            // Migrate single contact to contacts array
+            if (!acct.contacts && acct.contactName) {
+                acct.contacts = [{
+                    id: 'c_migrated_' + i,
+                    name: acct.contactName,
+                    title: acct.contactTitle || '',
+                    email: acct.contactEmail || '',
+                    phone: acct.contactPhone || '',
+                    buyingRole: '', influenceLevel: '', relationshipStance: 0,
+                    lastActivity: acct.lastContact || '', notes: ''
+                }];
+                changed = true;
+            }
             if (changed) localStorage.setItem(key, JSON.stringify(acct));
         } catch(e) {}
     }
@@ -3774,6 +3814,174 @@ function dealHealthDot(deal) {
     return '<span title="Healthy">&#128994;</span>';
 }
 
+// ===== MULTI-CONTACT MANAGEMENT =====
+const BUYING_ROLES = ['Champion','Economic Buyer','Technical Buyer','User Buyer','Influencer','Gatekeeper','Blocker','Coach'];
+const INFLUENCE_LEVELS = ['High','Medium','Low'];
+
+function migrateContactsToArray(acctData) {
+    if (acctData.contacts && acctData.contacts.length > 0) return acctData;
+    if (acctData.contactName) {
+        acctData.contacts = [{
+            id: 'c_' + Date.now(),
+            name: acctData.contactName,
+            title: acctData.contactTitle || '',
+            email: acctData.contactEmail || '',
+            phone: acctData.contactPhone || '',
+            buyingRole: '',
+            influenceLevel: '',
+            relationshipStance: 0,
+            lastActivity: acctData.lastContact || '',
+            notes: ''
+        }];
+    } else {
+        acctData.contacts = [];
+    }
+    return acctData;
+}
+
+function roleClass(role) {
+    return 'r-' + (role || '').toLowerCase().replace(/\s+/g, '-');
+}
+
+function stanceDots(stance) {
+    const s = parseInt(stance) || 0;
+    let dots = '';
+    for (let i = -2; i <= 2; i++) {
+        if (i === 0) dots += `<span class="contact-stance-dot ${s === 0 ? 'neutral' : ''}"></span>`;
+        else if (i < 0) dots += `<span class="contact-stance-dot ${s <= i ? 'neg' : ''}"></span>`;
+        else dots += `<span class="contact-stance-dot ${s >= i ? 'pos' : ''}"></span>`;
+    }
+    return dots;
+}
+
+function renderModalContacts(contacts) {
+    const el = document.getElementById('contactList');
+    document.getElementById('contactFormWrap').innerHTML = '';
+    if (!contacts || contacts.length === 0) {
+        el.innerHTML = '<div class="contact-empty">No contacts yet. Add your first contact above.</div>';
+        return;
+    }
+    el.innerHTML = contacts.map(c => `
+        <div class="contact-card">
+            <div class="contact-card-info">
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <span class="contact-card-name">${c.name}</span>
+                    ${c.buyingRole ? `<span class="contact-role ${roleClass(c.buyingRole)}">${c.buyingRole}</span>` : ''}
+                    ${c.influenceLevel ? `<span class="contact-influence inf-${c.influenceLevel.toLowerCase()}">${c.influenceLevel}</span>` : ''}
+                </div>
+                ${c.title ? `<div class="contact-card-title">${c.title}</div>` : ''}
+                <div class="contact-card-detail">
+                    ${c.email ? c.email : ''}${c.email && c.phone ? ' &middot; ' : ''}${c.phone ? c.phone : ''}
+                </div>
+                ${c.notes ? `<div class="contact-card-detail" style="color:var(--text2);margin-top:1px;">${c.notes}</div>` : ''}
+                <div class="contact-stance-dots" title="Stance: ${c.relationshipStance || 0} (-2 Blocker to +2 Champion)">${stanceDots(c.relationshipStance)}</div>
+            </div>
+            <div class="contact-card-actions">
+                <button onclick="editContact('${c.id}')" title="Edit">&#9998;</button>
+                <button onclick="deleteContact('${c.id}')" title="Delete" style="color:var(--accent4);">&times;</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getContactFormHTML(contact) {
+    const c = contact || { id: '', name: '', title: '', email: '', phone: '', buyingRole: '', influenceLevel: '', relationshipStance: 0, notes: '' };
+    const isEdit = !!c.id;
+    return `<div class="contact-form">
+        <div class="modal-row">
+            <div class="modal-field"><label>Name</label><input id="cf-name" value="${(c.name||'').replace(/"/g,'&quot;')}" placeholder="Jane Smith"></div>
+            <div class="modal-field"><label>Title</label><input id="cf-title" value="${(c.title||'').replace(/"/g,'&quot;')}" placeholder="CIO"></div>
+        </div>
+        <div class="modal-row">
+            <div class="modal-field"><label>Email</label><input id="cf-email" type="email" value="${(c.email||'').replace(/"/g,'&quot;')}" placeholder="jane@company.com"></div>
+            <div class="modal-field"><label>Phone</label><input id="cf-phone" value="${(c.phone||'').replace(/"/g,'&quot;')}" placeholder="306-555-1234"></div>
+        </div>
+        <div class="modal-row">
+            <div class="modal-field"><label>Buying Role</label>
+                <select id="cf-role"><option value="">—</option>${BUYING_ROLES.map(r => `<option value="${r}"${r===c.buyingRole?' selected':''}>${r}</option>`).join('')}</select>
+            </div>
+            <div class="modal-field"><label>Influence</label>
+                <select id="cf-influence"><option value="">—</option>${INFLUENCE_LEVELS.map(l => `<option value="${l}"${l===c.influenceLevel?' selected':''}>${l}</option>`).join('')}</select>
+            </div>
+            <div class="modal-field" style="max-width:120px;"><label>Stance (${c.relationshipStance||0})</label>
+                <input type="range" id="cf-stance" min="-2" max="2" value="${c.relationshipStance||0}" style="width:100%;" oninput="this.closest('.modal-field').querySelector('label').textContent='Stance ('+this.value+')'">
+            </div>
+        </div>
+        <div class="modal-row">
+            <div class="modal-field" style="flex:1;"><label>Notes</label><input id="cf-notes" value="${(c.notes||'').replace(/"/g,'&quot;')}" placeholder="Reports to deputy minister..."></div>
+        </div>
+        <div class="contact-form-actions">
+            <button class="modal-btn modal-btn-ghost" onclick="cancelContactForm()" style="padding:6px 14px;">Cancel</button>
+            <button class="modal-btn modal-btn-primary" onclick="saveContact('${c.id||''}')" style="padding:6px 14px;">${isEdit ? 'Update' : 'Add'} Contact</button>
+        </div>
+    </div>`;
+}
+
+function showContactForm() {
+    document.getElementById('contactFormWrap').innerHTML = getContactFormHTML(null);
+    document.getElementById('cf-name').focus();
+}
+
+function editContact(id) {
+    const d = getAcctData(currentModalAcct);
+    migrateContactsToArray(d);
+    const contact = (d.contacts || []).find(c => c.id === id);
+    if (!contact) return;
+    document.getElementById('contactFormWrap').innerHTML = getContactFormHTML(contact);
+    document.getElementById('cf-name').focus();
+}
+
+function deleteContact(id) {
+    if (!confirm('Remove this contact?')) return;
+    const d = getAcctData(currentModalAcct);
+    migrateContactsToArray(d);
+    d.contacts = (d.contacts || []).filter(c => c.id !== id);
+    setAcctData(currentModalAcct, d);
+    renderModalContacts(d.contacts);
+}
+
+function saveContact(editId) {
+    const name = document.getElementById('cf-name').value.trim();
+    if (!name) { showToast('error', 'Contact name is required.'); return; }
+    const contactData = {
+        id: editId || ('c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6)),
+        name: name,
+        title: document.getElementById('cf-title').value.trim(),
+        email: document.getElementById('cf-email').value.trim(),
+        phone: document.getElementById('cf-phone').value.trim(),
+        buyingRole: document.getElementById('cf-role').value,
+        influenceLevel: document.getElementById('cf-influence').value,
+        relationshipStance: parseInt(document.getElementById('cf-stance').value) || 0,
+        lastActivity: new Date().toISOString().slice(0, 10),
+        notes: document.getElementById('cf-notes').value.trim()
+    };
+    const d = getAcctData(currentModalAcct);
+    migrateContactsToArray(d);
+    if (editId) {
+        const idx = d.contacts.findIndex(c => c.id === editId);
+        if (idx >= 0) {
+            contactData.lastActivity = d.contacts[idx].lastActivity || contactData.lastActivity;
+            d.contacts[idx] = contactData;
+        }
+    } else {
+        d.contacts.push(contactData);
+    }
+    // Keep legacy contactName in sync with first contact for backwards compatibility
+    if (d.contacts.length > 0) {
+        d.contactName = d.contacts[0].name;
+        d.contactTitle = d.contacts[0].title;
+        d.contactEmail = d.contacts[0].email;
+        d.contactPhone = d.contacts[0].phone;
+    }
+    setAcctData(currentModalAcct, d);
+    renderModalContacts(d.contacts);
+    showToast('success', editId ? 'Contact updated.' : 'Contact added.');
+}
+
+function cancelContactForm() {
+    document.getElementById('contactFormWrap').innerHTML = '';
+}
+
 // ===== RELATIONSHIP HEALTH SCORING =====
 function calculateHealthScore(acctData) {
     const activities = acctData.activities || [];
@@ -3807,15 +4015,15 @@ function calculateHealthScore(acctData) {
     const depthWeights = { meeting: 10, call: 5, email_out: 2, email_in: 3, note: 1, stage_change: 1 };
     let depth = Math.min(25, last90.reduce((sum, a) => sum + (depthWeights[a.type] || 1), 0));
 
-    // Breadth: contacts engaged in last 30 days (0-20)
-    // Multi-contact is Phase 3 — for now, score based on whether contact info exists + pillars engaged
-    const hasPrimaryContact = acctData.contactName ? 1 : 0;
-    const pillarCount = (acctData.pillars || []).length;
-    let breadth = 0;
-    if (hasPrimaryContact && pillarCount >= 3) breadth = 20;
-    else if (hasPrimaryContact && pillarCount >= 2) breadth = 15;
-    else if (hasPrimaryContact && pillarCount >= 1) breadth = 10;
-    else if (hasPrimaryContact) breadth = 5;
+    // Breadth: contacts engaged (0-20)
+    const contacts = acctData.contacts || [];
+    const now30 = 30 * 86400000;
+    const activeContacts = contacts.filter(c => c.lastActivity && (now - new Date(c.lastActivity).getTime()) < now30);
+    let breadth = activeContacts.length >= 5 ? 20 :
+                  activeContacts.length >= 3 ? 15 :
+                  activeContacts.length >= 2 ? 10 :
+                  activeContacts.length >= 1 ? 5 :
+                  (acctData.contactName ? 3 : 0);
 
     const total = recency + frequency + depth + breadth;
     return { total, recency, frequency, depth, breadth };
