@@ -832,7 +832,7 @@
         </div>
         <div class="panel" style="padding:0;">
             <div class="tbl-wrap tbl-scroll">
-                <table id="k12Table"><thead><tr>
+                <table id="k12Table" class="tbl-clickable"><thead><tr>
                     <th>School Division</th><th>Type</th><th>Region</th><th>Students</th><th>Incumbent</th><th>CFO</th><th>IT Contact</th><th>Priority</th>
                 </tr></thead><tbody></tbody></table>
             </div>
@@ -849,7 +849,7 @@
         </div>
         <div class="panel" style="padding:0;">
             <div class="tbl-wrap tbl-scroll">
-                <table id="higheredTable"><thead><tr>
+                <table id="higheredTable" class="tbl-clickable"><thead><tr>
                     <th>Institution</th><th>Type</th><th>City</th><th>Priority</th><th>MPS Opp</th><th>M365/Cloud Opp</th><th>Managed IT Opp</th><th>Stage</th>
                 </tr></thead><tbody></tbody></table>
             </div>
@@ -869,7 +869,7 @@
         </div>
         <div class="panel" style="padding:0;">
             <div class="tbl-wrap tbl-scroll">
-                <table id="cuTable"><thead><tr>
+                <table id="cuTable" class="tbl-clickable"><thead><tr>
                     <th>Credit Union</th><th>Rank</th><th>Assets</th><th>Members</th><th>Locations</th><th>City</th><th>Priority</th>
                 </tr></thead><tbody></tbody></table>
             </div>
@@ -2210,7 +2210,9 @@ function renderK12(f='',p='') {
         if (fl && !JSON.stringify(a).toLowerCase().includes(fl)) return false;
         if (p && a.priority !== p) return false;
         return true;
-    }).map(a => `<tr>
+    }).map(a => {
+        const d = getAcctData(a.name);
+        return `<tr onclick="openModal('${a.name.replace(/'/g,"\\'")}','k12')">
         <td><strong style="color:var(--text)">${a.name}</strong></td>
         <td>${a.type}</td>
         <td>${a.region || '—'}</td>
@@ -2219,12 +2221,14 @@ function renderK12(f='',p='') {
         <td style="font-size:11px;">${a.cfo || '—'}</td>
         <td style="font-size:11px;">${a.it || '—'}</td>
         <td>${ptag(a.priority)}</td>
-    </tr>`).join('');
+    </tr>`;}).join('');
 }
 
 // ===== RENDER: HIGHER ED =====
 function renderHigherEd() {
-    document.querySelector('#higheredTable tbody').innerHTML = higherEd.map(a => `<tr>
+    document.querySelector('#higheredTable tbody').innerHTML = higherEd.map(a => {
+        const d = getAcctData(a.name);
+        return `<tr onclick="openModal('${a.name.replace(/'/g,"\\'")}','highered')">
         <td><strong style="color:var(--text)">${a.name}</strong></td>
         <td>${a.type}</td>
         <td>${a.city}</td>
@@ -2232,8 +2236,8 @@ function renderHigherEd() {
         <td style="font-size:11px;">${a.mps}</td>
         <td style="font-size:11px;">${a.cloud}</td>
         <td style="font-size:11px;">${a.mit}</td>
-        <td><span class="tag tag-new">${a.stage}</span></td>
-    </tr>`).join('');
+        <td>${stageTag(d.stage)}</td>
+    </tr>`;}).join('');
 }
 
 // ===== RENDER: CREDIT UNIONS =====
@@ -2242,7 +2246,9 @@ function renderCU(f='') {
     document.querySelector('#cuTable tbody').innerHTML = creditUnions.filter(a => {
         if (fl && !JSON.stringify(a).toLowerCase().includes(fl)) return false;
         return true;
-    }).map(a => `<tr>
+    }).map(a => {
+        const d = getAcctData(a.name);
+        return `<tr onclick="openModal('${a.name.replace(/'/g,"\\'")}','cu')">
         <td><strong style="color:var(--text)">${a.name}</strong></td>
         <td style="font-family:var(--mono);font-size:11px;">#${a.rank}</td>
         <td style="font-family:var(--mono);font-size:11px;">$${(a.assets/1e9).toFixed(1)}B</td>
@@ -2250,7 +2256,7 @@ function renderCU(f='') {
         <td style="font-family:var(--mono);font-size:11px;">${a.locations}</td>
         <td>${a.city || '—'}</td>
         <td>${ptag(a.priority)}</td>
-    </tr>`).join('');
+    </tr>`;}).join('');
 }
 
 // ===== NAV =====
@@ -2375,16 +2381,13 @@ function calcDeal() {
 let currentModalAcct = '';
 let currentModalType = '';
 
-// Checkbox toggle
+// Checkbox toggle — use preventDefault to stop label's native double-toggle
 document.querySelectorAll('.check-item').forEach(item => {
     item.addEventListener('click', (e) => {
-        if (e.target.tagName === 'INPUT') return;
+        e.preventDefault();
         const cb = item.querySelector('input');
         cb.checked = !cb.checked;
         item.classList.toggle('checked', cb.checked);
-    });
-    item.querySelector('input').addEventListener('change', () => {
-        item.classList.toggle('checked', item.querySelector('input').checked);
     });
 });
 
@@ -2434,18 +2437,6 @@ function closeModal() {
     document.getElementById('acctModal').classList.add('hidden');
     currentModalAcct = '';
 }
-
-// Toggle visual state of check-item chips when clicked
-document.querySelectorAll('.check-item').forEach(item => {
-    item.addEventListener('click', function(e) {
-        const cb = this.querySelector('input');
-        // The label click already toggles the checkbox, so sync the CSS class
-        // Use setTimeout(0) so the browser's default checkbox toggle happens first
-        setTimeout(() => {
-            this.classList.toggle('checked', cb.checked);
-        }, 0);
-    });
-});
 
 function saveModal() {
     const pillars = [];
