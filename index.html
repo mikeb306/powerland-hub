@@ -555,6 +555,21 @@
         .kanban-stat { font-size: 12px; color: var(--text2); }
         .kanban-stat strong { color: var(--text); font-family: var(--mono); }
 
+        /* COMPETITIVE INTEL */
+        .competitor-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+        .comp-chip {
+            font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);
+            color: var(--text2); cursor: pointer; user-select: none; transition: all .15s;
+        }
+        .comp-chip:hover { border-color: var(--border2); }
+        .comp-chip.selected { border-color: var(--accent4); color: var(--accent4); background: rgba(239,68,68,.08); }
+        .closed-lost-section { background: rgba(239,68,68,.04); border: 1px solid rgba(239,68,68,.12); border-radius: 10px; padding: 14px; margin-top: 10px; }
+        .closed-lost-section .modal-section-title { color: var(--accent4); }
+        .threat-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+        .threat-high { background: var(--accent4); }
+        .threat-medium { background: var(--accent3); }
+        .threat-low { background: var(--accent2); }
+
         /* MULTI-CONTACT */
         .contacts-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .contact-add-btn { font-size: 11px; font-weight: 600; color: var(--accent); background: rgba(79,140,255,.1); border: 1px solid rgba(79,140,255,.2); border-radius: 6px; padding: 4px 10px; cursor: pointer; transition: all .15s; }
@@ -1976,6 +1991,95 @@ Sr Account Executive | Xerox IT Solutions
             </div>
 
             <div class="modal-section">
+                <div class="modal-section-title">Competitive Intelligence</div>
+                <div class="modal-row">
+                    <div class="modal-field">
+                        <label>Primary Competitor</label>
+                        <select id="m-comp-primary">
+                            <option value="">— None —</option>
+                            <option value="Dell">Dell</option>
+                            <option value="CDW">CDW</option>
+                            <option value="Compugen">Compugen</option>
+                            <option value="SHI">SHI</option>
+                            <option value="Softchoice">Softchoice</option>
+                            <option value="Local VAR">Local VAR</option>
+                            <option value="Incumbent/Internal IT">Incumbent/Internal IT</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label>Threat Level</label>
+                        <select id="m-comp-threat">
+                            <option value="">—</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label>Price Position</label>
+                        <select id="m-comp-price">
+                            <option value="">—</option>
+                            <option value="Higher">Higher (we're more)</option>
+                            <option value="Equal">Equal</option>
+                            <option value="Lower">Lower (we're less)</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top:6px;">
+                    <label style="display:block;font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">All Competitors Present</label>
+                    <div class="competitor-chips" id="m-comp-all">
+                        <span class="comp-chip" data-comp="Dell">Dell</span>
+                        <span class="comp-chip" data-comp="CDW">CDW</span>
+                        <span class="comp-chip" data-comp="Compugen">Compugen</span>
+                        <span class="comp-chip" data-comp="SHI">SHI</span>
+                        <span class="comp-chip" data-comp="Softchoice">Softchoice</span>
+                        <span class="comp-chip" data-comp="Local VAR">Local VAR</span>
+                        <span class="comp-chip" data-comp="Incumbent/Internal IT">Incumbent/Internal IT</span>
+                        <span class="comp-chip" data-comp="Other">Other</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-section closed-lost-section" id="closedLostSection" style="display:none;">
+                <div class="modal-section-title">Closed Lost Details</div>
+                <div class="modal-row">
+                    <div class="modal-field">
+                        <label>Lost To</label>
+                        <select id="m-lost-to">
+                            <option value="">— Select —</option>
+                            <option value="Dell">Dell</option>
+                            <option value="CDW">CDW</option>
+                            <option value="Compugen">Compugen</option>
+                            <option value="SHI">SHI</option>
+                            <option value="Softchoice">Softchoice</option>
+                            <option value="Local VAR">Local VAR</option>
+                            <option value="Incumbent/Internal IT">Incumbent/Internal IT</option>
+                            <option value="No Decision">No Decision</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="modal-field" style="flex:2;">
+                        <label>Loss Reason</label>
+                        <select id="m-loss-reason">
+                            <option value="">— Select —</option>
+                            <option value="Price/Budget">Price/Budget</option>
+                            <option value="Product Gap">Product Gap</option>
+                            <option value="Incumbent Preference">Incumbent Preference</option>
+                            <option value="Relationship/Trust">Relationship/Trust</option>
+                            <option value="Procurement Process">Procurement Process</option>
+                            <option value="No Decision">No Decision</option>
+                            <option value="Internal IT Build">Internal IT Build</option>
+                            <option value="Political Change">Political Change</option>
+                            <option value="Contract Terms">Contract Terms</option>
+                            <option value="Implementation Concerns">Implementation Concerns</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-section">
                 <div class="modal-section-title">Activity & Next Steps</div>
                 <div class="modal-row">
                     <div class="modal-field">
@@ -2779,6 +2883,16 @@ document.querySelectorAll('.check-item').forEach(item => {
     });
 });
 
+// Competitor chip toggles
+document.querySelectorAll('#m-comp-all .comp-chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('selected'));
+});
+
+// Show/hide Closed Lost section based on stage
+document.getElementById('m-stage').addEventListener('change', function() {
+    document.getElementById('closedLostSection').style.display = this.value === 'Closed Lost' ? '' : 'none';
+});
+
 function openModal(name, type) {
     currentModalAcct = name;
     currentModalType = type;
@@ -2798,6 +2912,21 @@ function openModal(name, type) {
     document.getElementById('m-nextaction').value = d.nextAction || '';
     document.getElementById('m-source').value = d.dealSource || '';
     document.getElementById('m-notes').value = d.notes || '';
+
+    // Competitors
+    const comp = d.competitors || {};
+    document.getElementById('m-comp-primary').value = comp.primary || '';
+    document.getElementById('m-comp-threat').value = comp.threatLevel || '';
+    document.getElementById('m-comp-price').value = comp.pricePosition || '';
+    const allPresent = comp.allPresent || [];
+    document.querySelectorAll('#m-comp-all .comp-chip').forEach(chip => {
+        chip.classList.toggle('selected', allPresent.includes(chip.dataset.comp));
+    });
+
+    // Closed Lost fields
+    document.getElementById('m-lost-to').value = comp.lostTo || '';
+    document.getElementById('m-loss-reason').value = d.lossReason || '';
+    document.getElementById('closedLostSection').style.display = (d.stage === 'Closed Lost') ? '' : 'none';
 
     // MEDDPICC
     const meddpicc = d.meddpicc || {};
@@ -2850,6 +2979,27 @@ function saveModal() {
 
     const newStage = document.getElementById('m-stage').value;
     const oldData = getAcctData(currentModalAcct);
+
+    // Collect competitor data
+    const allPresent = [];
+    document.querySelectorAll('#m-comp-all .comp-chip.selected').forEach(chip => {
+        allPresent.push(chip.dataset.comp);
+    });
+    const competitors = {
+        primary: document.getElementById('m-comp-primary').value,
+        allPresent: allPresent,
+        threatLevel: document.getElementById('m-comp-threat').value,
+        pricePosition: document.getElementById('m-comp-price').value,
+        lostTo: document.getElementById('m-lost-to').value
+    };
+    const lossReason = document.getElementById('m-loss-reason').value;
+
+    // Enforce Closed Lost requirements
+    if (newStage === 'Closed Lost') {
+        if (!competitors.lostTo) { showToast('error', 'Please select who you lost to before marking Closed Lost.'); return; }
+        if (!lossReason) { showToast('error', 'Please select a loss reason before marking Closed Lost.'); return; }
+    }
+
     // Track stage changes
     const stageChanged = oldData.stage !== newStage;
     const stageEnteredDate = stageChanged ? new Date().toISOString().slice(0, 10) : (oldData.stageEnteredDate || new Date().toISOString().slice(0, 10));
@@ -2863,6 +3013,8 @@ function saveModal() {
         pillars: pillars,
         flags: flags,
         contacts: oldData.contacts || [],
+        competitors: competitors,
+        lossReason: lossReason,
         followUp: document.getElementById('m-followup').value,
         expiry: document.getElementById('m-expiry').value,
         lastContact: document.getElementById('m-lastcontact').value,
