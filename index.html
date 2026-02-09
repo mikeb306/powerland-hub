@@ -894,6 +894,29 @@
             font-family: var(--font); cursor: pointer; border-radius: 8px; transition: background .15s;
         }
         .bnav-more-item:hover { background: rgba(255,255,255,.05); }
+
+        /* ===== SYNC STATUS ===== */
+        .sync-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 9px; font-weight: 600; padding: 2px 8px;
+            border-radius: 10px; letter-spacing: .02em;
+        }
+        .sync-badge-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+        }
+        .sync-online .sync-badge-dot { background: var(--accent2); }
+        .sync-online { color: var(--accent2); background: rgba(52,211,153,.1); }
+        .sync-offline .sync-badge-dot { background: var(--accent4); }
+        .sync-offline { color: var(--accent4); background: rgba(239,68,68,.1); }
+        .sync-pending .sync-badge-dot { background: var(--accent3); animation: syncPulse 1.2s infinite; }
+        .sync-pending { color: var(--accent3); background: rgba(245,158,11,.1); }
+        @keyframes syncPulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+        .offline-banner {
+            display: none; background: rgba(239,68,68,.12); color: var(--accent4);
+            text-align: center; padding: 6px 12px; font-size: 11px; font-weight: 600;
+            border-bottom: 1px solid rgba(239,68,68,.2);
+        }
+        .offline-banner.show { display: block; }
     </style>
 </head>
 <body>
@@ -922,9 +945,11 @@
         <div class="topbar-right">
             <span class="topbar-name">Mike Bernhardt &middot; Sr AE</span>
             <div class="topbar-target">FY26: <strong>$3M</strong></div>
+            <span class="sync-badge sync-online" id="syncBadge"><span class="sync-badge-dot"></span> Synced</span>
             <button class="topbar-restore" onclick="openRestoreModal()" title="Backup & Restore">&#9881;</button>
         </div>
     </div>
+    <div class="offline-banner" id="offlineBanner">Offline — changes saved locally, will sync when reconnected</div>
     <div class="topbar-nav">
         <button class="topbar-tab active" data-page="dashboard">Dashboard</button>
         <button class="topbar-tab" data-page="pipeline">Pipeline</button>
@@ -3901,24 +3926,113 @@ function buildLocalPipeline() {
     return { deals, totalPipeline: total, dealCount: deals.length, target: 3000000 };
 }
 
+// ===== OFFLINE SYNC QUEUE =====
+const SYNC_QUEUE_KEY = 'xits_sync_queue';
+let syncQueue = JSON.parse(localStorage.getItem(SYNC_QUEUE_KEY) || '[]');
+let hubOnline = navigator.onLine;
+
+function updateSyncBadge() {
+    const badge = document.getElementById('syncBadge');
+    const banner = document.getElementById('offlineBanner');
+    if (!badge) return;
+    if (!hubOnline) {
+        badge.className = 'sync-badge sync-offline';
+        badge.innerHTML = '<span class="sync-badge-dot"></span> Offline';
+        if (banner) banner.classList.add('show');
+    } else if (syncQueue.length > 0) {
+        badge.className = 'sync-badge sync-pending';
+        badge.innerHTML = '<span class="sync-badge-dot"></span> Syncing ' + syncQueue.length;
+        if (banner) banner.classList.remove('show');
+    } else {
+        badge.className = 'sync-badge sync-online';
+        badge.innerHTML = '<span class="sync-badge-dot"></span> Synced';
+        if (banner) banner.classList.remove('show');
+    }
+}
+
+function saveSyncQueue() {
+    localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(syncQueue));
+    updateSyncBadge();
+}
+
+function queueSync(endpoint, method, payload) {
+    // Deduplicate: replace existing queued item for same endpoint
+    syncQueue = syncQueue.filter(item => item.endpoint !== endpoint);
+    syncQueue.push({ endpoint: endpoint, method: method, payload: payload, timestamp: Date.now() });
+    saveSyncQueue();
+    if (hubOnline) processSyncQueue();
+}
+
+async function processSyncQueue() {
+    if (!hubOnline || syncQueue.length === 0) return;
+    updateSyncBadge();
+    let retries = 0;
+    while (syncQueue.length > 0 && retries < 3) {
+        const item = syncQueue[0];
+        try {
+            const resp = await fetch('http://127.0.0.1:18790' + item.endpoint, {
+                method: item.method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(item.payload)
+            });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            syncQueue.shift();
+            saveSyncQueue();
+            retries = 0;
+        } catch (e) {
+            retries++;
+            if (retries >= 3) {
+                console.warn('[Hub] Sync queue stalled after 3 retries, will retry later');
+                break;
+            }
+            await new Promise(r => setTimeout(r, 1000 * retries));
+        }
+    }
+    updateSyncBadge();
+}
+
+window.addEventListener('online', () => {
+    hubOnline = true;
+    updateSyncBadge();
+    showToast('success', 'Back online — syncing ' + syncQueue.length + ' queued changes');
+    processSyncQueue();
+});
+
+window.addEventListener('offline', () => {
+    hubOnline = false;
+    updateSyncBadge();
+    showToast('warning', 'You are offline — changes will be saved locally');
+});
+
 function syncPipelineToProxy() {
     const pipeline = buildLocalPipeline();
-    if (pipeline.dealCount === 0) return; // Never overwrite cal-proxy with empty data
+    if (pipeline.dealCount === 0) return;
+    if (!hubOnline) {
+        queueSync('/pipeline', 'POST', pipeline);
+        return;
+    }
     fetch('http://127.0.0.1:18790/pipeline', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pipeline)
-    }).catch(() => {});
+    }).then(() => {
+        updateSyncBadge();
+    }).catch(() => {
+        queueSync('/pipeline', 'POST', pipeline);
+    });
 }
 
 function safePipelineSync() {
-    // Safe sync on page load: fetch cal-proxy first, merge intelligently
     const localPipeline = buildLocalPipeline();
+    if (!hubOnline) {
+        console.log('[Hub] Offline — skipping cal-proxy sync, using localStorage');
+        updateSyncBadge();
+        return;
+    }
     fetch('http://127.0.0.1:18790/pipeline').then(r => r.json()).then(remote => {
         const remoteHasData = remote && remote.deals && remote.deals.length > 0;
         const localHasData = localPipeline.dealCount > 0;
         if (!localHasData && remoteHasData) {
-            // localStorage is empty, cal-proxy has data — restore from cal-proxy
             remote.deals.forEach(deal => {
                 const existing = getAcctData(deal.account);
                 if (!existing.stage || existing.stage === 'Fresh') {
@@ -3939,13 +4053,13 @@ function safePipelineSync() {
             updateDashPipeline();
             console.log('[Hub] Restored ' + remote.deals.length + ' deals from cal-proxy into localStorage');
         } else if (localHasData) {
-            // localStorage has data — push to cal-proxy (current behavior)
             syncPipelineToProxy();
         }
-        // If both are empty, do nothing
+        updateSyncBadge();
+        // Process any queued items from previous offline session
+        if (syncQueue.length > 0) processSyncQueue();
     }).catch(() => {
-        // cal-proxy unreachable — use localStorage, don't push empty data
-        if (localPipeline.dealCount > 0) syncPipelineToProxy();
+        if (localPipeline.dealCount > 0) queueSync('/pipeline', 'POST', localPipeline);
     });
 }
 
@@ -5279,12 +5393,17 @@ function saveFabActivity() {
     if (notes) d.notes = (d.notes ? d.notes + '\n\n' : '') + '[' + today + ' ' + fabCurrentType + '] ' + notes;
     setAcctData(acct, d);
 
-    // Also post to cal-proxy notes
-    fetch('http://127.0.0.1:18790/notes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: notes || fabCurrentType, account: acct, type: 'note', source: 'hub-fab' })
-    }).catch(() => {});
+    // Also post to cal-proxy notes (queue if offline)
+    const notePayload = { text: notes || fabCurrentType, account: acct, type: 'note', source: 'hub-fab' };
+    if (!hubOnline) {
+        queueSync('/notes', 'POST', notePayload);
+    } else {
+        fetch('http://127.0.0.1:18790/notes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(notePayload)
+        }).catch(() => queueSync('/notes', 'POST', notePayload));
+    }
 
     closeFabLog();
     showToast('success', fabCurrentType.charAt(0).toUpperCase() + fabCurrentType.slice(1) + ' logged for ' + acct);
@@ -5334,29 +5453,36 @@ updateVelocity();
 renderWhitespaceHeatmap();
 renderKanban();
 fetchOcNotes();
+updateSyncBadge();
 safePipelineSync(); // Safe sync on load — never overwrites cal-proxy with empty data
 setInterval(fetchOcNotes, 30000); // Poll every 30s for new notes
+// Process any queued sync items from previous offline sessions
+if (syncQueue.length > 0 && hubOnline) processSyncQueue();
 
 // --- localStorage Backup & Restore ---
 function backupLocalStorage() {
     const data = {};
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key.startsWith('xits_')) {
+        if (key.startsWith('xits_') && key !== SYNC_QUEUE_KEY) {
             data[key] = localStorage.getItem(key);
         }
     }
-    if (Object.keys(data).length === 0) return; // Nothing to backup
+    if (Object.keys(data).length === 0) return;
+    const payload = { keys: data, keyCount: Object.keys(data).length, userAgent: navigator.userAgent };
+    if (!hubOnline) {
+        queueSync('/backup', 'POST', payload);
+        return;
+    }
     fetch('http://127.0.0.1:18790/backup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            keys: data,
-            keyCount: Object.keys(data).length,
-            userAgent: navigator.userAgent
-        })
+        body: JSON.stringify(payload)
     }).then(() => console.log('[Hub] localStorage backed up'))
-      .catch(() => console.warn('[Hub] Backup failed — cal-proxy unreachable'));
+      .catch(() => {
+        console.warn('[Hub] Backup failed — queued for retry');
+        queueSync('/backup', 'POST', payload);
+    });
 }
 
 // Backup on page unload
