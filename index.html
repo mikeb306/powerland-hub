@@ -131,6 +131,14 @@
         }
         .restore-btns .btn-cancel { background: var(--bg); color: var(--text2); border: 1px solid var(--border2); }
         .restore-btns .btn-restore { background: var(--accent); color: #fff; }
+        .dm-section { border-top: 1px solid var(--border); padding: 14px 0; }
+        .dm-section:first-of-type { border-top: none; }
+        .dm-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text2); margin-bottom: 8px; }
+        .dm-merge-opts { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+        .dm-radio { font-size: 12px; color: var(--text2); cursor: pointer; display: flex; align-items: baseline; gap: 6px; }
+        .dm-radio strong { color: var(--text); }
+        .dm-radio input[type="radio"] { accent-color: var(--accent); }
+        .dm-preview-stats { font-size: 11px; font-family: var(--mono); color: var(--text3); padding: 8px 10px; background: rgba(255,255,255,.03); border-radius: 6px; border: 1px solid var(--border); }
 
         /* PAGES */
         .page { display: none; }
@@ -2670,15 +2678,49 @@ Sr Account Executive | Xerox IT Solutions
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- RESTORE FROM BACKUP MODAL -->
+<!-- DATA MANAGEMENT MODAL -->
 <div class="restore-modal hidden" id="restoreModal">
-    <div class="restore-box">
-        <h3>Backup & Restore</h3>
-        <div id="restoreInfo" class="restore-info">Checking for backup...</div>
-        <p id="restoreDesc"></p>
-        <div class="restore-btns">
-            <button class="btn-cancel" onclick="document.getElementById('restoreModal').classList.add('hidden')">Cancel</button>
-            <button class="btn-restore" id="restoreBtn" onclick="restoreFromBackup()" style="display:none;">Restore Data</button>
+    <div class="restore-box" style="width:480px;text-align:left;">
+        <h3 style="text-align:center;">Data Management</h3>
+
+        <!-- Section 1: Cal-proxy Backup -->
+        <div class="dm-section">
+            <div class="dm-section-title">Cal-Proxy Backup</div>
+            <div id="restoreInfo" class="restore-info">Checking for backup...</div>
+            <p id="restoreDesc" style="font-size:12px;color:var(--text3);margin-bottom:8px;"></p>
+            <div class="restore-btns" style="justify-content:flex-start;">
+                <button class="btn-restore" id="restoreBtn" onclick="restoreFromBackup()" style="display:none;">Restore from Server</button>
+            </div>
+        </div>
+
+        <!-- Section 2: Export -->
+        <div class="dm-section">
+            <div class="dm-section-title">Export Data</div>
+            <p style="font-size:12px;color:var(--text3);margin-bottom:8px;">Download all account data as a JSON file. Includes deal stages, contacts, MEDDPICC scores, activities, and settings.</p>
+            <div id="exportStats" style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:8px;"></div>
+            <button class="btn-restore" onclick="exportAllData()">Export JSON</button>
+        </div>
+
+        <!-- Section 3: Import -->
+        <div class="dm-section">
+            <div class="dm-section-title">Import Data</div>
+            <p style="font-size:12px;color:var(--text3);margin-bottom:8px;">Import a previously exported JSON file. Choose a merge strategy:</p>
+            <div class="dm-merge-opts">
+                <label class="dm-radio"><input type="radio" name="mergeStrategy" value="merge" checked> <strong>Merge</strong> — import new accounts, update existing with newer data</label>
+                <label class="dm-radio"><input type="radio" name="mergeStrategy" value="overwrite"> <strong>Overwrite</strong> — replace all data with imported file</label>
+                <label class="dm-radio"><input type="radio" name="mergeStrategy" value="addonly"> <strong>Add Only</strong> — import only accounts that don't exist locally</label>
+            </div>
+            <div id="importPreview" style="display:none;margin-bottom:8px;"></div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <button class="btn-restore" onclick="document.getElementById('importFileInput').click()">Choose File</button>
+                <span id="importFileName" style="font-size:11px;color:var(--text3);"></span>
+            </div>
+            <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="previewImport(this)">
+            <button class="btn-restore" id="importBtn" onclick="executeImport()" style="display:none;margin-top:8px;background:var(--accent3);color:#000;">Import Data</button>
+        </div>
+
+        <div class="restore-btns" style="margin-top:16px;justify-content:center;">
+            <button class="btn-cancel" onclick="document.getElementById('restoreModal').classList.add('hidden')">Close</button>
         </div>
     </div>
 </div>
@@ -5498,6 +5540,17 @@ function openRestoreModal() {
     info.textContent = 'Checking for backup...';
     desc.textContent = '';
     btn.style.display = 'none';
+    // Reset import state
+    document.getElementById('importPreview').style.display = 'none';
+    document.getElementById('importBtn').style.display = 'none';
+    document.getElementById('importFileName').textContent = '';
+    document.getElementById('importFileInput').value = '';
+    pendingImportData = null;
+    // Show export stats
+    const exportStats = document.getElementById('exportStats');
+    let keyCount = 0;
+    for (let i = 0; i < localStorage.length; i++) { if (localStorage.key(i).startsWith('xits_acct_')) keyCount++; }
+    exportStats.textContent = keyCount + ' accounts in localStorage';
     modal.classList.remove('hidden');
     fetch('http://127.0.0.1:18790/backup').then(r => {
         if (!r.ok) throw new Error('No backup found');
@@ -5505,29 +5558,189 @@ function openRestoreModal() {
     }).then(backup => {
         const ts = new Date(backup.backupTimestamp);
         const ago = timeAgo(ts);
-        const keyCount = backup.keyCount || Object.keys(backup.keys || {}).length;
+        const bkCount = backup.keyCount || Object.keys(backup.keys || {}).length;
         const ua = backup.userAgent || 'Unknown device';
         const shortDevice = ua.includes('Mac') ? 'Mac' : ua.includes('Windows') ? 'Windows' : ua.includes('Linux') ? 'Linux' : 'Unknown';
         info.textContent = 'Last backup: ' + ts.toLocaleString() + ' (' + ago + ')';
-        desc.textContent = keyCount + ' keys from ' + shortDevice + '. Restoring will overwrite current localStorage data for all xits_ keys.';
+        desc.textContent = bkCount + ' keys from ' + shortDevice + '.';
         btn.style.display = 'inline-block';
     }).catch(() => {
-        info.textContent = 'No backup available';
-        desc.textContent = 'No previous backup found on cal-proxy. Open the Hub and use it normally — backups are created automatically when you close the page.';
+        info.textContent = 'No server backup available';
+        desc.textContent = 'Use Export/Import below for file-based data portability.';
     });
 }
 
 function restoreFromBackup() {
+    if (!confirm('This will overwrite current localStorage with the server backup. Continue?')) return;
     fetch('http://127.0.0.1:18790/backup').then(r => r.json()).then(backup => {
         const keys = backup.keys || {};
-        Object.entries(keys).forEach(([k, v]) => {
-            localStorage.setItem(k, v);
-        });
+        Object.entries(keys).forEach(([k, v]) => { localStorage.setItem(k, v); });
         document.getElementById('restoreModal').classList.add('hidden');
+        showToast('success', 'Restored ' + Object.keys(keys).length + ' keys from server backup');
         location.reload();
     }).catch(() => {
-        alert('Restore failed — could not reach cal-proxy');
+        showToast('error', 'Restore failed — could not reach cal-proxy');
     });
+}
+
+// ===== EXPORT ALL DATA =====
+function exportAllData() {
+    const exportData = { _hub_export: true, version: 1, exportedAt: new Date().toISOString(), accounts: {}, meta: {} };
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('xits_acct_')) {
+            try { exportData.accounts[key] = JSON.parse(localStorage.getItem(key)); }
+            catch(e) { exportData.accounts[key] = localStorage.getItem(key); }
+        } else if (key.startsWith('xits_') && key !== SYNC_QUEUE_KEY) {
+            exportData.meta[key] = localStorage.getItem(key);
+        }
+    }
+    const acctCount = Object.keys(exportData.accounts).length;
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = 'powerland-hub-export-' + dateStr + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('success', 'Exported ' + acctCount + ' accounts to JSON');
+}
+
+// ===== IMPORT DATA =====
+let pendingImportData = null;
+
+function previewImport(input) {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById('importFileName').textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (!data._hub_export || !data.accounts) {
+                // Try legacy format: raw localStorage dump
+                const keys = Object.keys(data).filter(k => k.startsWith('xits_'));
+                if (keys.length === 0) {
+                    showToast('error', 'Invalid file — not a Hub export');
+                    return;
+                }
+                // Convert legacy format
+                pendingImportData = { _hub_export: true, version: 0, accounts: {}, meta: {} };
+                keys.forEach(k => {
+                    if (k.startsWith('xits_acct_')) {
+                        try { pendingImportData.accounts[k] = JSON.parse(data[k]); }
+                        catch(ex) { pendingImportData.accounts[k] = data[k]; }
+                    } else {
+                        pendingImportData.meta[k] = data[k];
+                    }
+                });
+            } else {
+                pendingImportData = data;
+            }
+
+            // Build preview
+            const importAccts = Object.keys(pendingImportData.accounts);
+            let localAccts = 0, newAccts = 0, updateAccts = 0;
+            importAccts.forEach(key => {
+                const existing = localStorage.getItem(key);
+                if (existing) { updateAccts++; localAccts++; }
+                else newAccts++;
+            });
+            const preview = document.getElementById('importPreview');
+            const exportDate = pendingImportData.exportedAt ? new Date(pendingImportData.exportedAt).toLocaleString() : 'Unknown';
+            preview.innerHTML = '<div class="dm-preview-stats">' +
+                'File: ' + importAccts.length + ' accounts' +
+                (pendingImportData.exportedAt ? ' (exported ' + exportDate + ')' : '') + '<br>' +
+                'New: <strong style="color:var(--accent2)">' + newAccts + '</strong> | ' +
+                'Update: <strong style="color:var(--accent3)">' + updateAccts + '</strong> | ' +
+                'Meta keys: ' + Object.keys(pendingImportData.meta || {}).length +
+                '</div>';
+            preview.style.display = 'block';
+            document.getElementById('importBtn').style.display = 'inline-block';
+        } catch (err) {
+            showToast('error', 'Invalid JSON file');
+            pendingImportData = null;
+        }
+    };
+    reader.readAsText(file);
+}
+
+function executeImport() {
+    if (!pendingImportData) return;
+    const strategy = document.querySelector('input[name="mergeStrategy"]:checked').value;
+    const importAccts = pendingImportData.accounts;
+    const importMeta = pendingImportData.meta || {};
+    let added = 0, updated = 0, skipped = 0;
+
+    if (strategy === 'overwrite') {
+        if (!confirm('This will DELETE all current account data and replace it with the imported file. This cannot be undone. Continue?')) return;
+        // Remove all existing xits_acct_ keys
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k.startsWith('xits_acct_')) toRemove.push(k);
+        }
+        toRemove.forEach(k => localStorage.removeItem(k));
+        // Write all imported data
+        Object.entries(importAccts).forEach(([key, val]) => {
+            localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+            added++;
+        });
+        Object.entries(importMeta).forEach(([key, val]) => { localStorage.setItem(key, val); });
+    } else if (strategy === 'addonly') {
+        Object.entries(importAccts).forEach(([key, val]) => {
+            if (localStorage.getItem(key)) { skipped++; return; }
+            localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+            added++;
+        });
+    } else {
+        // merge: import new, update existing with newer/richer data
+        Object.entries(importAccts).forEach(([key, val]) => {
+            const existing = localStorage.getItem(key);
+            if (!existing) {
+                localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+                added++;
+                return;
+            }
+            try {
+                const local = JSON.parse(existing);
+                const imported = typeof val === 'string' ? JSON.parse(val) : val;
+                // Merge: imported wins for non-empty fields, arrays are concatenated for activities
+                const merged = { ...local };
+                Object.entries(imported).forEach(([field, fval]) => {
+                    if (field === 'activities' && Array.isArray(fval) && Array.isArray(local.activities)) {
+                        // Merge activities by deduplicating on date+type
+                        const existing_keys = new Set(local.activities.map(a => a.date + '|' + a.type));
+                        const newActivities = fval.filter(a => !existing_keys.has(a.date + '|' + a.type));
+                        merged.activities = [...local.activities, ...newActivities].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+                    } else if (field === 'contacts' && Array.isArray(fval) && Array.isArray(local.contacts)) {
+                        // Merge contacts by deduplicating on name+email
+                        const existing_ids = new Set(local.contacts.map(c => (c.name || '') + '|' + (c.email || '')));
+                        const newContacts = fval.filter(c => !existing_ids.has((c.name || '') + '|' + (c.email || '')));
+                        merged.contacts = [...local.contacts, ...newContacts];
+                    } else if (fval !== '' && fval !== null && fval !== undefined) {
+                        merged[field] = fval;
+                    }
+                });
+                localStorage.setItem(key, JSON.stringify(merged));
+                updated++;
+            } catch(e) {
+                localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+                updated++;
+            }
+        });
+        // Merge meta keys
+        Object.entries(importMeta).forEach(([key, val]) => {
+            if (!localStorage.getItem(key)) localStorage.setItem(key, val);
+        });
+    }
+
+    document.getElementById('restoreModal').classList.add('hidden');
+    const msg = strategy === 'overwrite' ? 'Imported ' + added + ' accounts (full overwrite)'
+        : 'Added ' + added + ', updated ' + updated + ', skipped ' + skipped + ' accounts';
+    showToast('success', msg);
+    location.reload();
 }
 </script>
 
