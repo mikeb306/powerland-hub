@@ -1,0 +1,5 @@
+voice-config.json
+*.mp3
+briefings/
+weekly/
+alert-state.json
