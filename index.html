@@ -602,7 +602,8 @@
         .tier-bronze { background: rgba(180,130,90,.18); color: #c8a06e; }
 
         /* TERRITORY MAP */
-        .map-container { height: 520px; border-radius: 10px; border: 1px solid var(--border); overflow: hidden; }
+        .map-container { height: 520px; border-radius: 10px; border: 1px solid var(--border); overflow: hidden; position: relative; z-index: 1; isolation: isolate; }
+        .mobile-back { display: none; margin-bottom: 12px; padding: 8px 16px; border: 1px solid var(--border); background: var(--bg2); color: var(--text); font-size: 13px; font-family: var(--font); border-radius: 8px; cursor: pointer; touch-action: manipulation; }
         .map-controls { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
         .map-controls select { padding: 6px 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--font); font-size: 12px; outline: none; }
         .map-controls select:focus { border-color: var(--accent); }
@@ -693,6 +694,62 @@
         .contact-form .modal-row { margin-bottom: 6px; }
         .contact-form-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 8px; }
         .contact-empty { text-align: center; padding: 16px 0; color: var(--text3); font-size: 11px; font-style: italic; }
+
+        /* RELATIONSHIP MAP */
+        .relmap-section { margin-top: 10px; }
+        .relmap-section.hidden { display: none; }
+        .relmap-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .relmap-header .modal-section-title { margin-bottom: 0; }
+        .relmap-grid {
+            position: relative; width: 100%; max-width: 320px; aspect-ratio: 5/3;
+            margin: 0 auto; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; overflow: hidden;
+        }
+        .relmap-axis-x, .relmap-axis-y {
+            position: absolute; background: var(--border);
+        }
+        .relmap-axis-x { left: 0; right: 0; top: 50%; height: 1px; }
+        .relmap-axis-y { top: 0; bottom: 0; left: 50%; width: 1px; }
+        .relmap-quadrant-label {
+            position: absolute; font-size: 9px; font-weight: 600;
+            color: var(--text3); opacity: .5; pointer-events: none; text-transform: uppercase; letter-spacing: .04em;
+        }
+        .relmap-ql-allies { top: 6px; right: 8px; color: var(--accent2); }
+        .relmap-ql-dangerous { top: 6px; left: 8px; color: var(--accent4); }
+        .relmap-ql-develop { bottom: 6px; right: 8px; }
+        .relmap-ql-neutral { bottom: 6px; left: 8px; }
+        .relmap-node {
+            position: absolute; width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 9px; font-weight: 700; color: #fff; cursor: pointer;
+            transform: translate(-50%, -50%); transition: box-shadow .15s, transform .15s;
+            border: 2px solid rgba(255,255,255,.15); z-index: 2;
+        }
+        .relmap-node:hover { transform: translate(-50%, -50%) scale(1.2); box-shadow: 0 0 12px rgba(255,255,255,.25); z-index: 3; }
+        .relmap-tooltip {
+            position: absolute; background: var(--card); border: 1px solid var(--border2);
+            border-radius: 8px; padding: 8px 10px; font-size: 11px; color: var(--text);
+            pointer-events: none; white-space: nowrap; z-index: 10;
+            box-shadow: 0 4px 16px rgba(0,0,0,.4); opacity: 0; transition: opacity .15s;
+        }
+        .relmap-tooltip.visible { opacity: 1; }
+        .relmap-tooltip-name { font-weight: 600; margin-bottom: 2px; }
+        .relmap-tooltip-detail { font-size: 10px; color: var(--text2); }
+        .relmap-axis-label {
+            position: absolute; font-size: 8px; color: var(--text3); opacity: .6;
+            text-transform: uppercase; letter-spacing: .05em;
+        }
+        .relmap-label-blocker { bottom: -16px; left: 4px; }
+        .relmap-label-champion { bottom: -16px; right: 4px; }
+        .relmap-label-low { left: -28px; bottom: 4px; font-size: 7px; }
+        .relmap-label-high { left: -28px; top: 4px; font-size: 7px; }
+        .relmap-wrap { position: relative; padding: 18px 32px 20px 32px; }
+        .relmap-legend {
+            display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+            margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border);
+        }
+        .relmap-legend-item { display: flex; align-items: center; gap: 4px; font-size: 9px; color: var(--text3); }
+        .relmap-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
         /* MEDDPICC PANEL */
         .meddpicc-panel { background: rgba(99,102,241,.04); border: 1px solid rgba(99,102,241,.12); border-radius: 10px; padding: 14px; }
@@ -798,10 +855,11 @@
         /* ===== BOTTOM NAV (mobile) ===== */
         .bottom-nav {
             display: none; position: fixed; bottom: 0; left: 0; right: 0;
-            z-index: 500; background: rgba(11,13,17,.98); backdrop-filter: blur(16px);
+            z-index: 1100; background: rgba(11,13,17,.98); backdrop-filter: blur(16px);
             border-top: 1px solid var(--border2);
             padding: 6px 0 calc(8px + env(safe-area-inset-bottom, 8px));
             -webkit-tap-highlight-color: transparent;
+            overflow: visible;
         }
         .bottom-nav-inner {
             display: flex; justify-content: space-around; align-items: center;
@@ -841,7 +899,8 @@
             .bottom-nav { display: block; }
             body { padding-bottom: 90px; }
             .topbar-nav { display: none; }
-            .fab-container { bottom: 100px; }
+            .fab-container { display: none; }
+            .mobile-back { display: inline-block; }
             .kpi-row { grid-template-columns: repeat(3, 1fr); }
             .kanban-column { min-width: 180px; max-width: 200px; }
             .topbar-name { display: none; }
@@ -853,6 +912,8 @@
             .whitespace-table { font-size: 10px; }
             .whitespace-table th, .whitespace-table td { padding: 4px 3px; }
             .map-container { height: 400px; }
+            .relmap-grid { max-width: 280px; aspect-ratio: 4/3; }
+            .relmap-node { width: 26px; height: 26px; font-size: 8px; }
         }
 
         /* ===== BREAKPOINT 3: Phone (≤480px) ===== */
@@ -874,7 +935,6 @@
             .qa-box { width: 100%; margin: 8px; }
             .dash-header h1 { font-size: 17px; }
             .panel { padding: 12px; }
-            .fab-container { bottom: 82px; right: 16px; }
             .fab-main { width: 48px; height: 48px; font-size: 24px; line-height: 48px; }
             .kanban-column { min-width: 160px; max-width: 180px; }
             .deal-card { padding: 8px; font-size: 12px; }
@@ -886,6 +946,13 @@
             .topbar-xerox { font-size: 12px; }
             .topbar-its { font-size: 10px; }
             .topbar-restore { font-size: 10px; padding: 2px 6px; }
+            .meddpicc-grid { grid-template-columns: 1fr; gap: 6px; }
+            .meddpicc-item label { width: 90px; }
+            .relmap-grid { max-width: 260px; aspect-ratio: 1/1; }
+            .relmap-node { width: 24px; height: 24px; font-size: 8px; }
+            .relmap-wrap { padding: 14px 24px 16px 24px; }
+            .relmap-legend { gap: 4px; }
+            .relmap-legend-item { font-size: 8px; }
         }
 
         /* ===== BOTTOM NAV MORE SHEET ===== */
@@ -905,6 +972,24 @@
             font-family: var(--font); cursor: pointer; border-radius: 8px; transition: background .15s;
         }
         .bnav-more-item:hover { background: rgba(255,255,255,.05); }
+        .bnav-log-sheet { position: fixed; inset: 0; z-index: 1200; display: flex; align-items: flex-end; }
+        .bnav-log-sheet.hidden { display: none; }
+        .bnav-log-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+        .bnav-log-panel {
+            position: relative; width: 100%; background: var(--bg2);
+            border-top-left-radius: 16px; border-top-right-radius: 16px;
+            padding: 16px 16px calc(72px + env(safe-area-inset-bottom, 4px));
+        }
+        .bnav-log-panel .bnav-more-title { margin-bottom: 4px; }
+        .bnav-log-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .bnav-log-btn {
+            display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+            border: 1px solid var(--border); background: var(--bg); color: var(--text);
+            font-size: 15px; font-family: var(--font); cursor: pointer; border-radius: 10px;
+            transition: border-color .15s, background .15s; touch-action: manipulation;
+        }
+        .bnav-log-btn:hover, .bnav-log-btn:active { border-color: var(--accent); background: rgba(99,102,241,.08); }
+        .bnav-log-btn span:first-child { font-size: 22px; }
 
         /* ===== SYNC STATUS ===== */
         .sync-badge {
@@ -1248,6 +1333,7 @@
 <!-- ==================== SMB ==================== -->
 <div id="smb" class="page">
     <div class="container">
+        <button class="mobile-back" onclick="switchPage('dashboard')">&larr; Back to Home</button>
         <div class="sec-header">
             <h2>SMB Prospects <span class="count-badge" id="smbCount">30</span></h2>
             <p>Mid-market SK organizations (100–499 employees or $10M+ revenue). Sourced from SK Company Database.</p>
@@ -1283,6 +1369,7 @@
 <!-- ==================== K-12 ==================== -->
 <div id="k12" class="page">
     <div class="container">
+        <button class="mobile-back" onclick="switchPage('dashboard')">&larr; Back to Home</button>
         <div class="sec-header">
             <h2>K-12 Education <span class="count-badge">27</span></h2>
             <p>27 school divisions. Contact info retained. All treated as fresh prospects.</p>
@@ -1309,6 +1396,7 @@
 <!-- ==================== HIGHER ED ==================== -->
 <div id="highered" class="page">
     <div class="container">
+        <button class="mobile-back" onclick="switchPage('dashboard')">&larr; Back to Home</button>
         <div class="sec-header">
             <h2>Higher Education <span class="count-badge">5</span></h2>
             <p>Saskatchewan universities, polytechnic, and indigenous institutions.</p>
@@ -1326,6 +1414,7 @@
 <!-- ==================== CREDIT UNIONS ==================== -->
 <div id="creditunions" class="page">
     <div class="container">
+        <button class="mobile-back" onclick="switchPage('dashboard')">&larr; Back to Home</button>
         <div class="sec-header">
             <h2>Saskatchewan Credit Unions <span class="count-badge">14</span></h2>
             <p>14 credit unions by assets. All treated as fresh prospects.</p>
@@ -1346,6 +1435,7 @@
 <!-- ==================== PILLARS ==================== -->
 <div id="pillars" class="page">
     <div class="container">
+        <button class="mobile-back" onclick="switchPage('dashboard')">&larr; Back to Home</button>
         <div class="sec-header">
             <h2>Xerox IT Solutions — Portfolio</h2>
             <p>Full solution stack via Powerland. On-premise, cloud, and managed services.</p>
@@ -1460,6 +1550,7 @@
 <!-- ==================== TERRITORY MAP ==================== -->
 <div id="territory" class="page">
     <div class="container">
+        <button class="mobile-back" onclick="switchPage('dashboard')">&larr; Back to Home</button>
         <div class="sec-header">
             <h2>Saskatchewan Territory Map</h2>
             <p>Geographic view of all accounts. Color = deal status. Size = deal value.</p>
@@ -1490,6 +1581,7 @@
 <!-- ==================== PLAYBOOK ==================== -->
 <div id="playbook" class="page">
     <div class="container">
+        <button class="mobile-back" onclick="switchPage('dashboard')">&larr; Back to Home</button>
         <div class="sec-header">
             <h2>Sales Playbook</h2>
             <p>Plays, discovery questions, competitive intel, and templates aligned to Powerland's 12 pillars.</p>
@@ -1973,6 +2065,7 @@ Sr Account Executive | Xerox IT Solutions
 <!-- ==================== TOOLS ==================== -->
 <div id="tools" class="page">
     <div class="container">
+        <button class="mobile-back" onclick="switchPage('dashboard')">&larr; Back to Home</button>
         <div class="sec-header">
             <h2>Revenue Calculator & Tools</h2>
             <p>Deal sizing, quota tracking, activity planning, and territory intelligence.</p>
@@ -2161,6 +2254,7 @@ Sr Account Executive | Xerox IT Solutions
 <!-- ==================== CALENDAR ==================== -->
 <div id="calendar" class="page">
     <div class="container">
+        <button class="mobile-back" onclick="switchPage('dashboard')">&larr; Back to Home</button>
         <div class="sec-header">
             <h2>Calendar</h2>
             <p>Your synced calendar from mike@mountainthirteen.ca. If the calendar doesn't load, ensure sharing settings allow embed access.</p>
@@ -2412,6 +2506,28 @@ Sr Account Executive | Xerox IT Solutions
                 </div>
                 <div id="contactList" class="contact-list"></div>
                 <div id="contactFormWrap"></div>
+            </div>
+
+            <!-- Relationship Map -->
+            <div id="relMapSection" class="relmap-section hidden">
+                <div class="relmap-header">
+                    <div class="modal-section-title">Relationship Map</div>
+                </div>
+                <div class="relmap-wrap">
+                    <span class="relmap-axis-label relmap-label-blocker">Blocker</span>
+                    <span class="relmap-axis-label relmap-label-champion">Champion</span>
+                    <span class="relmap-axis-label relmap-label-low">Low</span>
+                    <span class="relmap-axis-label relmap-label-high">High</span>
+                    <div id="relMapGrid" class="relmap-grid">
+                        <div class="relmap-axis-x"></div>
+                        <div class="relmap-axis-y"></div>
+                        <span class="relmap-quadrant-label relmap-ql-allies">Allies</span>
+                        <span class="relmap-quadrant-label relmap-ql-dangerous">Dangerous</span>
+                        <span class="relmap-quadrant-label relmap-ql-develop">Develop</span>
+                        <span class="relmap-quadrant-label relmap-ql-neutral">Neutral</span>
+                    </div>
+                </div>
+                <div id="relMapLegend" class="relmap-legend"></div>
             </div>
 
             <div class="modal-section">
@@ -2739,7 +2855,7 @@ Sr Account Executive | Xerox IT Solutions
             <span class="bottom-nav-icon">&#128202;</span>
             <span class="bottom-nav-label">Pipeline</span>
         </button>
-        <button class="bottom-nav-item bnav-log" id="bnavLogBtn">
+        <button class="bottom-nav-item bnav-log" id="bnavLogBtn" onclick="openBnavLog()">
             <span class="bottom-nav-icon">+</span>
             <span class="bottom-nav-label">Log</span>
         </button>
@@ -2768,6 +2884,20 @@ Sr Account Executive | Xerox IT Solutions
         <button class="bnav-more-item" data-bnav="playbook">Playbook</button>
         <button class="bnav-more-item" data-bnav="tools">Tools</button>
         <button class="bnav-more-item" data-bnav="calendar">Calendar</button>
+    </div>
+</div>
+
+<!-- BOTTOM NAV LOG SHEET -->
+<div class="bnav-log-sheet hidden" id="bnavLogSheet">
+    <div class="bnav-log-backdrop" onclick="closeBnavLog()"></div>
+    <div class="bnav-log-panel">
+        <div class="bnav-more-title">Log Activity</div>
+        <div class="bnav-log-grid">
+            <button class="bnav-log-btn" onclick="closeBnavLog();logActivity('call')"><span>&#128222;</span> Call</button>
+            <button class="bnav-log-btn" onclick="closeBnavLog();logActivity('email')"><span>&#128231;</span> Email</button>
+            <button class="bnav-log-btn" onclick="closeBnavLog();logActivity('meeting')"><span>&#129309;</span> Meeting</button>
+            <button class="bnav-log-btn" onclick="closeBnavLog();logActivity('note')"><span>&#128221;</span> Note</button>
+        </div>
     </div>
 </div>
 
@@ -3141,11 +3271,14 @@ document.querySelectorAll('.bnav-more-item[data-bnav]').forEach(btn => {
     });
 });
 
-// Bottom nav Log button — toggles FAB
-document.getElementById('bnavLogBtn').addEventListener('click', () => {
+// Bottom nav Log button — opens activity type picker sheet
+function openBnavLog() {
     closeBnavMore();
-    toggleFAB();
-});
+    document.getElementById('bnavLogSheet').classList.remove('hidden');
+}
+function closeBnavLog() {
+    document.getElementById('bnavLogSheet').classList.add('hidden');
+}
 
 // Bottom nav More menu
 document.getElementById('bnavMoreBtn').addEventListener('click', () => {
@@ -5092,6 +5225,7 @@ function renderModalContacts(contacts) {
     document.getElementById('contactFormWrap').innerHTML = '';
     if (!contacts || contacts.length === 0) {
         el.innerHTML = '<div class="contact-empty">No contacts yet. Add your first contact above.</div>';
+        renderRelMap(contacts);
         return;
     }
     el.innerHTML = contacts.map(c => `
@@ -5115,6 +5249,7 @@ function renderModalContacts(contacts) {
             </div>
         </div>
     `).join('');
+    renderRelMap(contacts);
 }
 
 function getContactFormHTML(contact) {
@@ -5213,6 +5348,115 @@ function saveContact(editId) {
 
 function cancelContactForm() {
     document.getElementById('contactFormWrap').innerHTML = '';
+}
+
+// ===== RELATIONSHIP MAP =====
+const ROLE_COLORS = {
+    'Champion': '#34d399', 'Economic Buyer': '#4f8cff', 'Technical Buyer': '#a78bfa',
+    'User Buyer': '#0ea5e9', 'Influencer': '#f59e0b', 'Gatekeeper': '#9ca3af',
+    'Blocker': '#f87171', 'Coach': '#22c55e'
+};
+const ROLE_INITIALS = {
+    'Champion': 'CH', 'Economic Buyer': 'EB', 'Technical Buyer': 'TB',
+    'User Buyer': 'UB', 'Influencer': 'IN', 'Gatekeeper': 'GK',
+    'Blocker': 'BL', 'Coach': 'CO'
+};
+
+function renderRelMap(contacts) {
+    const section = document.getElementById('relMapSection');
+    const grid = document.getElementById('relMapGrid');
+    const legend = document.getElementById('relMapLegend');
+    if (!section || !grid) return;
+
+    // Remove old nodes and tooltip
+    grid.querySelectorAll('.relmap-node, .relmap-tooltip').forEach(n => n.remove());
+
+    // Filter to contacts with influence + stance data
+    const mappable = (contacts || []).filter(c =>
+        c.influenceLevel && (c.relationshipStance !== undefined && c.relationshipStance !== null && c.relationshipStance !== '')
+    );
+
+    if (mappable.length === 0) {
+        section.classList.add('hidden');
+        return;
+    }
+    section.classList.remove('hidden');
+
+    // Build jitter map: group contacts by same grid cell to offset overlaps
+    const cellMap = {};
+    mappable.forEach(c => {
+        const key = `${c.relationshipStance}_${c.influenceLevel}`;
+        if (!cellMap[key]) cellMap[key] = [];
+        cellMap[key].push(c);
+    });
+
+    // Influence to Y%: High=top (15%), Medium=50%, Low=bottom (85%)
+    const infToY = { 'High': 15, 'Medium': 50, 'Low': 85 };
+    // Stance to X%: -2=10%, -1=30%, 0=50%, 1=70%, 2=90%
+    const stanceToX = { '-2': 10, '-1': 30, '0': 50, '1': 70, '2': 90 };
+
+    // Create tooltip element
+    const tooltip = document.createElement('div');
+    tooltip.className = 'relmap-tooltip';
+    grid.appendChild(tooltip);
+
+    // Jitter offsets for overlapping nodes
+    const jitterOffsets = [
+        [0, 0], [-12, -8], [12, -8], [-12, 8], [12, 8],
+        [0, -14], [0, 14], [-18, 0], [18, 0]
+    ];
+
+    Object.keys(cellMap).forEach(key => {
+        const group = cellMap[key];
+        group.forEach((c, idx) => {
+            const baseX = stanceToX[String(c.relationshipStance)] || 50;
+            const baseY = infToY[c.influenceLevel] || 50;
+            const jitter = jitterOffsets[idx % jitterOffsets.length];
+
+            const node = document.createElement('div');
+            node.className = 'relmap-node';
+            node.style.left = `calc(${baseX}% + ${jitter[0]}px)`;
+            node.style.top = `calc(${baseY}% + ${jitter[1]}px)`;
+            node.style.background = ROLE_COLORS[c.buyingRole] || '#6b7280';
+            node.textContent = ROLE_INITIALS[c.buyingRole] || c.name.slice(0, 2).toUpperCase();
+            node.title = '';
+
+            // Tooltip on hover/tap
+            const showTip = () => {
+                const stanceLabels = { '-2': 'Blocker', '-1': 'Skeptic', '0': 'Neutral', '1': 'Supporter', '2': 'Champion' };
+                tooltip.innerHTML = `<div class="relmap-tooltip-name">${c.name}</div>` +
+                    `<div class="relmap-tooltip-detail">${c.title || 'No title'}</div>` +
+                    `<div class="relmap-tooltip-detail">${c.buyingRole || 'No role'} &middot; ${c.influenceLevel} influence</div>` +
+                    `<div class="relmap-tooltip-detail">Stance: ${stanceLabels[String(c.relationshipStance)] || 'Unknown'}</div>`;
+                // Position tooltip above node
+                const nodeRect = node.getBoundingClientRect();
+                const gridRect = grid.getBoundingClientRect();
+                let tipLeft = nodeRect.left - gridRect.left + nodeRect.width / 2;
+                let tipTop = nodeRect.top - gridRect.top - 6;
+                tooltip.style.left = tipLeft + 'px';
+                tooltip.style.top = tipTop + 'px';
+                tooltip.style.transform = 'translate(-50%, -100%)';
+                tooltip.classList.add('visible');
+            };
+            const hideTip = () => { tooltip.classList.remove('visible'); };
+
+            node.addEventListener('mouseenter', showTip);
+            node.addEventListener('mouseleave', hideTip);
+            node.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                showTip();
+                setTimeout(hideTip, 2500);
+            }, { passive: false });
+
+            grid.appendChild(node);
+        });
+    });
+
+    // Build legend
+    const usedRoles = [...new Set(mappable.map(c => c.buyingRole).filter(Boolean))];
+    legend.innerHTML = usedRoles.map(role =>
+        `<span class="relmap-legend-item"><span class="relmap-legend-dot" style="background:${ROLE_COLORS[role] || '#6b7280'}"></span>${ROLE_INITIALS[role] || '??'} = ${role}</span>`
+    ).join('');
 }
 
 // ===== RELATIONSHIP HEALTH SCORING =====
