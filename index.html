@@ -478,6 +478,8 @@
         .oc-note-body { flex: 1; min-width: 0; }
         .oc-note-text { color: var(--text); word-break: break-word; }
         .oc-note-meta { color: var(--text3); font-size: 9px; margin-top: 2px; }
+        .oc-note-accept { font-size: 12px; color: var(--accent2); cursor: pointer; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; font-weight: 700; }
+        .oc-note-accept:hover { background: rgba(52,211,153,.15); }
         .oc-note-dismiss { font-size: 10px; color: var(--text3); cursor: pointer; padding: 2px 4px; border-radius: 3px; flex-shrink: 0; }
         .oc-note-dismiss:hover { color: var(--accent4); background: rgba(239,68,68,.1); }
 
@@ -3013,6 +3015,11 @@ const smbAccounts = [
     {name:"Agrium Inc (Vanscoy)",industry:"Manufacturing",emp:500,sales:561000000,city:"Vanscoy",contact:"",title:""},
     {name:"Dakota Dunes Community Dev",industry:"Government",emp:250,sales:0,city:"Whitecap",contact:"",title:""},
     {name:"Loraas Disposal Services",industry:"Industrial",emp:200,sales:30000000,city:"Saskatoon",contact:"",title:""},
+    {name:"Southern Plains Co-op",industry:"Agriculture",emp:100,sales:0,city:"Assiniboia",contact:"",title:""},
+    {name:"Muskoday First Nation",industry:"Government",emp:80,sales:0,city:"Muskoday",contact:"",title:""},
+    {name:"Innovation Saskatchewan",industry:"Government",emp:120,sales:0,city:"Regina",contact:"",title:""},
+    {name:"W. Shupe & Company",industry:"Professional Services",emp:30,sales:0,city:"Regina",contact:"",title:""},
+    {name:"SK Conflict of Interest Commissioner",industry:"Government",emp:15,sales:0,city:"Regina",contact:"",title:""},
 ];
 
 // ===== K-12 DATA =====
@@ -3318,6 +3325,35 @@ document.getElementById('targetPct').textContent = pct + '%';
 document.getElementById('targetBar').style.width = pct + '%';
 // Set profit baseline
 if (!localStorage.getItem('xits_profit_fy26')) localStorage.setItem('xits_profit_fy26', '1620');
+
+// One-time deal seed from OpenClaw Telegram import (Feb 2026)
+if (!localStorage.getItem('xits_deals_seeded_feb26')) {
+    const seedDeals = [
+        {acct:'Viterra', stage:'Prospecting', value:'382000', closeQ:'Q1 2026', notes:'Lenovo ThinkPad Fleet', dealSource:'OpenClaw'},
+        {acct:'Viterra', stage:'Prospecting', value:'643000', closeQ:'Q1 2026', notes:'HP Thin Client Fleet', dealSource:'OpenClaw'},
+        {acct:'Southern Plains Co-op', stage:'Proposal', value:'14293', closeQ:'Q1 2026', notes:'M365 Renewal', dealSource:'OpenClaw'},
+        {acct:'Muskoday First Nation', stage:'Discovery', value:'', closeQ:'Q3 2026', notes:'Server Refresh', dealSource:'OpenClaw'},
+        {acct:'SaskPower', stage:'Prospecting', value:'658000', closeQ:'Q1 2026', notes:'Cybersecurity Renewal 2026', dealSource:'OpenClaw'},
+        {acct:'Innovation Saskatchewan', stage:'Discovery', value:'9400', closeQ:'Q1 2026', notes:'HPE Renewal', dealSource:'OpenClaw'},
+        {acct:'W. Shupe & Company', stage:'Negotiation', value:'14094', closeQ:'Q1 2026', notes:'M365 Renewal', dealSource:'OpenClaw'},
+        {acct:'SK Conflict of Interest Commissioner', stage:'Discovery', value:'753', closeQ:'Q1 2026', notes:'M365 Renewal', dealSource:'OpenClaw'},
+    ];
+    seedDeals.forEach(sd => {
+        const key = 'xits_acct_' + sd.acct;
+        const existing = JSON.parse(localStorage.getItem(key) || '{}');
+        if (!existing.stage || existing.stage === 'Fresh') {
+            existing.stage = sd.stage;
+            existing.value = sd.value;
+            existing.closeQ = sd.closeQ;
+            existing.notes = (existing.notes ? existing.notes + '\n' : '') + sd.notes;
+            existing.dealSource = sd.dealSource;
+            existing.stageEnteredDate = new Date().toISOString().slice(0,10);
+            existing.prob = String(STAGE_CONFIG[sd.stage]?.prob || 0);
+            localStorage.setItem(key, JSON.stringify(existing));
+        }
+    });
+    localStorage.setItem('xits_deals_seeded_feb26', '1');
+}
 
 // ===== SECTION TABS (Playbook & Tools sub-navigation) =====
 document.querySelectorAll('.section-tabs').forEach(tabGroup => {
@@ -4098,12 +4134,15 @@ function renderOcInbox() {
         const d = new Date(n.dt);
         const ago = timeAgo(d);
         const acctStr = n.account ? `<strong>${n.account}</strong> — ` : '';
+        const isPipeline = n.type === 'pipeline' && n.account;
+        const acceptBtn = isPipeline ? `<span class="oc-note-accept" onclick="acceptOcNote(${n.id})" title="Accept to Pipeline">&#10003;</span>` : '';
         return `<div class="oc-note">
             <span class="oc-note-type ${n.type || 'note'}">${n.type || 'note'}</span>
             <div class="oc-note-body">
                 <div class="oc-note-text">${acctStr}${escHtml(n.text)}</div>
                 <div class="oc-note-meta">${ago}</div>
             </div>
+            ${acceptBtn}
             <span class="oc-note-dismiss" onclick="dismissOcNote(${n.id})" title="Dismiss">&times;</span>
         </div>`;
     }).join('');
@@ -4115,6 +4154,50 @@ function dismissOcNote(id) {
     fetch('http://127.0.0.1:18790/notes/' + id, { method: 'DELETE' })
         .then(() => { ocNotes = ocNotes.filter(n => n.id !== id); renderOcInbox(); })
         .catch(() => {});
+}
+function acceptOcNote(id) {
+    const note = ocNotes.find(n => n.id === id);
+    if (!note || !note.account) return;
+    // Parse deal info from note text: "Description - CAD value | Close: date | Stage: stage"
+    const text = note.text || '';
+    const valMatch = text.match(/CAD\s*([\d,.]+)/i);
+    const stageMatch = text.match(/Stage:\s*([^|]+)/i);
+    const closeMatch = text.match(/Close:\s*([^|]+)/i);
+    const noteDesc = text.split(' - CAD')[0] || text.split(' |')[0] || text;
+    // Map OpenClaw stages to Hub stages
+    const stageMap = {'opening':'Prospecting','needs development':'Discovery','present proposal':'Proposal','closing':'Negotiation','verbal commit':'Verbal Commit','closed won':'Closed Won'};
+    const rawStage = (stageMatch ? stageMatch[1].trim() : '').toLowerCase();
+    const hubStage = stageMap[rawStage] || 'Prospecting';
+    // Find matching Hub account name (fuzzy)
+    const allHubAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name), ...k12.map(a=>a.name), ...higherEd.map(a=>a.name), ...creditUnions.map(a=>a.name)];
+    const noteAcctLower = note.account.toLowerCase().replace(/\s*(inc\.?|ltd\.?|corp\.?|corporation)\s*/gi, '').trim();
+    let matched = allHubAccts.find(a => a.toLowerCase() === noteAcctLower) ||
+                  allHubAccts.find(a => a.toLowerCase().includes(noteAcctLower) || noteAcctLower.includes(a.toLowerCase()));
+    if (!matched) {
+        // Try word overlap
+        const noteWords = noteAcctLower.split(/\s+/);
+        matched = allHubAccts.find(a => noteWords.some(w => w.length > 3 && a.toLowerCase().includes(w)));
+    }
+    if (!matched) { showToast('error', 'No matching account for "' + note.account + '". Add it first.'); return; }
+    // Write deal to localStorage
+    const key = 'xits_acct_' + matched;
+    const existing = JSON.parse(localStorage.getItem(key) || '{}');
+    existing.stage = hubStage;
+    if (valMatch) existing.value = valMatch[1].replace(/,/g, '');
+    if (closeMatch) {
+        const cd = new Date(closeMatch[1].trim());
+        if (!isNaN(cd)) { const q = 'Q' + (Math.floor(cd.getMonth()/3)+1) + ' ' + cd.getFullYear(); existing.closeQ = q; }
+    }
+    existing.notes = (existing.notes ? existing.notes + '\n' : '') + noteDesc.trim();
+    existing.dealSource = 'OpenClaw';
+    existing.stageEnteredDate = new Date().toISOString().slice(0,10);
+    existing.prob = String(STAGE_CONFIG[hubStage]?.prob || 0);
+    localStorage.setItem(key, JSON.stringify(existing));
+    // Dismiss the note from inbox
+    dismissOcNote(id);
+    showToast('success', matched + ' added to pipeline (' + hubStage + ')');
+    updateKPICards();
+    if (typeof renderKanban === 'function') renderKanban();
 }
 function timeAgo(d) {
     const s = Math.floor((Date.now() - d.getTime()) / 1000);
