@@ -3328,7 +3328,7 @@ document.getElementById('targetBar').style.width = pct + '%';
 if (!localStorage.getItem('xits_profit_fy26')) localStorage.setItem('xits_profit_fy26', '1620');
 
 // One-time deal seed from OpenClaw Telegram import (Feb 2026)
-if (!localStorage.getItem('xits_deals_seeded_feb26_v2')) {
+if (!localStorage.getItem('xits_deals_seeded_feb26_v3')) {
     const seedDeals = [
         {acct:'Viterra/Bunge — ThinkPad Fleet', stage:'Prospecting', value:'382000', closeQ:'Q1 2026', notes:'Lenovo ThinkPad Fleet', dealSource:'OpenClaw'},
         {acct:'Viterra/Bunge — Thin Client Fleet', stage:'Prospecting', value:'643000', closeQ:'Q1 2026', notes:'HP Thin Client Fleet', dealSource:'OpenClaw'},
@@ -3340,22 +3340,20 @@ if (!localStorage.getItem('xits_deals_seeded_feb26_v2')) {
         {acct:'SK Conflict of Interest Commissioner', stage:'Discovery', value:'753', closeQ:'Q1 2026', notes:'M365 Renewal', dealSource:'OpenClaw'},
     ];
     seedDeals.forEach(sd => {
-        const key = 'xits_acct_' + sd.acct;
+        const key = acctKey(sd.acct);
         const existing = JSON.parse(localStorage.getItem(key) || '{}');
-        if (!existing.stage || existing.stage === 'Fresh') {
-            existing.stage = sd.stage;
-            existing.value = sd.value;
-            existing.closeQ = sd.closeQ;
-            existing.notes = (existing.notes ? existing.notes + '\n' : '') + sd.notes;
-            existing.dealSource = sd.dealSource;
-            existing.stageEnteredDate = new Date().toISOString().slice(0,10);
-            existing.prob = String(STAGE_CONFIG[sd.stage]?.prob || 0);
-            localStorage.setItem(key, JSON.stringify(existing));
-        }
+        existing.stage = sd.stage;
+        existing.value = sd.value;
+        existing.closeQ = sd.closeQ;
+        existing.notes = (existing.notes ? existing.notes + '\n' : '') + sd.notes;
+        existing.dealSource = sd.dealSource;
+        existing.stageEnteredDate = new Date().toISOString().slice(0,10);
+        existing.prob = String(STAGE_CONFIG[sd.stage]?.prob || 0);
+        localStorage.setItem(key, JSON.stringify(existing));
     });
-    localStorage.setItem('xits_deals_seeded_feb26_v2', '1');
-    // Clean up old Viterra single entry
-    localStorage.removeItem('xits_acct_Viterra');
+    localStorage.setItem('xits_deals_seeded_feb26_v3', '1');
+    // Clean up stale keys from previous broken seeds
+    Object.keys(localStorage).filter(k => k.startsWith('xits_acct_') && k.includes('/')).forEach(k => localStorage.removeItem(k));
 }
 
 // ===== SECTION TABS (Playbook & Tools sub-navigation) =====
@@ -4199,7 +4197,7 @@ function acceptOcNote(id) {
         }
     }
     // Write deal to localStorage
-    const key = 'xits_acct_' + targetAcct;
+    const key = acctKey(targetAcct);
     const existing = JSON.parse(localStorage.getItem(key) || '{}');
     existing.stage = hubStage;
     if (valMatch) existing.value = valMatch[1].replace(/,/g, '');
