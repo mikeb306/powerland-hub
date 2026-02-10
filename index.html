@@ -3324,7 +3324,8 @@ document.getElementById('calcMonthly').textContent = '$' + Math.round(remaining 
 const pct = (21806 / 3000000 * 100).toFixed(1);
 document.getElementById('targetPct').textContent = pct + '%';
 document.getElementById('targetBar').style.width = pct + '%';
-// Set profit baseline
+// Set revenue + profit baselines
+if (!localStorage.getItem('xits_revenue_base_fy26')) localStorage.setItem('xits_revenue_base_fy26', '21806');
 if (!localStorage.getItem('xits_profit_fy26')) localStorage.setItem('xits_profit_fy26', '1620');
 
 // One-time deal seed from OpenClaw Telegram import (Feb 2026)
@@ -5007,7 +5008,9 @@ function updateKPICards() {
     const quota = 3000000;
     const allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name),
         ...k12.map(a=>a.name), ...higherEd.map(a=>a.name), ...creditUnions.map(a=>a.name)];
-    let closedWon = 0, weightedPipeline = 0;
+    // Base revenue already booked (not tracked as individual deals in Hub)
+    const revenueBase = Number(localStorage.getItem('xits_revenue_base_fy26') || '21806');
+    let closedWon = revenueBase, weightedPipeline = 0;
     const closingThisMonth = [];
     const now = new Date();
     const currentMonth = now.getMonth();
