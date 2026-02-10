@@ -2952,7 +2952,8 @@ const entAccounts = [
     {name:"Conexus Credit Union",sector:"Financial",emp:891,city:"Regina",priority:"B",incumbent:"Unknown",contact:"CMO",source:"Tracker"},
     {name:"Affinity Credit Union",sector:"Financial",emp:802,city:"Saskatoon",priority:"B",incumbent:"Unknown",contact:"",source:"Tracker"},
     {name:"SARCAN Recycling",sector:"Government",emp:790,city:"Saskatoon",priority:"C",incumbent:"—",contact:"",source:"Tracker"},
-    {name:"Viterra",sector:"Agriculture",emp:726,city:"Regina",priority:"C",incumbent:"—",contact:"",source:"Tracker"},
+    {name:"Viterra/Bunge — ThinkPad Fleet",sector:"Agriculture",emp:726,city:"Regina",priority:"B",incumbent:"—",contact:"",source:"Tracker"},
+    {name:"Viterra/Bunge — Thin Client Fleet",sector:"Agriculture",emp:726,city:"Regina",priority:"B",incumbent:"—",contact:"",source:"Tracker"},
     {name:"SLGA",sector:"Crown Corp",emp:682,city:"Regina",priority:"C",incumbent:"—",contact:"",source:"Tracker"},
     {name:"Co-op Life Insurance",sector:"Financial",emp:598,city:"Regina",priority:"C",incumbent:"—",contact:"",source:"Tracker"},
     {name:"Saskatchewan WCB",sector:"Crown Corp",emp:505,city:"Regina",priority:"B",incumbent:"Unknown",contact:"",source:"Tracker"},
@@ -2978,7 +2979,7 @@ const entAccounts = [
     {name:"Saskatchewan Health Authority",sector:"Healthcare",emp:44000,city:"Saskatoon/Regina",priority:"A",incumbent:"—",contact:"",source:"Territory"},
     {name:"eHealth Saskatchewan",sector:"Healthcare",emp:1200,city:"Regina",priority:"A",incumbent:"—",contact:"",source:"Territory"},
     {name:"SaskPower",sector:"Crown Corp",emp:3300,city:"Regina",priority:"A",incumbent:"—",contact:"",source:"Territory"},
-    {name:"Bunge Canada",sector:"Agriculture",emp:900,city:"Saskatoon",priority:"B",incumbent:"—",contact:"",source:"Territory"},
+    {name:"Bunge Canada (Viterra)",sector:"Agriculture",emp:900,city:"Saskatoon",priority:"B",incumbent:"—",contact:"",source:"Territory"},
     {name:"K+S Potash Canada",sector:"Mining",emp:600,city:"Bethune",priority:"B",incumbent:"—",contact:"",source:"Territory"},
     {name:"GSCS (Greater Saskatoon Catholic Schools)",sector:"Government",emp:2500,city:"Saskatoon",priority:"A",incumbent:"—",contact:"Laurier Langlois",source:"Tracker"},
 ];
@@ -3327,10 +3328,10 @@ document.getElementById('targetBar').style.width = pct + '%';
 if (!localStorage.getItem('xits_profit_fy26')) localStorage.setItem('xits_profit_fy26', '1620');
 
 // One-time deal seed from OpenClaw Telegram import (Feb 2026)
-if (!localStorage.getItem('xits_deals_seeded_feb26')) {
+if (!localStorage.getItem('xits_deals_seeded_feb26_v2')) {
     const seedDeals = [
-        {acct:'Viterra', stage:'Prospecting', value:'382000', closeQ:'Q1 2026', notes:'Lenovo ThinkPad Fleet', dealSource:'OpenClaw'},
-        {acct:'Viterra', stage:'Prospecting', value:'643000', closeQ:'Q1 2026', notes:'HP Thin Client Fleet', dealSource:'OpenClaw'},
+        {acct:'Viterra/Bunge — ThinkPad Fleet', stage:'Prospecting', value:'382000', closeQ:'Q1 2026', notes:'Lenovo ThinkPad Fleet', dealSource:'OpenClaw'},
+        {acct:'Viterra/Bunge — Thin Client Fleet', stage:'Prospecting', value:'643000', closeQ:'Q1 2026', notes:'HP Thin Client Fleet', dealSource:'OpenClaw'},
         {acct:'Southern Plains Co-op', stage:'Proposal', value:'14293', closeQ:'Q1 2026', notes:'M365 Renewal', dealSource:'OpenClaw'},
         {acct:'Muskoday First Nation', stage:'Discovery', value:'', closeQ:'Q3 2026', notes:'Server Refresh', dealSource:'OpenClaw'},
         {acct:'SaskPower', stage:'Prospecting', value:'658000', closeQ:'Q1 2026', notes:'Cybersecurity Renewal 2026', dealSource:'OpenClaw'},
@@ -3352,7 +3353,9 @@ if (!localStorage.getItem('xits_deals_seeded_feb26')) {
             localStorage.setItem(key, JSON.stringify(existing));
         }
     });
-    localStorage.setItem('xits_deals_seeded_feb26', '1');
+    localStorage.setItem('xits_deals_seeded_feb26_v2', '1');
+    // Clean up old Viterra single entry
+    localStorage.removeItem('xits_acct_Viterra');
 }
 
 // ===== SECTION TABS (Playbook & Tools sub-navigation) =====
@@ -4179,8 +4182,24 @@ function acceptOcNote(id) {
         matched = allHubAccts.find(a => noteWords.some(w => w.length > 3 && a.toLowerCase().includes(w)));
     }
     if (!matched) { showToast('error', 'No matching account for "' + note.account + '". Add it first.'); return; }
+    // If base account already has an active deal, use "Account — DealName" variant
+    let targetAcct = matched;
+    const baseKey = 'xits_acct_' + matched;
+    const baseData = JSON.parse(localStorage.getItem(baseKey) || '{}');
+    if (baseData.stage && baseData.stage !== 'Fresh' && noteDesc.trim()) {
+        // Check if a suffixed version already exists for this deal
+        const suffix = noteDesc.trim().slice(0, 40);
+        const suffixedName = matched.split(' — ')[0] + ' — ' + suffix;
+        const suffixedAccts = allHubAccts.filter(a => a.startsWith(matched.split(' — ')[0] + ' — '));
+        const existingSuffix = suffixedAccts.find(a => a === suffixedName);
+        if (existingSuffix) {
+            targetAcct = existingSuffix;
+        } else {
+            targetAcct = suffixedName;
+        }
+    }
     // Write deal to localStorage
-    const key = 'xits_acct_' + matched;
+    const key = 'xits_acct_' + targetAcct;
     const existing = JSON.parse(localStorage.getItem(key) || '{}');
     existing.stage = hubStage;
     if (valMatch) existing.value = valMatch[1].replace(/,/g, '');
