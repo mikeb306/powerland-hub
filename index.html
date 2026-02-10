@@ -1121,14 +1121,18 @@
         </div>
 
         <div class="kpi-row">
-            <div class="kpi kpi-green">
+            <div class="kpi kpi-green" style="cursor:pointer;" onclick="document.getElementById('profitReveal').classList.toggle('hidden')">
                 <div class="kpi-label">Closed Revenue</div>
-                <div class="kpi-value">$24K</div>
+                <div class="kpi-value" id="kpiClosedRev">$22K</div>
                 <div class="kpi-sub">FY2026 booked</div>
+                <div id="profitReveal" class="hidden" style="margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,.08);">
+                    <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.03em;">Profit</div>
+                    <div style="font-size:16px;font-weight:700;color:var(--accent2);font-family:var(--mono);" id="kpiProfit">$1,620</div>
+                </div>
             </div>
             <div class="kpi kpi-accent">
                 <div class="kpi-label">Gap to Target</div>
-                <div class="kpi-value">$2.98M</div>
+                <div class="kpi-value" id="kpiGapTarget">$2.98M</div>
                 <div class="kpi-sub">Remaining to close</div>
             </div>
             <div class="kpi">
@@ -3305,13 +3309,15 @@ renderEnt(); renderSmb(); renderK12(); renderHigherEd(); renderCU();
 // Monthly calc
 const now = new Date();
 const monthsLeft = 12 - now.getMonth();
-const remaining = 2976000;
+const remaining = 3000000 - 21806;
 document.getElementById('monthsLeft').textContent = monthsLeft;
 document.getElementById('monthlyNeeded').textContent = '$' + Math.round(remaining / monthsLeft / 1000) + 'K/mo needed';
 document.getElementById('calcMonthly').textContent = '$' + Math.round(remaining / monthsLeft / 1000) + 'K';
-const pct = (24000 / 3000000 * 100).toFixed(1);
+const pct = (21806 / 3000000 * 100).toFixed(1);
 document.getElementById('targetPct').textContent = pct + '%';
 document.getElementById('targetBar').style.width = pct + '%';
+// Set profit baseline
+if (!localStorage.getItem('xits_profit_fy26')) localStorage.setItem('xits_profit_fy26', '1620');
 
 // ===== SECTION TABS (Playbook & Tools sub-navigation) =====
 document.querySelectorAll('.section-tabs').forEach(tabGroup => {
@@ -4968,6 +4974,18 @@ function updateKPICards() {
     zone.textContent = zoneLabel + ' (target: 3.5\u20135\u00D7)';
     coverageEl.appendChild(zone);
     document.getElementById('kpiCoverageSub').textContent = wpFormatted + ' / $' + Math.round(remainingQuota/1e3) + 'K remaining';
+
+    // Update top KPI row — revenue + gap
+    const revFormatted = closedWon >= 1e6 ? '$'+(closedWon/1e6).toFixed(1)+'M' : closedWon >= 1e3 ? '$'+Math.round(closedWon/1e3)+'K' : '$'+closedWon;
+    const gap = Math.max(quota - closedWon, 0);
+    const gapFormatted = gap >= 1e6 ? '$'+(gap/1e6).toFixed(2)+'M' : gap >= 1e3 ? '$'+Math.round(gap/1e3)+'K' : '$'+gap;
+    document.getElementById('kpiClosedRev').textContent = revFormatted;
+    document.getElementById('kpiGapTarget').textContent = gapFormatted;
+    // Profit from localStorage
+    const profit = Number(localStorage.getItem('xits_profit_fy26') || '0');
+    if (profit > 0) {
+        document.getElementById('kpiProfit').textContent = '$' + profit.toLocaleString();
+    }
 
     // Also update the target bar
     const pct = Math.min(Math.round(closedWon / quota * 1000) / 10, 100);
