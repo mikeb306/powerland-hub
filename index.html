@@ -1101,32 +1101,75 @@
         .bz-ql-btn { padding:4px 10px;border-radius:5px;font-size:10px;font-weight:600;border:1px solid var(--border);background:none;color:var(--text2);cursor:pointer;transition:all .1s; }
         .bz-ql-btn:hover { background:var(--accent);color:#fff;border-color:var(--accent); }
 
-        /* CALL MODE */
+        /* CALL MODE — Elite V2 */
         .bz-call-overlay { position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column; }
         .bz-call-overlay.hidden { display:none; }
-        .bz-call-topbar { display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:var(--bg2);border-bottom:2px solid var(--accent4);font-family:var(--mono);font-size:13px;color:var(--text2); }
-        .bz-call-exit { background:none;border:1px solid var(--text3);color:var(--text3);padding:4px 12px;border-radius:6px;font-family:var(--font);font-size:11px;cursor:pointer; }
+        .bz-call-topbar { display:flex;align-items:center;gap:16px;padding:10px 20px;background:var(--bg2);border-bottom:2px solid var(--accent);font-family:var(--mono);font-size:12px;color:var(--text2);flex-wrap:wrap; }
+        .bz-call-topbar .bz-stat-pill { background:var(--bg3);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600; }
+        .bz-call-topbar .bz-stat-pill strong { color:var(--text); }
+        .bz-sprint-timer { font-size:18px;font-weight:700;font-family:var(--mono);min-width:70px; }
+        .bz-sprint-timer.green { color:var(--accent2); }
+        .bz-sprint-timer.yellow { color:var(--accent3); }
+        .bz-sprint-timer.red { color:var(--accent4); }
+        .bz-call-exit { background:none;border:1px solid var(--text3);color:var(--text3);padding:4px 12px;border-radius:6px;font-family:var(--font);font-size:11px;cursor:pointer;margin-left:auto; }
         .bz-call-exit:hover { color:var(--text);border-color:var(--text); }
-        .bz-call-body { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;max-width:700px;margin:0 auto;width:100%;gap:12px; }
-        .bz-call-company { font-size:20px;font-weight:700;color:var(--text);text-align:center; }
-        .bz-call-company small { font-size:13px;color:var(--text3);font-weight:400; }
-        .bz-call-contact-card { background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 20px;width:100%;text-align:center; }
-        .bz-call-contact-name { font-size:18px;font-weight:600; }
-        .bz-call-contact-title { font-size:13px;color:var(--text2);margin-bottom:8px; }
-        .bz-call-contact-actions { display:flex;gap:10px;justify-content:center; }
-        .bz-call-copy { padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;border:1px solid var(--border);background:none;color:var(--accent);cursor:pointer;font-family:var(--mono);transition:all .1s; }
+        .bz-call-skip { background:none;border:1px solid var(--accent3);color:var(--accent3);padding:4px 12px;border-radius:6px;font-family:var(--font);font-size:11px;cursor:pointer; }
+        .bz-call-skip:hover { background:rgba(251,191,36,.1);color:var(--text); }
+        .bz-dq-badge { display:inline-block;width:10px;height:10px;border-radius:50%;margin-left:4px;vertical-align:middle; }
+        .bz-dq-badge.dq-green { background:var(--accent2); }
+        .bz-dq-badge.dq-yellow { background:var(--accent3); }
+        .bz-dq-badge.dq-red { background:var(--accent4); }
+        .bz-cadence-banner { padding:8px 20px;font-size:12px;font-weight:600;font-family:var(--mono);display:flex;align-items:center;gap:10px;background:rgba(79,140,255,.08);border-bottom:1px solid rgba(79,140,255,.2);color:var(--accent); }
+        .bz-cadence-banner.overdue { background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);color:var(--accent4); }
+        .bz-cadence-banner.done { background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.2);color:var(--accent2); }
+        .bz-cadence-banner .bz-cad-step-label { background:var(--bg3);padding:2px 8px;border-radius:4px;font-size:10px;text-transform:uppercase;letter-spacing:.04em; }
+        .bz-call-body-v2 { flex:1;display:grid;grid-template-columns:1fr 380px;gap:0;overflow:hidden; }
+        .bz-call-action-col { display:flex;flex-direction:column;padding:20px 24px;overflow-y:auto;gap:10px; }
+        .bz-call-company { font-size:20px;font-weight:700;color:var(--text); }
+        .bz-call-company small { font-size:12px;color:var(--text3);font-weight:400;display:block;margin-top:2px; }
+        .bz-call-company .bz-obfuscated { color:var(--accent3);font-size:10px;font-weight:500; }
+        .bz-call-contact-card { background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px; }
+        .bz-call-contact-name { font-size:16px;font-weight:600; }
+        .bz-call-contact-title { font-size:12px;color:var(--text2);margin-bottom:6px; }
+        .bz-call-contact-actions { display:flex;gap:8px;flex-wrap:wrap; }
+        .bz-call-copy { padding:5px 12px;border-radius:6px;font-size:11px;font-weight:500;border:1px solid var(--border);background:none;color:var(--accent);cursor:pointer;font-family:var(--mono);transition:all .1s; }
         .bz-call-copy:hover { background:rgba(79,140,255,.1);border-color:var(--accent); }
-        .bz-call-opener { background:rgba(79,140,255,.06);border:1px solid rgba(79,140,255,.15);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--accent);font-style:italic;width:100%;text-align:center; }
-        .bz-call-tags { display:flex;gap:6px;flex-wrap:wrap;justify-content:center; }
-        .bz-call-notes { width:100%;padding:10px 14px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;resize:none;height:60px; }
-        .bz-call-outcomes { display:flex;gap:6px;flex-wrap:wrap;justify-content:center; }
-        .bz-outcome { padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;transition:all .1s; }
+        .bz-call-opener { background:rgba(79,140,255,.06);border:1px solid rgba(79,140,255,.15);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--accent);font-style:italic; }
+        .bz-call-notes { width:100%;padding:8px 12px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:12px;resize:none;height:50px; }
+        .bz-call-outcomes { display:flex;gap:6px;flex-wrap:wrap; }
+        .bz-outcome { padding:7px 14px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;transition:all .1s; }
         .bz-outcome:hover { border-color:var(--accent);color:var(--text); }
         .bz-outcome-meeting { border-color:var(--accent2);color:var(--accent2); }
         .bz-outcome-meeting:hover { background:rgba(52,211,153,.12); }
         .bz-outcome-dead { border-color:var(--accent4);color:var(--accent4); }
         .bz-outcome-dead:hover { background:rgba(239,68,68,.12); }
-        .bz-call-advance { text-align:center;font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.04em; }
+        .bz-outcome-skip { border-color:var(--accent3);color:var(--accent3); }
+        .bz-outcome-skip:hover { background:rgba(251,191,36,.08); }
+        .bz-call-intel-col { background:var(--bg2);border-left:1px solid var(--border);padding:16px;overflow-y:auto; }
+        .bz-intel-section { margin-bottom:14px; }
+        .bz-intel-section-title { font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:flex;align-items:center;gap:6px;cursor:pointer; }
+        .bz-intel-section-title .collapse-icon { font-size:8px;transition:transform .2s; }
+        .bz-intel-row { display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:var(--text2); }
+        .bz-intel-row strong { color:var(--text);font-weight:600; }
+        .bz-intel-tags { display:flex;gap:4px;flex-wrap:wrap;margin-top:4px; }
+        .bz-intel-tags span { background:var(--bg3);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:9px;color:var(--text2); }
+        .bz-intel-desc { font-size:11px;color:var(--text2);line-height:1.5;margin-top:4px;max-height:80px;overflow-y:auto; }
+        .bz-rejection-bar { height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-top:4px; }
+        .bz-rejection-bar-fill { height:100%;background:var(--accent5,#a78bfa);border-radius:3px;transition:width .3s; }
+        .bz-touch-log { font-size:10px;color:var(--text2); }
+        .bz-touch-log div { padding:2px 0;border-bottom:1px solid var(--border);display:flex;gap:6px; }
+        .bz-touch-log .outcome-connected { color:var(--accent2); }
+        .bz-touch-log .outcome-meeting { color:var(--accent2);font-weight:700; }
+        .bz-touch-log .outcome-vm { color:var(--accent3); }
+        .bz-touch-log .outcome-no_answer,.bz-touch-log .outcome-gatekeeper { color:var(--text3); }
+        .bz-touch-log .outcome-not_interested { color:var(--accent4); }
+        .bz-coaching-tip { font-size:10px;color:var(--text2);padding:4px 8px;background:rgba(79,140,255,.04);border-left:2px solid var(--accent);margin-bottom:4px;line-height:1.4; }
+        .bz-coaching-tip strong { color:var(--accent); }
+        .bz-xp-popup { position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:999;text-align:center;pointer-events:none; }
+        .bz-xp-popup .level-title { font-size:28px;font-weight:800;color:var(--accent2);text-shadow:0 0 20px rgba(52,211,153,.4); }
+        .bz-xp-popup .level-subtitle { font-size:14px;color:var(--text2);margin-top:4px; }
+        .bz-call-advance { text-align:center;font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.04em; }
+        @media (max-width:900px) { .bz-call-body-v2 { grid-template-columns:1fr; } .bz-call-intel-col { max-height:40vh; } }
 
         /* DETAIL PANEL */
         .bz-detail-overlay { position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);display:flex;justify-content:flex-end; }
@@ -2542,29 +2585,39 @@ Sr Account Executive | Xerox IT Solutions
     </div>
 </div>
 
-<!-- BLITZ CALL MODE OVERLAY -->
+<!-- BLITZ CALL MODE OVERLAY — Elite V2 -->
 <div class="bz-call-overlay hidden" id="bzCallOverlay">
     <div class="bz-call-topbar">
-        <span id="bzCallTimer">60:00 remaining</span>
-        <span id="bzCallDials">DIALS: 0/15</span>
-        <span id="bzCallStreak">Streak: 0</span>
+        <span class="bz-sprint-timer green" id="bzCallTimer">15:00</span>
+        <span class="bz-stat-pill">DIALS <strong id="bzCallDials">0</strong></span>
+        <span class="bz-stat-pill">STREAK <strong id="bzCallStreak">0</strong></span>
+        <span class="bz-stat-pill">CONVOS <strong id="bzCallConvos">0</strong></span>
+        <span class="bz-stat-pill">MTG <strong id="bzCallMtg">0</strong></span>
+        <span class="bz-stat-pill">XP <strong id="bzCallXP">0</strong></span>
+        <span class="bz-stat-pill">LVL <strong id="bzCallLevel">1</strong></span>
+        <span class="bz-stat-pill" id="bzCallDQ">DQ <span class="bz-dq-badge dq-green"></span></span>
+        <button class="bz-call-skip" onclick="bzSkipAccount()">[S] Skip</button>
         <button class="bz-call-exit" onclick="bzExitCallMode()">ESC Exit</button>
     </div>
-    <div class="bz-call-body">
-        <div id="bzCallCompany" class="bz-call-company"></div>
-        <div class="bz-call-contact-card" id="bzCallContact"></div>
-        <div class="bz-call-opener" id="bzCallOpener"></div>
-        <div class="bz-call-tags" id="bzCallTags"></div>
-        <textarea class="bz-call-notes" id="bzCallNotes" placeholder="Notes..."></textarea>
-        <div class="bz-call-outcomes">
-            <button class="bz-outcome" data-o="connected" onclick="bzLogOutcome('connected')">[1] Connected</button>
-            <button class="bz-outcome" data-o="vm" onclick="bzLogOutcome('vm')">[2] VM</button>
-            <button class="bz-outcome" data-o="no_answer" onclick="bzLogOutcome('no_answer')">[3] No Answer</button>
-            <button class="bz-outcome" data-o="gatekeeper" onclick="bzLogOutcome('gatekeeper')">[4] Gatekeeper</button>
-            <button class="bz-outcome bz-outcome-meeting" data-o="meeting" onclick="bzLogOutcome('meeting')">[5] Meeting Booked</button>
-            <button class="bz-outcome bz-outcome-dead" data-o="not_interested" onclick="bzLogOutcome('not_interested')">[6] Not Interested</button>
+    <div class="bz-cadence-banner" id="bzCadenceBanner">Loading cadence...</div>
+    <div class="bz-call-body-v2">
+        <div class="bz-call-action-col">
+            <div id="bzCallCompany" class="bz-call-company"></div>
+            <div class="bz-call-contact-card" id="bzCallContact"></div>
+            <div class="bz-call-opener" id="bzCallOpener"></div>
+            <textarea class="bz-call-notes" id="bzCallNotes" placeholder="Notes... (N to focus)"></textarea>
+            <div class="bz-call-outcomes">
+                <button class="bz-outcome" data-o="connected" onclick="bzLogOutcome('connected')">[1] Connected</button>
+                <button class="bz-outcome" data-o="vm" onclick="bzLogOutcome('vm')">[2] VM</button>
+                <button class="bz-outcome" data-o="no_answer" onclick="bzLogOutcome('no_answer')">[3] No Answer</button>
+                <button class="bz-outcome" data-o="gatekeeper" onclick="bzLogOutcome('gatekeeper')">[4] Gatekeeper</button>
+                <button class="bz-outcome bz-outcome-meeting" data-o="meeting" onclick="bzLogOutcome('meeting')">[5] Meeting Booked</button>
+                <button class="bz-outcome bz-outcome-dead" data-o="not_interested" onclick="bzLogOutcome('not_interested')">[6] Not Interested</button>
+                <button class="bz-outcome bz-outcome-skip" onclick="bzSkipAccount()">[S] Skip</button>
+            </div>
+            <div class="bz-call-advance">1-6 = Log Outcome &middot; S = Skip &middot; N = Notes &middot; TAB = Copy Phone &middot; ESC = Exit</div>
         </div>
-        <div class="bz-call-advance">ENTER = Save &amp; Load Next Account</div>
+        <div class="bz-call-intel-col" id="bzCallIntelCol"></div>
     </div>
     <div class="bz-call-summary hidden" id="bzCallSummary"></div>
 </div>
@@ -6525,6 +6578,165 @@ function bzKey(id) { return 'xits_blitz_' + id; }
 function getBzData(id) { try { return JSON.parse(localStorage.getItem(bzKey(id))) || {}; } catch { return {}; } }
 function setBzData(id, data) { localStorage.setItem(bzKey(id), JSON.stringify(data)); }
 
+// ===== CADENCE ENGINE =====
+const CADENCE_SEQUENCE = [
+    { day:1, channel:'linkedin', action:'View profile + connection request' },
+    { day:2, channel:'phone', action:'Call #1 (4-5 PM optimal)' },
+    { day:3, channel:'email', action:'Email #1 — lead with context' },
+    { day:5, channel:'phone', action:'Call #2 (10-11:30 AM window)' },
+    { day:7, channel:'email', action:'Email #2 — reference previous attempts' },
+    { day:9, channel:'phone', action:'Call #3 + VM (<30s, direct to email)' },
+    { day:12, channel:'phone', action:'Call #4 — try different time' },
+    { day:14, channel:'email+linkedin', action:'Email #3 + LinkedIn DM — shift messaging' },
+    { day:17, channel:'phone', action:'Call #5 (final push)' },
+    { day:21, channel:'email', action:'Breakup email — move to nurture' }
+];
+
+const BZ_LEVEL_TITLES = ['Rookie','Dialer','Closer','Rainmaker','Deal Machine','Pipeline King','President\'s Club'];
+const BZ_XP_MAP = { connected:25, meeting:100, vm:10, no_answer:5, gatekeeper:10, not_interested:5 };
+
+function bzGetSprintStats() {
+    try { return JSON.parse(localStorage.getItem('xits_blitz_sprint_stats')) || { xp:0, level:1, totalSprints:0, totalDials:0, rejections:0 }; }
+    catch { return { xp:0, level:1, totalSprints:0, totalDials:0, rejections:0 }; }
+}
+function bzSaveSprintStats(s) { localStorage.setItem('xits_blitz_sprint_stats', JSON.stringify(s)); }
+
+function bzCalcCadenceStep(id) {
+    const d = getBzData(id);
+    const step = d.cadenceStep || 0;
+    const startDate = d.cadenceStartDate;
+    if (!startDate || step >= CADENCE_SEQUENCE.length) return { step: step, seq: null, status: step >= CADENCE_SEQUENCE.length ? 'done' : 'new', daysUntil: 0 };
+    const seq = CADENCE_SEQUENCE[step];
+    const daysSinceStart = Math.floor((Date.now() - new Date(startDate).getTime()) / 86400000);
+    const daysUntil = seq.day - daysSinceStart;
+    return { step, seq, status: daysUntil <= 0 ? (daysUntil < -2 ? 'overdue' : 'due') : 'upcoming', daysUntil };
+}
+
+function bzAdvanceCadence(id) {
+    const d = getBzData(id);
+    if (!d.cadenceStartDate) d.cadenceStartDate = new Date().toISOString().slice(0,10);
+    d.cadenceStep = (d.cadenceStep || 0) + 1;
+    if (d.cadenceStep < CADENCE_SEQUENCE.length) {
+        const nextSeq = CADENCE_SEQUENCE[d.cadenceStep];
+        const start = new Date(d.cadenceStartDate);
+        start.setDate(start.getDate() + nextSeq.day);
+        d.nextActionDate = start.toISOString().slice(0,10);
+    } else {
+        d.cadenceCompleted = true;
+    }
+    setBzData(id, d);
+}
+
+function bzDataQuality(a) {
+    let s = 0;
+    const c = (a.contacts && a.contacts[0]) || {};
+    if (c.name && !/\*/.test(c.name)) s += 2; else if (c.name) s += 1;
+    if (c.phone || a.phone) s += 1;
+    if (c.email) s += 1;
+    if (a.description || (a.keywords && a.keywords.length)) s += 2;
+    if (a.itHeadcount || a.employees) s += 1;
+    if (a.revenue) s += 1;
+    if (a.website) s += 1;
+    if (c.linkedin) s += 1;
+    return Math.min(s, 10);
+}
+
+function bzSkipAccount() {
+    if (!bzCallSession || bzCallSession.index >= bzCallSession.queue.length) return;
+    const a = bzCallSession.queue[bzCallSession.index];
+    const d = getBzData(a.id);
+    d.skipped = true;
+    d.skipReason = 'Skipped in call session';
+    setBzData(a.id, d);
+    showToast('info', 'Skipped — loading next');
+    bzCallSession.index++;
+    bzRenderCallAccount();
+}
+
+function renderCallIntelPanel(a, d, contact, intel, cadStep) {
+    const el = document.getElementById('bzCallIntelCol');
+    let html = '';
+    // Company Intel
+    html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Company Intel</div>';
+    if (a.industry) html += '<div class="bz-intel-row"><span>Industry</span><strong>' + a.industry + '</strong></div>';
+    if (a.employees) html += '<div class="bz-intel-row"><span>Employees</span><strong>' + a.employees + '</strong></div>';
+    if (a.itHeadcount) html += '<div class="bz-intel-row"><span>IT Headcount</span><strong>' + a.itHeadcount + '</strong></div>';
+    if (a.revenue) html += '<div class="bz-intel-row"><span>Revenue</span><strong>' + fmtSales(a.revenue) + '</strong></div>';
+    if (a.foundedYear) html += '<div class="bz-intel-row"><span>Founded</span><strong>' + a.foundedYear + '</strong></div>';
+    if (a.domain) html += '<div class="bz-intel-row"><span>Domain</span><strong>' + a.domain + '</strong></div>';
+    // M365 / Vendor / Renewal
+    const m365 = d.m365Status || 'unknown';
+    html += '<div class="bz-intel-row"><span>M365</span><strong style="color:' + (m365==='yes'?'var(--accent2)':m365==='no'?'var(--accent4)':'var(--text3)') + ';">' + m365.toUpperCase() + '</strong></div>';
+    if (d.currentVendor) html += '<div class="bz-intel-row"><span>Current Vendor</span><strong>' + d.currentVendor + '</strong></div>';
+    if (d.renewalDate) html += '<div class="bz-intel-row"><span>Renewal</span><strong>' + d.renewalDate + '</strong></div>';
+    if (d.competitorNotes) html += '<div class="bz-intel-row"><span>Competitors</span><strong>' + d.competitorNotes + '</strong></div>';
+    if (a.description) html += '<div class="bz-intel-desc">' + a.description + '</div>';
+    if (a.keywords && a.keywords.length) html += '<div class="bz-intel-tags">' + a.keywords.map(function(k){return '<span>'+k+'</span>';}).join('') + '</div>';
+    html += '</div>';
+    // Contact Background
+    if (contact.name) {
+        html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Contact Background</div>';
+        if (intel.careerHistory && intel.careerHistory.length) {
+            html += '<div class="bz-touch-log">' + intel.careerHistory.map(function(ch){ return '<div><span>' + (ch.years||'') + '</span><strong>' + ch.title + '</strong> @ ' + ch.company + '</div>'; }).join('') + '</div>';
+        }
+        if (intel.education) html += '<div class="bz-intel-row"><span>Education</span><strong>' + intel.education + '</strong></div>';
+        var tags = [];
+        if (intel.interests) intel.interests.forEach(function(i){tags.push(i);});
+        if (intel.sportsTeams) intel.sportsTeams.forEach(function(i){tags.push(i);});
+        if (intel.communityInvolvement) intel.communityInvolvement.forEach(function(i){tags.push(i);});
+        if (tags.length) html += '<div class="bz-intel-tags">' + tags.map(function(t){return '<span>'+t+'</span>';}).join('') + '</div>';
+        html += '</div>';
+    }
+    // Touch History
+    var cadence = d.cadence || [];
+    if (cadence.length) {
+        html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Touch History (' + cadence.length + ')</div>';
+        html += '<div class="bz-touch-log">' + cadence.slice().reverse().slice(0,10).map(function(c){
+            return '<div><span>' + (c.date||'').slice(5) + '</span><span>' + c.type + '</span><span class="outcome-' + c.outcome + '">' + c.outcome + '</span>' + (c.note ? '<span>' + c.note + '</span>' : '') + '</div>';
+        }).join('') + '</div></div>';
+    }
+    // Persistence Tracker
+    var rejections = d.rejections || 0;
+    var pct = Math.min(rejections / 4 * 100, 100);
+    html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Persistence Tracker</div>';
+    html += '<div style="font-size:10px;color:var(--text2);">80% of prospects say no 4 times before yes</div>';
+    html += '<div class="bz-rejection-bar"><div class="bz-rejection-bar-fill" style="width:' + pct + '%;"></div></div>';
+    html += '<div style="font-size:9px;color:var(--text3);margin-top:2px;">' + rejections + '/4 rejections — ' + (rejections >= 4 ? 'statistically due for yes' : (4 - rejections) + ' more before breakthrough') + '</div></div>';
+    // Coaching
+    html += '<div class="bz-intel-section"><div class="bz-intel-section-title" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">Coaching <span class="collapse-icon">&#9660;</span></div><div>';
+    html += '<div class="bz-coaching-tip"><strong>"How have you been?"</strong> = 6.6x success opener (Gong)</div>';
+    html += '<div class="bz-coaching-tip">Talk:listen target: <strong>43%/57%</strong> — let them talk</div>';
+    html += '<div class="bz-coaching-tip">Successful calls avg <strong>5:50</strong> — keep them engaged</div>';
+    html += '<div class="bz-coaching-tip">Avoid: <strong>"contract" "discount" "just" "however" "honestly"</strong></div>';
+    html += '<div class="bz-coaching-tip">Pattern interrupt: lead with <strong>peer reference or stat</strong>, not pitch</div>';
+    html += '</div></div>';
+    // NEPQ
+    html += '<div class="bz-intel-section"><div class="bz-intel-section-title" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'none\':\'block\'">NEPQ Quick Ref <span class="collapse-icon">&#9654;</span></div><div style="display:none;">';
+    html += '<div class="bz-coaching-tip"><strong>Situation:</strong> "What does your IT environment look like today?"</div>';
+    html += '<div class="bz-coaching-tip"><strong>Problem:</strong> "What challenges are you facing with [vendor/fleet/security]?"</div>';
+    html += '<div class="bz-coaching-tip"><strong>Solution:</strong> "What if you could [reduce cost/simplify/secure]?"</div>';
+    html += '<div class="bz-coaching-tip"><strong>Consequence:</strong> "What happens if nothing changes in 12 months?"</div>';
+    html += '<div class="bz-coaching-tip"><strong>Qualifying:</strong> "If we could solve X, would it make sense to explore?"</div>';
+    html += '</div></div>';
+    // Objection handling
+    html += '<div class="bz-intel-section"><div class="bz-intel-section-title" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'none\':\'block\'">Objection: "Not Interested" <span class="collapse-icon">&#9654;</span></div><div style="display:none;">';
+    html += '<div class="bz-coaching-tip"><strong>1. Agree:</strong> "Totally understand — most people say that initially"</div>';
+    html += '<div class="bz-coaching-tip"><strong>2. Ask:</strong> "Quick question — who handles your print/IT currently?"</div>';
+    html += '<div class="bz-coaching-tip"><strong>3. Redirect:</strong> "Just want to see if there\'s a way we can save you time/money on X"</div>';
+    html += '</div></div>';
+    el.innerHTML = html;
+}
+
+function bzShowLevelUp(level) {
+    var title = BZ_LEVEL_TITLES[Math.min(level - 1, BZ_LEVEL_TITLES.length - 1)];
+    var popup = document.createElement('div');
+    popup.className = 'bz-xp-popup';
+    popup.innerHTML = '<div class="level-title">LEVEL ' + level + '</div><div class="level-subtitle">' + title + '</div>';
+    document.body.appendChild(popup);
+    setTimeout(function(){ popup.style.opacity = '0'; popup.style.transition = 'opacity .5s'; }, 1500);
+    setTimeout(function(){ popup.remove(); }, 2000);
+}
+
 function bzSeedAccounts() {
     if (localStorage.getItem('xits_blitz_seeded_v1') || !blitzAccounts.length) return;
     blitzAccounts.forEach(a => {
@@ -6968,6 +7180,15 @@ function openBlitzDetail(id) {
         '<div class="bz-detail-field"><label>Next Action Date</label><input type="date" id="bzDetNextDate" value="' + (d.nextActionDate || '') + '" onchange="bzDetailSave(\'' + id + '\')"></div>' +
         '<div class="bz-detail-field"><label>Notes</label><textarea id="bzDetNotes" onblur="bzDetailSave(\'' + id + '\')">' + (d.notes || '') + '</textarea></div>' +
         '</div>' +
+        '<div class="bz-detail-section"><div class="bz-detail-label">M365 / Vendor Intel</div>' +
+        '<div class="bz-detail-field"><label>M365 Status</label><select id="bzDetM365" onchange="bzDetailSave(\'' + id + '\')">' +
+        '<option value="unknown"' + ((d.m365Status||'unknown')==='unknown'?' selected':'') + '>Unknown</option>' +
+        '<option value="yes"' + (d.m365Status==='yes'?' selected':'') + '>Yes</option>' +
+        '<option value="no"' + (d.m365Status==='no'?' selected':'') + '>No</option></select></div>' +
+        '<div class="bz-detail-field"><label>Current Vendor</label><input type="text" id="bzDetVendor" value="' + (d.currentVendor || '') + '" placeholder="Who handles their IT/print?" onblur="bzDetailSave(\'' + id + '\')"></div>' +
+        '<div class="bz-detail-field"><label>Renewal Date</label><input type="date" id="bzDetRenewal" value="' + (d.renewalDate || '') + '" onchange="bzDetailSave(\'' + id + '\')"></div>' +
+        '<div class="bz-detail-field"><label>Competitor Notes</label><textarea id="bzDetCompetitors" onblur="bzDetailSave(\'' + id + '\')" style="height:50px;" placeholder="Competitors in the account...">' + (d.competitorNotes || '') + '</textarea></div>' +
+        '</div>' +
         '<button class="bz-log-next-btn" onclick="bzLogAndNext(\'' + id + '\')">Log &amp; Next</button>';
 
     document.getElementById('bzDetailOverlay').classList.remove('hidden');
@@ -6976,11 +7197,19 @@ function openBlitzDetail(id) {
 function closeBlitzDetail() { document.getElementById('bzDetailOverlay').classList.add('hidden'); }
 
 function bzDetailSave(id) {
-    const d = getBzData(id);
+    var d = getBzData(id);
     d.status = document.getElementById('bzDetStatus').value;
     d.pipelineValue = Number(document.getElementById('bzDetValue').value) || 0;
     d.nextActionDate = document.getElementById('bzDetNextDate').value;
     d.notes = document.getElementById('bzDetNotes').value;
+    var m365El = document.getElementById('bzDetM365');
+    if (m365El) d.m365Status = m365El.value;
+    var vendorEl = document.getElementById('bzDetVendor');
+    if (vendorEl) d.currentVendor = vendorEl.value;
+    var renewalEl = document.getElementById('bzDetRenewal');
+    if (renewalEl) d.renewalDate = renewalEl.value;
+    var compEl = document.getElementById('bzDetCompetitors');
+    if (compEl) d.competitorNotes = compEl.value;
     setBzData(id, d);
 }
 
@@ -6996,20 +7225,31 @@ function bzLogAndNext(id) {
     if (next) setTimeout(() => openBlitzDetail(next.id), 300);
 }
 
-// ===== CALL MODE =====
+// ===== CALL MODE — Elite V2 =====
 function bzStartCallMode(resume) {
-    const queue = blitzAccounts
-        .map(a => ({ ...a, d: getBzData(a.id) }))
-        .filter(a => a.d.status !== 'dead' && a.d.status !== 'nurture')
-        .sort((a, b) => {
-            const today = new Date().toISOString().slice(0, 10);
-            const aOverdue = a.d.status === 'meeting' && a.d.nextActionDate && a.d.nextActionDate < today;
-            const bOverdue = b.d.status === 'meeting' && b.d.nextActionDate && b.d.nextActionDate < today;
-            if (aOverdue && !bOverdue) return -1;
-            if (bOverdue && !aOverdue) return 1;
-            return bzDaysSince(a.d.lastTouch) - bzDaysSince(b.d.lastTouch);
-        })
-        .reverse();
+    var stats = bzGetSprintStats();
+    stats.totalSprints++;
+    bzSaveSprintStats(stats);
+
+    var today = new Date().toISOString().slice(0,10);
+    var queue = blitzAccounts
+        .map(function(a){ return Object.assign({}, a, { d: getBzData(a.id) }); })
+        .filter(function(a){ return a.d.status !== 'dead' && a.d.status !== 'nurture' && !a.d.skipped; })
+        .sort(function(a, b){
+            // Cadence overdue first
+            var aCad = bzCalcCadenceStep(a.id);
+            var bCad = bzCalcCadenceStep(b.id);
+            if (aCad.status === 'overdue' && bCad.status !== 'overdue') return -1;
+            if (bCad.status === 'overdue' && aCad.status !== 'overdue') return 1;
+            if (aCad.status === 'due' && bCad.status !== 'due' && bCad.status !== 'overdue') return -1;
+            if (bCad.status === 'due' && aCad.status !== 'due' && aCad.status !== 'overdue') return 1;
+            // Then data quality
+            var aDq = bzDataQuality(a);
+            var bDq = bzDataQuality(b);
+            if (aDq !== bDq) return bDq - aDq;
+            // Then staleness
+            return bzDaysSince(a.d.lastTouch) > bzDaysSince(b.d.lastTouch) ? -1 : 1;
+        });
 
     bzCallSession = {
         queue: queue,
@@ -7021,16 +7261,16 @@ function bzStartCallMode(resume) {
         meetingsBooked: 0,
         pipelineAdded: 0,
         startTime: Date.now(),
-        timerSeconds: 3600,
-        lastOutcome: null
+        timerSeconds: 900,
+        lastOutcome: null,
+        xpGained: 0,
+        sprintNumber: stats.totalSprints
     };
 
     document.getElementById('bzCallOverlay').classList.remove('hidden');
     document.getElementById('bzCallSummary').classList.add('hidden');
     bzRenderCallAccount();
     bzStartTimer();
-
-    // Keyboard shortcuts
     document.addEventListener('keydown', bzCallKeyHandler);
 }
 
@@ -7046,9 +7286,10 @@ function bzCallKeyHandler(e) {
     else if (e.key === '4') bzLogOutcome('gatekeeper');
     else if (e.key === '5') bzLogOutcome('meeting');
     else if (e.key === '6') bzLogOutcome('not_interested');
+    else if (e.key === 's' || e.key === 'S') bzSkipAccount();
     else if (e.key === 'Escape') bzExitCallMode();
     else if (e.key === 'n' || e.key === 'N') document.getElementById('bzCallNotes').focus();
-    else if (e.key === 'Tab') { e.preventDefault(); const a = bzCallSession.queue[bzCallSession.index]; if (a) { const c = (a.contacts && a.contacts[0]) || {}; bzCopyPhone(c.phone || a.phone || ''); } }
+    else if (e.key === 'Tab') { e.preventDefault(); var a = bzCallSession.queue[bzCallSession.index]; if (a) { var c = (a.contacts && a.contacts[0]) || {}; bzCopyPhone(c.phone || a.phone || ''); } }
 }
 
 function bzRenderCallAccount() {
@@ -7056,59 +7297,110 @@ function bzRenderCallAccount() {
         bzShowSummary();
         return;
     }
-    const a = bzCallSession.queue[bzCallSession.index];
-    const contact = (a.contacts && a.contacts[0]) || {};
-    const intel = contact.personalIntel || {};
-    const phone = contact.phone || a.phone || '';
-    const email = contact.email || '';
+    var a = bzCallSession.queue[bzCallSession.index];
+    var d = getBzData(a.id);
+    var contact = (a.contacts && a.contacts[0]) || {};
+    var intel = contact.personalIntel || {};
+    var phone = contact.phone || a.phone || '';
+    var email = contact.email || '';
+    var cadStep = bzCalcCadenceStep(a.id);
+    var dq = bzDataQuality(a);
+    var stats = bzGetSprintStats();
 
-    document.getElementById('bzCallCompany').innerHTML = a.company + ' <small>' + (a.industry || '') + ' · ' + (a.city || '') + ' · ' + (a.employees || '') + ' emp' + (a.revenue ? ' · ' + fmtSales(a.revenue) : '') + '</small>';
+    // Cadence banner
+    var banner = document.getElementById('bzCadenceBanner');
+    if (cadStep.seq) {
+        banner.className = 'bz-cadence-banner' + (cadStep.status === 'overdue' ? ' overdue' : cadStep.status === 'done' ? ' done' : '');
+        banner.innerHTML = '<span class="bz-cad-step-label">Step ' + (cadStep.step + 1) + '/10</span> Day ' + cadStep.seq.day + ': ' + cadStep.seq.channel.toUpperCase() + ' — ' + cadStep.seq.action +
+            (cadStep.status === 'overdue' ? ' <strong>OVERDUE</strong>' : cadStep.status === 'due' ? ' <strong>DUE TODAY</strong>' : ' (in ' + cadStep.daysUntil + 'd)');
+    } else if (cadStep.status === 'done') {
+        banner.className = 'bz-cadence-banner done';
+        banner.innerHTML = '<span class="bz-cad-step-label">Complete</span> Cadence finished — move to nurture or re-engage';
+    } else {
+        banner.className = 'bz-cadence-banner';
+        banner.innerHTML = '<span class="bz-cad-step-label">New</span> First touch starts the 21-day cadence';
+    }
 
-    document.getElementById('bzCallContact').innerHTML = '<div class="bz-call-contact-name">' + (contact.name || 'No contact') + '</div>' +
-        '<div class="bz-call-contact-title">' + (contact.title || '') + '</div>' +
-        '<div class="bz-call-contact-actions">' +
-        (phone ? '<button class="bz-call-copy" onclick="bzCopyPhone(\'' + phone + '\')">&#128222; ' + phone + '</button>' : '') +
-        (email ? '<button class="bz-call-copy" onclick="bzCopyText(\'' + email + '\')">&#128231; ' + email + '</button>' : '') +
-        (contact.linkedin ? '<button class="bz-call-copy" onclick="window.open(\'' + contact.linkedin + '\',\'_blank\')">&#128188; LinkedIn</button>' : '') +
-        '</div>';
+    // Company header
+    var obfuscated = contact.name && /\*/.test(contact.name);
+    document.getElementById('bzCallCompany').innerHTML = a.company + '<small>' + [a.industry, a.city, (a.employees ? a.employees + ' emp' : ''), (a.revenue ? fmtSales(a.revenue) : '')].filter(Boolean).join(' · ') + '</small>';
 
-    document.getElementById('bzCallOpener').innerHTML = intel.suggestedOpener ? intel.suggestedOpener : '<span style="color:var(--text3);">No opener available — personalize based on context</span>';
+    // Contact card
+    var contactHtml = '<div class="bz-call-contact-name">' + (contact.name || 'No contact');
+    if (obfuscated) contactHtml += ' <span class="bz-obfuscated">(name partially hidden)</span>';
+    contactHtml += '</div><div class="bz-call-contact-title">' + (contact.title || '') + '</div><div class="bz-call-contact-actions">';
+    if (phone) contactHtml += '<button class="bz-call-copy" onclick="bzCopyPhone(\'' + phone.replace(/'/g,'\\\'') + '\')">&#128222; ' + phone + '</button>';
+    if (email) contactHtml += '<button class="bz-call-copy" onclick="bzCopyText(\'' + email.replace(/'/g,'\\\'') + '\')">&#128231; ' + email + '</button>';
+    if (contact.linkedin) contactHtml += '<button class="bz-call-copy" onclick="window.open(\'' + contact.linkedin + '\',\'_blank\')">&#128188; LinkedIn</button>';
+    if (a.website) contactHtml += '<button class="bz-call-copy" onclick="window.open(\'' + a.website + '\',\'_blank\')">&#127760; Website</button>';
+    if (a.linkedin) contactHtml += '<button class="bz-call-copy" onclick="window.open(\'' + a.linkedin + '\',\'_blank\')">&#127970; Company LI</button>';
+    contactHtml += '</div>';
+    document.getElementById('bzCallContact').innerHTML = contactHtml;
 
-    let tags = '';
-    if (intel.interests) tags += intel.interests.map(i => '<span class="bz-tag bz-tag-interest">' + i + '</span>').join('');
-    if (intel.sportsTeams) tags += intel.sportsTeams.map(i => '<span class="bz-tag bz-tag-sport">' + i + '</span>').join('');
-    if (intel.communityInvolvement) tags += intel.communityInvolvement.map(i => '<span class="bz-tag bz-tag-community">' + i + '</span>').join('');
-    document.getElementById('bzCallTags').innerHTML = tags || '';
+    // Opener
+    document.getElementById('bzCallOpener').innerHTML = intel.suggestedOpener ? intel.suggestedOpener : '<span style="color:var(--text3);">No opener — lead with "How have you been?" (6.6x success)</span>';
 
     document.getElementById('bzCallNotes').value = '';
-    document.getElementById('bzCallDials').textContent = 'DIALS: ' + bzCallSession.dials + '/' + bzCallSession.target;
-    document.getElementById('bzCallStreak').textContent = 'Streak: ' + bzCallSession.streak;
+
+    // Stats
+    document.getElementById('bzCallDials').textContent = bzCallSession.dials;
+    document.getElementById('bzCallStreak').textContent = bzCallSession.streak;
+    document.getElementById('bzCallConvos').textContent = bzCallSession.conversations;
+    document.getElementById('bzCallMtg').textContent = bzCallSession.meetingsBooked;
+    document.getElementById('bzCallXP').textContent = stats.xp;
+    document.getElementById('bzCallLevel').textContent = stats.level;
+
+    // Data quality badge
+    var dqEl = document.getElementById('bzCallDQ');
+    var dqClass = dq >= 7 ? 'dq-green' : dq >= 4 ? 'dq-yellow' : 'dq-red';
+    dqEl.innerHTML = 'DQ <span class="bz-dq-badge ' + dqClass + '"></span>';
+
+    // Intel panel
+    renderCallIntelPanel(a, d, contact, intel, cadStep);
 }
 
 function bzLogOutcome(outcome) {
     if (!bzCallSession || bzCallSession.index >= bzCallSession.queue.length) return;
-    const a = bzCallSession.queue[bzCallSession.index];
-    const note = document.getElementById('bzCallNotes').value;
-    const d = getBzData(a.id);
+    var a = bzCallSession.queue[bzCallSession.index];
+    var note = document.getElementById('bzCallNotes').value;
+    var d = getBzData(a.id);
     if (!d.cadence) d.cadence = [];
-    const today = new Date().toISOString().slice(0, 10);
-    d.cadence.push({ type: 'phone', outcome, note, date: today });
+    var today = new Date().toISOString().slice(0, 10);
+    d.cadence.push({ type: 'phone', outcome: outcome, note: note, date: today });
     d.lastTouch = today;
     if (d.status === 'fresh') d.status = 'contacted';
     if (outcome === 'meeting') { d.status = 'meeting'; bzCallSession.meetingsBooked++; }
     if (outcome === 'not_interested') d.status = 'dead';
     if (outcome === 'connected') bzCallSession.conversations++;
+    // Track rejections
+    if (outcome === 'no_answer' || outcome === 'gatekeeper' || outcome === 'not_interested') {
+        d.rejections = (d.rejections || 0) + 1;
+    }
     setBzData(a.id, d);
+
+    // Advance cadence
+    bzAdvanceCadence(a.id);
 
     bzCallSession.dials++;
     bzCallSession.streak++;
     bzCallSession.lastOutcome = outcome;
 
+    // XP system
+    var xpEarned = BZ_XP_MAP[outcome] || 5;
+    var stats = bzGetSprintStats();
+    stats.xp += xpEarned;
+    stats.totalDials++;
+    var newLevel = Math.floor(stats.xp / 100) + 1;
+    var leveledUp = newLevel > stats.level;
+    stats.level = newLevel;
+    bzSaveSprintStats(stats);
+    bzCallSession.xpGained += xpEarned;
+
     // Milestones
+    if (outcome === 'meeting') showToast('success', 'MEETING BOOKED! +' + xpEarned + ' XP');
     if (bzCallSession.dials === 5) showToast('success', '5 dials!');
-    if (bzCallSession.dials === 10) showToast('success', '10 dials — you\'re on fire!');
-    if (bzCallSession.dials === 15) showToast('success', 'Target hit: 15 dials!');
-    if (outcome === 'meeting') showToast('success', 'MEETING BOOKED!');
+    if (bzCallSession.dials === 10) showToast('success', '10 dials — on fire!');
+    if (bzCallSession.dials === 15) showToast('success', 'Target hit: 15!');
 
     bzUpdateStreak();
 
@@ -7119,21 +7411,22 @@ function bzLogOutcome(outcome) {
         target: bzCallSession.target
     }));
 
-    // Show logged toast then advance
-    const logged = document.createElement('div');
-    logged.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--accent2);color:#000;padding:10px 24px;border-radius:10px;font-weight:700;font-size:14px;z-index:999;';
-    logged.textContent = 'Logged!';
-    document.body.appendChild(logged);
-    setTimeout(() => {
-        logged.remove();
+    // XP flash + advance
+    var flash = document.createElement('div');
+    flash.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--accent2);color:#000;padding:10px 24px;border-radius:10px;font-weight:700;font-size:16px;z-index:999;';
+    flash.textContent = '+' + xpEarned + ' XP';
+    document.body.appendChild(flash);
+    setTimeout(function(){
+        flash.remove();
+        if (leveledUp) bzShowLevelUp(newLevel);
         bzCallSession.index++;
         bzRenderCallAccount();
-    }, 800);
+    }, 600);
 }
 
 function bzStartTimer() {
     if (bzCallSession._timer) clearInterval(bzCallSession._timer);
-    bzCallSession._timer = setInterval(() => {
+    bzCallSession._timer = setInterval(function(){
         if (!bzCallSession) return;
         bzCallSession.timerSeconds--;
         if (bzCallSession.timerSeconds <= 0) {
@@ -7141,22 +7434,30 @@ function bzStartTimer() {
             bzShowSummary();
             return;
         }
-        const min = Math.floor(bzCallSession.timerSeconds / 60);
-        const sec = bzCallSession.timerSeconds % 60;
-        document.getElementById('bzCallTimer').textContent = min + ':' + String(sec).padStart(2, '0') + ' remaining';
+        var min = Math.floor(bzCallSession.timerSeconds / 60);
+        var sec = bzCallSession.timerSeconds % 60;
+        var timerEl = document.getElementById('bzCallTimer');
+        timerEl.textContent = min + ':' + String(sec).padStart(2, '0');
+        timerEl.className = 'bz-sprint-timer ' + (min >= 10 ? 'green' : min >= 5 ? 'yellow' : 'red');
     }, 1000);
 }
 
 function bzShowSummary() {
-    const elapsed = Math.round((Date.now() - bzCallSession.startTime) / 60000);
+    var elapsed = Math.round((Date.now() - bzCallSession.startTime) / 60000);
+    var stats = bzGetSprintStats();
     document.getElementById('bzCallSummary').classList.remove('hidden');
-    document.getElementById('bzCallSummary').innerHTML = '<div class="bz-summary-card"><h2>Session Complete</h2>' +
+    document.getElementById('bzCallSummary').innerHTML = '<div class="bz-summary-card"><h2>Sprint #' + bzCallSession.sprintNumber + ' Complete</h2>' +
         '<div class="bz-summary-stats">' +
         '<div class="bz-summary-stat"><div class="val">' + elapsed + '</div><div class="lbl">Minutes</div></div>' +
         '<div class="bz-summary-stat"><div class="val">' + bzCallSession.dials + '</div><div class="lbl">Dials</div></div>' +
         '<div class="bz-summary-stat"><div class="val">' + bzCallSession.conversations + '</div><div class="lbl">Conversations</div></div>' +
         '<div class="bz-summary-stat"><div class="val">' + bzCallSession.meetingsBooked + '</div><div class="lbl">Meetings</div></div>' +
-        '</div><button class="bz-start-btn" onclick="bzExitCallMode()" style="background:var(--accent);">Close</button></div>';
+        '<div class="bz-summary-stat"><div class="val">+' + bzCallSession.xpGained + '</div><div class="lbl">XP Gained</div></div>' +
+        '<div class="bz-summary-stat"><div class="val">' + stats.level + '</div><div class="lbl">Level</div></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:center;margin-top:12px;">' +
+        '<button class="bz-start-btn" onclick="bzExitCallMode();bzStartCallMode();" style="background:var(--accent2);">Start Another Sprint</button>' +
+        '<button class="bz-start-btn" onclick="bzExitCallMode()" style="background:var(--accent);">Done</button></div></div>';
 }
 
 function bzExitCallMode() {
