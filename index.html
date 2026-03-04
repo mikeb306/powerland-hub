@@ -4,31 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SK Command Center — Mike Bernhardt | Xerox IT Solutions</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230f1117'/><text x='16' y='22' font-family='system-ui' font-weight='700' font-size='16' fill='%234f8cff' text-anchor='middle'>SK</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
-            --bg: #0b0d11;
-            --bg2: #10131a;
-            --bg3: #161a24;
-            --card: #161a24;
-            --card-hover: #1c2030;
-            --text: #e8eaed;
-            --text2: #9aa0ac;
-            --text3: #5a6070;
+            --bg: #0f1117;
+            --bg2: #141820;
+            --bg3: #1a1f2e;
+            --card: #1a1f2e;
+            --card-hover: #1f2538;
+            --text: #e2e4e9;
+            --text2: #8b92a0;
+            --text3: #4d5565;
             --accent: #4f8cff;
             --accent2: #34d399;
             --accent3: #f59e0b;
             --accent4: #ef4444;
             --accent5: #a78bfa;
+            --accent6: #38bdf8;
             --xerox-red: #e4002b;
             --border: rgba(255,255,255,.07);
             --border2: rgba(255,255,255,.12);
-            --font: 'DM Sans', system-ui, sans-serif;
+            --accent-light: rgba(79,140,255,.12);
+            --accent2-light: rgba(52,211,153,.12);
+            --accent3-light: rgba(245,158,11,.12);
+            --accent4-light: rgba(239,68,68,.12);
+            --accent5-light: rgba(167,139,250,.12);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,.25);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,.3);
+            --shadow-glow: 0 0 20px rgba(79,140,255,.08);
+            --font: 'Inter', system-ui, sans-serif;
+            --font-display: 'DM Sans', system-ui, sans-serif;
             --mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --text-xs: 10px;
+            --text-sm: 11px;
+            --text-base: 12.5px;
+            --text-md: 14px;
+            --text-lg: 16px;
+            --text-xl: 20px;
+            --text-2xl: 26px;
+            --text-3xl: 32px;
+            --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-6: 24px; --sp-8: 32px;
             --radius: 12px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -40,16 +61,18 @@
         /* AUTH SCREEN */
         .auth-overlay {
             position: fixed; inset: 0; z-index: 999;
-            background: var(--bg);
+            background: linear-gradient(135deg, #0f1117 0%, #141830 50%, #0f1117 100%);
             display: flex; align-items: center; justify-content: center;
         }
         .auth-overlay.hidden { display: none; }
         .auth-box {
             background: var(--card); border: 1px solid var(--border2);
-            border-radius: 16px; padding: 40px 36px; width: 360px; text-align: center;
+            border-radius: 16px; padding: 48px 40px; width: 380px; text-align: center;
+            box-shadow: var(--shadow-lg);
         }
-        .auth-logo { font-size: 18px; font-weight: 700; color: var(--xerox-red); margin-bottom: 4px; }
-        .auth-logo span { color: var(--text2); font-weight: 400; font-size: 14px; }
+        .auth-logo { font-size: var(--text-xl); font-weight: 700; color: var(--xerox-red); margin-bottom: 4px; font-family: var(--font-display); }
+        .auth-logo span { color: var(--text2); font-weight: 400; font-size: var(--text-md); }
+        .auth-hero { font-size: var(--text-2xl); font-weight: 700; color: var(--text); margin: 16px 0 4px; font-family: var(--font-display); letter-spacing: -0.02em; }
         .auth-subtitle { font-size: 13px; color: var(--text3); margin-bottom: 28px; }
         .auth-input {
             width: 100%; padding: 12px 16px; border-radius: 10px;
@@ -74,7 +97,7 @@
         /* NAV — TWO-ROW LAYOUT */
         .topbar {
             position: sticky; top: 0; z-index: 50;
-            background: rgba(11,13,17,.95); backdrop-filter: blur(20px);
+            background: rgba(15,17,23,.95); backdrop-filter: blur(20px);
         }
         .topbar-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -113,6 +136,24 @@
         .topbar-tab:hover { color: var(--text); }
         .topbar-tab.active { color: var(--accent); }
         .topbar-tab.active::after { background: var(--accent); }
+        .topbar-accent-line { height: 1px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent5)); opacity: .5; }
+        .topbar-streak { font-size: 11px; font-weight: 700; color: var(--accent3); white-space: nowrap; }
+        .topbar-dropdown { position: relative; display: flex; align-items: stretch; }
+        .topbar-dd-trigger { cursor: pointer; }
+        .topbar-dd-trigger.dd-open { color: var(--accent); }
+        .topbar-dd-menu {
+            display: none; position: absolute; top: 100%; left: 0; z-index: 60;
+            background: var(--bg2); border: 1px solid var(--border2); border-radius: 8px;
+            min-width: 160px; padding: 4px 0; box-shadow: var(--shadow-lg);
+        }
+        .topbar-dd-menu.open { display: block; }
+        .topbar-dd-item {
+            display: block; width: 100%; text-align: left; padding: 8px 16px;
+            font-size: 12px; font-weight: 500; color: var(--text2); background: none;
+            border: none; cursor: pointer; font-family: var(--font); transition: all .1s;
+        }
+        .topbar-dd-item:hover { color: var(--text); background: rgba(255,255,255,.05); }
+        .topbar-dd-item.active { color: var(--accent); }
         .restore-modal {
             position: fixed; inset: 0; z-index: 998; background: rgba(0,0,0,.6);
             display: flex; align-items: center; justify-content: center;
@@ -147,17 +188,31 @@
 
         /* DASH HEADER */
         .dash-header { padding: 28px 0 20px; }
-        .dash-header h1 { font-size: 22px; font-weight: 700; color: var(--text); }
+        .dash-header h1 { font-size: var(--text-xl); font-weight: 700; color: var(--text); font-family: var(--font-display); }
         .dash-header p { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+        /* TODAY'S FOCUS */
+        .today-focus {
+            background: linear-gradient(135deg, rgba(79,140,255,.08), rgba(52,211,153,.06));
+            border: 1px solid var(--accent-light); border-radius: var(--radius);
+            padding: 18px 22px; margin-bottom: 16px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
+        }
+        .tf-item { flex: 1; min-width: 140px; }
+        .tf-label { font-size: var(--text-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+        .tf-value { font-size: var(--text-md); font-weight: 600; color: var(--text); }
+        .tf-value.tf-active { color: var(--accent2); }
+        .tf-value.tf-warn { color: var(--accent3); }
+        .tf-streak { font-size: var(--text-lg); font-weight: 700; color: var(--accent3); }
 
         /* KPI */
         .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 16px; }
         .kpi {
             background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 18px 16px; position: relative;
+            padding: 18px 16px; position: relative; transition: all .2s;
         }
-        .kpi-label { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
-        .kpi-value { font-size: 26px; font-weight: 700; color: var(--text); font-family: var(--mono); }
+        .kpi:hover { box-shadow: var(--shadow-glow); }
+        .kpi-label { font-size: var(--text-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+        .kpi-value { font-size: var(--text-3xl); font-weight: 700; color: var(--text); font-family: var(--mono); }
         .kpi-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
         .kpi-accent .kpi-value { color: var(--accent); }
         .kpi-green .kpi-value { color: var(--accent2); }
@@ -177,8 +232,9 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
 
-        .panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
-        .panel-title { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text2); margin-bottom: 14px; }
+        .panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: all .2s; }
+        .panel:hover { box-shadow: var(--shadow-glow); }
+        .panel-title { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text2); margin-bottom: 14px; font-family: var(--font-display); }
 
         /* BARS */
         .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -188,8 +244,8 @@
         .bar-count { font-size: 12px; color: var(--text3); width: 28px; text-align: right; font-family: var(--mono); }
 
         /* TABLES */
-        .tbl-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; font-size: var(--text-base); min-width: 600px; }
         th {
             text-align: left; padding: 9px 10px; font-size: 10px; font-weight: 600;
             letter-spacing: .06em; text-transform: uppercase; color: var(--text3);
@@ -198,8 +254,8 @@
         td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
         tr:hover td { background: rgba(255,255,255,.02); color: var(--text); }
         .tag { display: inline-block; padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 600; letter-spacing: .02em; white-space: nowrap; }
-        .tag-a { background: rgba(239,68,68,.12); color: #f87171; }
-        .tag-b { background: rgba(245,158,11,.12); color: #fbbf24; }
+        .tag-a { background: var(--accent4-light); color: #f87171; }
+        .tag-b { background: var(--accent3-light); color: #fbbf24; }
         .tag-c { background: rgba(100,116,139,.15); color: #94a3b8; }
         .tag-new { background: rgba(100,116,139,.1); color: var(--text3); }
         .tag-db { background: rgba(79,140,255,.1); color: var(--accent); }
@@ -238,17 +294,17 @@
             padding: 24px 20px; transition: all .2s;
         }
         .play-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-        .play-card h3 { font-family: 'Space Grotesk', var(--font); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; letter-spacing: -0.01em; }
+        .play-card h3 { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; letter-spacing: -0.01em; }
         .play-card p { font-size: 12.5px; color: var(--text2); line-height: 1.7; letter-spacing: 0.005em; }
         .play-example {
             margin-top: 12px; padding: 12px 14px; border-radius: 8px;
             background: rgba(79,140,255,.04); border: 1px solid rgba(79,140,255,.12);
             font-size: 12px; color: var(--text2); line-height: 1.65; font-style: italic;
         }
-        .play-example strong { color: var(--accent); font-style: normal; font-family: 'Space Grotesk', var(--font); font-weight: 600; }
-        #playbook .sec-header h2 { font-family: 'Space Grotesk', var(--font); font-size: 22px; letter-spacing: -0.02em; font-weight: 700; }
+        .play-example strong { color: var(--accent); font-style: normal; font-family: var(--font-display); font-weight: 600; }
+        #playbook .sec-header h2 { font-family: var(--font-display); font-size: 22px; letter-spacing: -0.02em; font-weight: 700; }
         #playbook .sec-header p { font-size: 13px; letter-spacing: 0.01em; }
-        #playbook .section-tab { font-family: 'Space Grotesk', var(--font); letter-spacing: -0.01em; }
+        #playbook .section-tab { font-family: var(--font-display); letter-spacing: -0.01em; }
 
         /* CALC */
         .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -445,12 +501,12 @@
         .modal-btn-ghost:hover { border-color: var(--border2); color: var(--text); }
         .tbl-clickable tbody tr { cursor: pointer; }
         .tbl-clickable tbody tr:hover td { background: rgba(79,140,255,.04); }
-        .tag-discovery { background: rgba(79,140,255,.12); color: var(--accent); }
-        .tag-needs-analysis { background: rgba(99,102,241,.12); color: #818cf8; }
-        .tag-qualifying { background: rgba(167,139,250,.12); color: var(--accent5); }
-        .tag-proposal { background: rgba(245,158,11,.12); color: var(--accent3); }
-        .tag-negotiation { background: rgba(239,68,68,.12); color: var(--accent4); }
-        .tag-won { background: rgba(52,211,153,.15); color: var(--accent2); }
+        .tag-discovery { background: var(--accent-light); color: var(--accent); }
+        .tag-needs-analysis { background: var(--accent5-light); color: var(--accent5); }
+        .tag-qualifying { background: var(--accent5-light); color: var(--accent5); }
+        .tag-proposal { background: var(--accent3-light); color: var(--accent3); }
+        .tag-negotiation { background: var(--accent4-light); color: var(--accent4); }
+        .tag-won { background: var(--accent2-light); color: var(--accent2); }
         .tag-lost { background: rgba(100,116,139,.15); color: var(--text3); text-decoration: line-through; }
         .tag-fresh { background: rgba(100,116,139,.1); color: var(--text3); }
         .pillar-dots { display: flex; gap: 2px; flex-wrap: wrap; }
@@ -475,10 +531,10 @@
         .oc-note { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
         .oc-note:last-child { border-bottom: none; }
         .oc-note-type { font-size: 9px; padding: 2px 5px; border-radius: 3px; font-weight: 600; flex-shrink: 0; text-transform: uppercase; }
-        .oc-note-type.note { background: rgba(99,102,241,.15); color: #818cf8; }
-        .oc-note-type.follow-up { background: rgba(251,191,36,.15); color: #fbbf24; }
-        .oc-note-type.pipeline { background: rgba(52,211,153,.15); color: #34d399; }
-        .oc-note-type.flag { background: rgba(239,68,68,.15); color: #ef4444; }
+        .oc-note-type.note { background: var(--accent5-light); color: var(--accent5); }
+        .oc-note-type.follow-up { background: var(--accent3-light); color: var(--accent3); }
+        .oc-note-type.pipeline { background: var(--accent2-light); color: var(--accent2); }
+        .oc-note-type.flag { background: var(--accent4-light); color: var(--accent4); }
         .oc-note-body { flex: 1; min-width: 0; }
         .oc-note-text { color: var(--text); word-break: break-word; }
         .oc-note-meta { color: var(--text3); font-size: 9px; margin-top: 2px; }
@@ -570,9 +626,9 @@
             font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 4px;
             font-family: var(--mono);
         }
-        .deal-card-meddpicc.mred { background: rgba(239,68,68,.2); color: #f87171; }
-        .deal-card-meddpicc.myellow { background: rgba(245,158,11,.2); color: #fbbf24; }
-        .deal-card-meddpicc.mgreen { background: rgba(52,211,153,.2); color: #34d399; }
+        .deal-card-meddpicc.mred { background: rgba(239,68,68,.2); color: var(--accent4); }
+        .deal-card-meddpicc.myellow { background: rgba(245,158,11,.2); color: var(--accent3); }
+        .deal-card-meddpicc.mgreen { background: rgba(52,211,153,.2); color: var(--accent2); }
         .deal-card-next { font-size: 10px; color: var(--text3); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .deal-card-age-warning { border-left-color: var(--accent3) !important; background: rgba(245,158,11,.06) !important; }
         .deal-card-age-warning .deal-card-days { color: var(--accent3); font-weight: 700; }
@@ -603,7 +659,7 @@
         /* ACCOUNT TIER BADGES */
         .tier-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
         .tier-platinum { background: rgba(167,139,250,.18); color: #c4b5fd; }
-        .tier-gold { background: rgba(245,158,11,.18); color: #fbbf24; }
+        .tier-gold { background: var(--accent3-light); color: var(--accent3); }
         .tier-silver { background: rgba(156,163,175,.18); color: #d1d5db; }
         .tier-bronze { background: rgba(180,130,90,.18); color: #c8a06e; }
 
@@ -677,14 +733,14 @@
         .contact-card-title { font-size: 10px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .contact-card-detail { font-size: 10px; color: var(--text3); margin-top: 2px; }
         .contact-role { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; white-space: nowrap; text-transform: uppercase; letter-spacing: .03em; }
-        .contact-role.r-champion { background: rgba(52,211,153,.15); color: #34d399; }
-        .contact-role.r-economic-buyer { background: rgba(79,140,255,.15); color: #4f8cff; }
-        .contact-role.r-technical-buyer { background: rgba(167,139,250,.15); color: #a78bfa; }
-        .contact-role.r-user-buyer { background: rgba(14,165,233,.15); color: #0ea5e9; }
-        .contact-role.r-influencer { background: rgba(245,158,11,.15); color: #f59e0b; }
+        .contact-role.r-champion { background: var(--accent2-light); color: var(--accent2); }
+        .contact-role.r-economic-buyer { background: var(--accent-light); color: var(--accent); }
+        .contact-role.r-technical-buyer { background: var(--accent5-light); color: var(--accent5); }
+        .contact-role.r-user-buyer { background: rgba(56,189,248,.15); color: var(--accent6); }
+        .contact-role.r-influencer { background: var(--accent3-light); color: var(--accent3); }
         .contact-role.r-gatekeeper { background: rgba(156,163,175,.15); color: #9ca3af; }
-        .contact-role.r-blocker { background: rgba(239,68,68,.15); color: #f87171; }
-        .contact-role.r-coach { background: rgba(34,197,94,.15); color: #22c55e; }
+        .contact-role.r-blocker { background: var(--accent4-light); color: var(--accent4); }
+        .contact-role.r-coach { background: var(--accent2-light); color: var(--accent2); }
         .contact-influence { font-size: 9px; font-weight: 600; color: var(--text3); }
         .contact-influence.inf-high { color: var(--accent2); }
         .contact-influence.inf-medium { color: var(--accent3); }
@@ -762,7 +818,7 @@
         .meddpicc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
         .meddpicc-item { display: flex; align-items: center; gap: 8px; }
         .meddpicc-item label { font-size: 10px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .03em; width: 70px; flex-shrink: 0; }
-        .meddpicc-item input[type="range"] { flex: 1; accent-color: #6366f1; height: 4px; cursor: pointer; }
+        .meddpicc-item input[type="range"] { flex: 1; accent-color: var(--accent5); height: 4px; cursor: pointer; }
         .meddpicc-item .meddpicc-score { font-size: 11px; font-family: var(--mono); color: var(--accent5); font-weight: 700; width: 20px; text-align: right; }
         .meddpicc-total { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(99,102,241,.12); }
         .meddpicc-total-label { font-size: 11px; font-weight: 600; color: var(--text2); }
@@ -774,9 +830,9 @@
         .meddpicc-fill { height: 100%; border-radius: 3px; transition: width .3s, background .3s; }
 
         /* STAGE TAGS - UPDATED */
-        .tag-prospecting { background: rgba(99,102,241,.12); color: #818cf8; }
-        .tag-solution-design { background: rgba(14,165,233,.12); color: #38bdf8; }
-        .tag-verbal-commit { background: rgba(34,197,94,.12); color: #4ade80; }
+        .tag-prospecting { background: var(--accent5-light); color: var(--accent5); }
+        .tag-solution-design { background: rgba(56,189,248,.12); color: var(--accent6); }
+        .tag-verbal-commit { background: var(--accent2-light); color: var(--accent2); }
 
         /* FAB */
         .fab-container { position: fixed; bottom: 24px; right: 24px; z-index: 200; }
@@ -832,36 +888,55 @@
         .kpi-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
         .kpi-metric {
             background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 16px; position: relative; overflow: hidden;
+            padding: 16px; position: relative; overflow: hidden; transition: all .2s;
         }
-        .kpi-metric-label { font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
-        .kpi-metric-value { font-size: 24px; font-weight: 700; font-family: var(--mono); margin-bottom: 2px; }
+        .kpi-metric:hover { box-shadow: var(--shadow-glow); }
+        .kpi-metric-label { font-size: var(--text-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; font-family: var(--font-display); }
+        .kpi-metric-value { font-size: var(--text-2xl); font-weight: 700; font-family: var(--mono); margin-bottom: 2px; }
         .kpi-metric-sub { font-size: 11px; color: var(--text2); }
         .kpi-metric-bar { height: 4px; background: rgba(255,255,255,.06); border-radius: 2px; margin-top: 10px; overflow: hidden; }
         .kpi-metric-fill { height: 100%; border-radius: 2px; transition: width .6s ease; }
         .kpi-coverage-zone { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 6px; }
-        .kpi-coverage-zone.zone-red { background: rgba(239,68,68,.15); color: #f87171; }
-        .kpi-coverage-zone.zone-yellow { background: rgba(245,158,11,.15); color: #fbbf24; }
-        .kpi-coverage-zone.zone-green { background: rgba(34,197,94,.15); color: #4ade80; }
+        .kpi-coverage-zone.zone-red { background: var(--accent4-light); color: var(--accent4); }
+        .kpi-coverage-zone.zone-yellow { background: var(--accent3-light); color: var(--accent3); }
+        .kpi-coverage-zone.zone-green { background: var(--accent2-light); color: var(--accent2); }
 
         /* TOAST */
         .toast-container { position: fixed; top: 20px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
         .toast {
-            padding: 12px 18px; border-radius: 10px; font-size: 12px; font-weight: 500;
+            padding: 12px 18px 12px 22px; border-radius: 10px; font-size: 12px; font-weight: 500;
             color: #fff; pointer-events: auto; animation: toastIn .3s ease;
-            max-width: 380px; box-shadow: 0 4px 16px rgba(0,0,0,.3);
+            max-width: 380px; box-shadow: var(--shadow-lg); position: relative; overflow: hidden;
         }
+        .toast::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; border-radius:10px 0 0 10px; }
         .toast.info { background: rgba(99,102,241,.95); }
+        .toast.info::before { background: var(--accent5); }
         .toast.success { background: rgba(34,197,94,.95); }
+        .toast.success::before { background: var(--accent2); }
         .toast.warning { background: rgba(245,158,11,.95); }
+        .toast.warning::before { background: var(--accent3); }
         .toast.error { background: rgba(239,68,68,.95); }
+        .toast.error::before { background: var(--accent4); }
         @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(40px); } }
+
+        /* MICRO-INTERACTIONS */
+        @keyframes xpDrift { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-40px); } }
+        .xp-float {
+            position: fixed; z-index: 600; font-size: 14px; font-weight: 700; font-family: var(--mono);
+            color: var(--accent2); pointer-events: none; animation: xpDrift 1.2s ease-out forwards;
+        }
+        @keyframes greenPulse { 0% { box-shadow: 0 0 0 0 rgba(52,211,153,.4); } 70% { box-shadow: 0 0 0 10px rgba(52,211,153,0); } 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); } }
+        .pulse-success { animation: greenPulse .6s ease; }
+        @keyframes callWindowGlow { 0%,100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); } 50% { box-shadow: 0 0 8px 2px rgba(52,211,153,.15); } }
+        .topbar.call-window-active { animation: callWindowGlow 3s ease infinite; }
+        .play-card .play-example { max-height: 0; overflow: hidden; transition: max-height .3s ease; margin-top: 0; padding: 0 14px; border: none; }
+        .play-card.expanded .play-example { max-height: 200px; margin-top: 12px; padding: 12px 14px; border: 1px solid rgba(79,140,255,.12); }
 
         /* ===== BOTTOM NAV (mobile) ===== */
         .bottom-nav {
             display: none; position: fixed; bottom: 0; left: 0; right: 0;
-            z-index: 1100; background: rgba(11,13,17,.98); backdrop-filter: blur(16px);
+            z-index: 1100; background: rgba(15,17,23,.98); backdrop-filter: blur(16px);
             border-top: 1px solid var(--border2);
             padding: 6px 0 calc(8px + env(safe-area-inset-bottom, 8px));
             -webkit-tap-highlight-color: transparent;
@@ -878,10 +953,11 @@
             -webkit-tap-highlight-color: transparent; touch-action: manipulation;
             min-height: 44px; min-width: 44px; justify-content: center;
         }
-        .bottom-nav-icon { font-size: 22px; line-height: 1; }
+        .bottom-nav-icon { font-size: 24px; line-height: 1; }
         .bottom-nav-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
-        .bottom-nav-item { color: var(--text3); }
+        .bottom-nav-item { color: var(--text3); position: relative; }
         .bottom-nav-item.active { color: var(--accent); }
+        .bottom-nav-item.active::after { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:16px; height:2px; background:var(--accent); border-radius:1px; }
         .bottom-nav-item:hover { color: var(--text); }
         .bottom-nav-item.bnav-log { color: var(--accent5); }
         .bottom-nav-item.bnav-log .bottom-nav-icon {
@@ -920,6 +996,7 @@
             .map-container { height: 400px; }
             .relmap-grid { max-width: 280px; aspect-ratio: 4/3; }
             .relmap-node { width: 26px; height: 26px; font-size: 8px; }
+            .today-focus { flex-direction: column; gap: 12px; }
         }
 
         /* ===== BREAKPOINT 3: Phone (≤480px) ===== */
@@ -1049,6 +1126,7 @@
         .bz-s-qualified { background:rgba(167,139,250,.12);color:var(--accent5); }
         .bz-s-nurture { background:rgba(154,160,172,.12);color:var(--text2); }
         .bz-s-dead { background:rgba(90,96,112,.12);color:var(--text3);text-decoration:line-through; }
+        .bz-s-pl_client { background:var(--accent2-light);color:var(--accent2);font-weight:700; }
         .bz-stale { font-size:10px;font-weight:600; }
         .bz-stale-ok { color:var(--accent2); }
         .bz-stale-warn { color:var(--accent3); }
@@ -1218,7 +1296,8 @@
 <div class="auth-overlay" id="authOverlay">
     <div class="auth-box">
         <div class="auth-logo">Xerox <span>IT Solutions</span></div>
-        <div class="auth-subtitle">SK Territory — Prospecting Command Center</div>
+        <div class="auth-hero">SK Command Center</div>
+        <div class="auth-subtitle">Saskatchewan Territory — Pipeline Intelligence</div>
         <input type="password" class="auth-input" id="authPass" placeholder="Enter access code" autofocus>
         <button class="auth-btn" id="authBtn">Unlock</button>
         <div class="auth-error" id="authError">Incorrect code. Try again.</div>
@@ -1236,8 +1315,8 @@
         </div>
         <span class="topbar-center">SK Command Center</span>
         <div class="topbar-right">
-            <span class="topbar-name">Mike Bernhardt &middot; Sr AE</span>
-            <div class="topbar-target">FY26: <strong>$3M</strong></div>
+            <span class="topbar-streak" id="topbarStreak" title="Calling streak"></span>
+            <span class="topbar-name">Mike B &middot; Sr AE</span>
             <span class="sync-badge sync-online" id="syncBadge"><span class="sync-badge-dot"></span> Synced</span>
             <button class="topbar-restore" onclick="openRestoreModal()" title="Backup & Restore">&#9881;</button>
         </div>
@@ -1246,18 +1325,29 @@
     <div class="topbar-nav">
         <button class="topbar-tab active" data-page="dashboard">Dashboard</button>
         <button class="topbar-tab" data-page="pipeline">Pipeline</button>
-        <button class="topbar-tab" data-page="ent">ENT</button>
-        <button class="topbar-tab" data-page="smb">SMB</button>
-        <button class="topbar-tab" data-page="k12">K-12</button>
-        <button class="topbar-tab" data-page="highered">Higher Ed</button>
-        <button class="topbar-tab" data-page="creditunions">Credit Unions</button>
+        <div class="topbar-dropdown">
+            <button class="topbar-tab topbar-dd-trigger" data-dropdown="accounts">Accounts &#9662;</button>
+            <div class="topbar-dd-menu" id="dd-accounts">
+                <button class="topbar-dd-item" data-page="ent">Enterprise</button>
+                <button class="topbar-dd-item" data-page="smb">SMB</button>
+                <button class="topbar-dd-item" data-page="k12">K-12</button>
+                <button class="topbar-dd-item" data-page="highered">Higher Ed</button>
+                <button class="topbar-dd-item" data-page="creditunions">Credit Unions</button>
+            </div>
+        </div>
         <button class="topbar-tab" data-page="pillars">Pillars</button>
         <button class="topbar-tab" data-page="territory">Territory</button>
-        <button class="topbar-tab" data-page="playbook">Playbook</button>
-        <button class="topbar-tab" data-page="tools">Tools</button>
-        <button class="topbar-tab" data-page="calendar">Calendar</button>
         <button class="topbar-tab" data-page="blitz" style="color:var(--accent4);font-weight:700;">Blitz</button>
+        <div class="topbar-dropdown">
+            <button class="topbar-tab topbar-dd-trigger" data-dropdown="tools">Tools &#9662;</button>
+            <div class="topbar-dd-menu" id="dd-tools">
+                <button class="topbar-dd-item" data-page="playbook">Playbook</button>
+                <button class="topbar-dd-item" data-page="calendar">Calendar</button>
+                <button class="topbar-dd-item" data-page="tools">Backup / Restore</button>
+            </div>
+        </div>
     </div>
+    <div class="topbar-accent-line"></div>
 </nav>
 
 <!-- ==================== DASHBOARD ==================== -->
@@ -1292,6 +1382,25 @@
             <button class="qa-btn" onclick="openQuickDeal()"><span>+</span> Quick Add Deal</button>
             <button class="qa-btn" onclick="openAddAccount()"><span>+</span> Add Account</button>
             <button class="qa-btn" onclick="showWeekPriorities()"><span>&#9776;</span> This Week</button>
+        </div>
+
+        <div class="today-focus" id="todayFocus">
+            <div class="tf-item">
+                <div class="tf-label">Priority Action</div>
+                <div class="tf-value" id="tfAction">Loading...</div>
+            </div>
+            <div class="tf-item">
+                <div class="tf-label">Next Meeting</div>
+                <div class="tf-value" id="tfMeeting">None today</div>
+            </div>
+            <div class="tf-item">
+                <div class="tf-label">Call Window</div>
+                <div class="tf-value" id="tfCallWindow">Outside window</div>
+            </div>
+            <div class="tf-item">
+                <div class="tf-label">Streak</div>
+                <div class="tf-streak" id="tfStreak">-</div>
+            </div>
         </div>
 
         <div class="kpi-metrics" id="kpiMetrics">
@@ -2496,6 +2605,7 @@ Sr Account Executive | Xerox IT Solutions
                 <div class="kpi-metric"><div class="kpi-metric-label">Meetings Booked</div><div class="kpi-metric-value" id="bzKpiMeetings">0</div></div>
                 <div class="kpi-metric"><div class="kpi-metric-label">Pipeline Value</div><div class="kpi-metric-value" id="bzKpiPipeline">$0</div></div>
                 <div class="kpi-metric"><div class="kpi-metric-label">Due Today</div><div class="kpi-metric-value" id="bzKpiDue">0</div></div>
+                <div class="kpi-metric"><div class="kpi-metric-label">PL Clients</div><div class="kpi-metric-value" id="bzKpiPlClient" style="color:var(--accent2);">0</div></div>
             </div>
 
             <div class="bz-momentum-wrap">
@@ -2552,6 +2662,7 @@ Sr Account Executive | Xerox IT Solutions
                     <span class="bz-chip" data-f="qualified" onclick="bzFilterChip(this)">Qualified</span>
                     <span class="bz-chip" data-f="nurture" onclick="bzFilterChip(this)">Nurture</span>
                     <span class="bz-chip" data-f="dead" onclick="bzFilterChip(this)">Dead</span>
+                    <span class="bz-chip" data-f="pl_client" onclick="bzFilterChip(this)">PL Client</span>
                 </div>
                 <select class="filter-select" id="bzCityFilter" onchange="renderBlitz()" style="max-width:140px;">
                     <option value="">All Cities</option>
@@ -3621,9 +3732,43 @@ function renderCU(f='') {
 }
 
 // ===== NAV =====
-document.querySelectorAll('.topbar-tab').forEach(tab => {
+// Dropdown menus
+document.querySelectorAll('.topbar-dd-trigger').forEach(trigger => {
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ddId = trigger.dataset.dropdown;
+        const menu = document.getElementById('dd-' + ddId);
+        const wasOpen = menu.classList.contains('open');
+        // Close all dropdowns first
+        document.querySelectorAll('.topbar-dd-menu').forEach(m => m.classList.remove('open'));
+        document.querySelectorAll('.topbar-dd-trigger').forEach(t => t.classList.remove('dd-open'));
+        if (!wasOpen) {
+            menu.classList.add('open');
+            trigger.classList.add('dd-open');
+        }
+    });
+});
+document.addEventListener('click', () => {
+    document.querySelectorAll('.topbar-dd-menu').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.topbar-dd-trigger').forEach(t => t.classList.remove('dd-open'));
+});
+// Dropdown items navigate
+document.querySelectorAll('.topbar-dd-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        switchPage(item.dataset.page);
+        document.querySelectorAll('.topbar-dd-menu').forEach(m => m.classList.remove('open'));
+        document.querySelectorAll('.topbar-dd-trigger').forEach(t => t.classList.remove('dd-open'));
+        // Mark parent dropdown trigger as active
+        document.querySelectorAll('.topbar-dd-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+    });
+});
+// Direct tab clicks
+document.querySelectorAll('.topbar-tab[data-page]').forEach(tab => {
     tab.addEventListener('click', () => {
         document.querySelectorAll('.topbar-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.topbar-dd-item').forEach(i => i.classList.remove('active'));
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         tab.classList.add('active');
         document.getElementById(tab.dataset.page).classList.add('active');
@@ -3632,20 +3777,36 @@ document.querySelectorAll('.topbar-tab').forEach(tab => {
         window.scrollTo(0, 0);
     });
 });
+// Update streak badge in topbar
+function updateTopbarStreak() {
+    var sd = JSON.parse(localStorage.getItem('xits_blitz_streak') || '{"days":0,"lastDate":""}');
+    var el = document.getElementById('topbarStreak');
+    if (el) el.textContent = sd.days > 0 ? '\uD83D\uDD25 ' + sd.days + '-day streak' : '';
+}
+updateTopbarStreak();
 
 // ===== BOTTOM NAV =====
 function switchPage(page) {
     document.querySelectorAll('.topbar-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.topbar-dd-item').forEach(i => i.classList.remove('active'));
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const topTab = document.querySelector('.topbar-tab[data-page="' + page + '"]');
-    if (topTab) topTab.classList.add('active');
+    // Check if page is in a dropdown
+    var ddItem = document.querySelector('.topbar-dd-item[data-page="' + page + '"]');
+    if (ddItem) {
+        ddItem.classList.add('active');
+        var parentTrigger = ddItem.closest('.topbar-dropdown').querySelector('.topbar-dd-trigger');
+        if (parentTrigger) parentTrigger.classList.add('active');
+    } else {
+        var topTab = document.querySelector('.topbar-tab[data-page="' + page + '"]');
+        if (topTab) topTab.classList.add('active');
+    }
     document.getElementById(page).classList.add('active');
     if (page === 'pillars') renderWhitespaceHeatmap();
-    if (page === 'territory') { initTerritoryMap(); setTimeout(() => { if (territoryMap) territoryMap.invalidateSize(); }, 100); }
+    if (page === 'territory') { initTerritoryMap(); setTimeout(function(){ if (territoryMap) territoryMap.invalidateSize(); }, 100); }
     if (page === 'blitz') initBlitz();
     // Sync bottom nav active state
     document.querySelectorAll('.bottom-nav-item[data-bnav]').forEach(b => b.classList.remove('active'));
-    const bnavBtn = document.querySelector('.bottom-nav-item[data-bnav="' + page + '"]');
+    var bnavBtn = document.querySelector('.bottom-nav-item[data-bnav="' + page + '"]');
     if (bnavBtn) bnavBtn.classList.add('active');
     window.scrollTo(0, 0);
 }
@@ -5423,6 +5584,57 @@ function meddpiccBadge(meddpicc) {
     return `<span class="deal-card-meddpicc ${cls}">M${pct}</span>`;
 }
 
+// ===== TODAY'S FOCUS =====
+function updateTodayFocus() {
+    var allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name),
+        ...k12.map(a=>a.name), ...higherEd.map(a=>a.name), ...creditUnions.map(a=>a.name)];
+    var staleMax = null, staleMaxDays = 0;
+    allAccts.forEach(function(name) {
+        var d = getAcctData(name);
+        if (!d.stage || d.stage === 'Fresh' || d.stage === 'Closed Won' || d.stage === 'Closed Lost') return;
+        var last = d.lastActivity ? new Date(d.lastActivity) : null;
+        if (!last) return;
+        var days = Math.floor((Date.now() - last.getTime()) / 86400000);
+        if (days > staleMaxDays) { staleMaxDays = days; staleMax = { name: name, days: days, stage: d.stage }; }
+    });
+    var actionEl = document.getElementById('tfAction');
+    if (staleMax && staleMaxDays >= 7) {
+        actionEl.textContent = staleMax.name + ' (' + staleMaxDays + 'd stale)';
+        actionEl.className = 'tf-value tf-warn';
+    } else {
+        actionEl.textContent = 'All deals active';
+        actionEl.className = 'tf-value tf-active';
+    }
+    // Call window
+    var now = new Date();
+    var hour = now.getHours(), min = now.getMinutes();
+    var totalMin = hour * 60 + min;
+    var cwEl = document.getElementById('tfCallWindow');
+    if ((totalMin >= 600 && totalMin <= 690) || (totalMin >= 840 && totalMin <= 960)) {
+        cwEl.textContent = totalMin <= 690 ? 'ACTIVE 10-11:30am' : 'ACTIVE 2-4pm';
+        cwEl.className = 'tf-value tf-active';
+    } else {
+        cwEl.textContent = 'Next: ' + (totalMin < 600 ? '10:00am' : totalMin < 840 ? '2:00pm' : 'Tomorrow 10am');
+        cwEl.className = 'tf-value';
+    }
+    // Streak
+    var sd = JSON.parse(localStorage.getItem('xits_blitz_streak') || '{"days":0,"lastDate":""}');
+    var streakEl = document.getElementById('tfStreak');
+    streakEl.textContent = sd.days > 0 ? '\uD83D\uDD25 ' + sd.days + '-day' : 'No streak';
+    // Meeting
+    var mtgEl = document.getElementById('tfMeeting');
+    var mtgs = JSON.parse(localStorage.getItem('xits_meetings') || '[]');
+    var todayStr = now.toISOString().slice(0,10);
+    var todayMtg = mtgs.find(function(m){ return m.date === todayStr; });
+    if (todayMtg) {
+        mtgEl.textContent = (todayMtg.time || '') + ' ' + (todayMtg.title || todayMtg.account || 'Meeting');
+        mtgEl.className = 'tf-value tf-active';
+    } else {
+        mtgEl.textContent = 'None today';
+        mtgEl.className = 'tf-value';
+    }
+}
+
 // ===== KPI METRIC CARDS =====
 function updateKPICards() {
     const quota = 3000000;
@@ -6205,6 +6417,29 @@ function showToast(type, message, duration) {
     }, duration);
 }
 
+function showXpFloat(amount, x, y) {
+    var el = document.createElement('div');
+    el.className = 'xp-float';
+    el.textContent = '+' + amount + ' XP';
+    el.style.left = (x || window.innerWidth / 2) + 'px';
+    el.style.top = (y || 100) + 'px';
+    document.body.appendChild(el);
+    setTimeout(function(){ el.remove(); }, 1300);
+}
+
+function updateCallWindowGlow() {
+    var now = new Date();
+    var totalMin = now.getHours() * 60 + now.getMinutes();
+    var topbar = document.querySelector('.topbar');
+    if ((totalMin >= 600 && totalMin <= 690) || (totalMin >= 840 && totalMin <= 960)) {
+        topbar.classList.add('call-window-active');
+    } else {
+        topbar.classList.remove('call-window-active');
+    }
+}
+updateCallWindowGlow();
+setInterval(updateCallWindowGlow, 60000);
+
 // ===== FAB (Floating Action Button) =====
 let fabOpen = false;
 let fabCurrentType = 'call';
@@ -6273,6 +6508,9 @@ function saveFabActivity() {
 
     closeFabLog();
     showToast('success', fabCurrentType.charAt(0).toUpperCase() + fabCurrentType.slice(1) + ' logged for ' + acct);
+    // Pulse the today-focus card
+    var tf = document.getElementById('todayFocus');
+    if (tf) { tf.classList.add('pulse-success'); setTimeout(function(){ tf.classList.remove('pulse-success'); }, 700); }
     updateStaleAccounts();
     updateDashFollowUps();
     updateAtRiskPanel();
@@ -6312,6 +6550,7 @@ updateStageBreakdown();
 updateStaleAccounts();
 updateHotDeals();
 updateKPICards();
+updateTodayFocus();
 updateAtRiskPanel();
 updateWinRate();
 updateLossReasons();
@@ -6568,7 +6807,7 @@ function executeImport() {
 }
 
 // ===== BLITZ — Mid-Market Attack =====
-const BLITZ_STATUSES = ['fresh','contacted','meeting','qualified','nurture','dead'];
+const BLITZ_STATUSES = ['fresh','contacted','meeting','qualified','nurture','dead','pl_client'];
 let blitzAccounts = [{"id":"blitz_001","company":"REGINA CATHOLIC SCHOOL DIVISION","domain":"powerland.ca","city":"Regina","revenue":19500000,"phone":"+13067917200","website":"http://www.powerland.ca","linkedin":"http://www.linkedin.com/company/powerlandcanada","employees":120,"industry":"information technology & services","score":8,"contacts":[{"name":"Kevin Fe***h","title":"Infrastructure Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Kevin, I've been working with several SK companies similar to REGINA CATHOLIC SCHOOL DIVISION on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Riley Le***s","title":"Information Technology Service Desk Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Riley, I've been working with several SK companies similar to REGINA CATHOLIC SCHOOL DIVISION on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_002","company":"INTERNATIONAL ROAD DYNAMICS INC.","domain":"irdinc.com","city":"Saskatoon","revenue":153305000,"phone":"+13066536600","website":"http://www.irdinc.com","linkedin":"http://www.linkedin.com/company/ird_3","employees":470,"industry":"information technology & services","score":8,"contacts":[]},{"id":"blitz_003","company":"SASK GAMING","domain":"slga.com","city":"Regina","revenue":457000000,"phone":"+13067875563","website":"http://www.slga.com","linkedin":"http://www.linkedin.com/company/saskatchewan-liquor-and-gaming-authority","employees":680,"industry":"government administration","score":8,"contacts":[{"name":"Kathy Jo***s","title":"Director IT","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Kathy, I've been working with several SK companies similar to SASK GAMING on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_004","company":"DELCO AUTOMATION","domain":"delcoautomation.com","city":"Saskatoon","revenue":0,"phone":"+13062446449","website":"http://www.delcoautomation.com","linkedin":"http://www.linkedin.com/company/delco-automation-inc.","employees":74,"industry":"information technology & services","score":7,"contacts":[{"name":"Rob Ro***h","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Rob, I've been working with several SK companies similar to DELCO AUTOMATION on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_005","company":"SATURN OIL & GAS INC.","domain":"saturnoil.com","city":"Saskatoon","revenue":709978000,"phone":"+13068500922","website":"http://www.saturnoil.com","linkedin":"http://www.linkedin.com/company/saturnoilgas","employees":210,"industry":"oil & energy","score":7,"contacts":[{"name":"Ken Wa***t","title":"Manager, IT Infrastructure Services","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Ken, I've been working with several SK companies similar to SATURN OIL & GAS INC. on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_006","company":"Coconut Software Corporation","domain":"coconutsoftware.com","city":"Saskatoon","revenue":28700000,"phone":"+18442008329","website":"http://www.coconutsoftware.com","linkedin":"http://www.linkedin.com/company/coconut-software","employees":190,"industry":"information technology & services","score":7,"contacts":[{"name":"Romeo Iula","title":"CTO & Co-founder","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Romeo, I've been working with several SK companies similar to Coconut Software Corporation on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Tyler Thompson","title":"Director, Information Technology Operations","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_007","company":"VECTOR CONSTRUCTION LTD.","domain":"vector-construction.com","city":"Saskatoon","revenue":163500000,"phone":"+13069343533","website":"http://www.vector-construction.com","linkedin":"http://www.linkedin.com/company/vectorconstruction","employees":390,"industry":"construction","score":7,"contacts":[]},{"id":"blitz_008","company":"Flaman Group of Companies","domain":"flaman.com","city":"Saskatoon","revenue":98500000,"phone":"+13067030020","website":"http://www.flaman.com","linkedin":"http://www.linkedin.com/company/flaman-group","employees":350,"industry":"retail","score":7,"contacts":[{"name":"Jordan Moore","title":"IT Manager","email":"jordan.moore@flaman.com","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Jordan, I've been working with several SK companies similar to Flaman Group of Companies on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_009","company":"West Coast Reductions Ltd","domain":"wcrl.com","city":"Saskatoon","revenue":51700000,"phone":"+13069344887","website":"http://www.wcrl.com","linkedin":"http://www.linkedin.com/company/west-coast-reduction-ltd.","employees":210,"industry":"renewables & environment","score":7,"contacts":[{"name":"Michael Fo***f","title":"Chief Information Officer","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Michael, I've been working with several SK companies similar to West Coast Reductions Ltd on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Todd Di***n","title":"Senior Manager, IT Service Delivery","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_010","company":"PEACE HILLS TRUST COMPANY","domain":"peacehills.com","city":"Saskatoon","revenue":30596000,"phone":"+13069558600","website":"http://www.peacehills.com","linkedin":"http://www.linkedin.com/company/peace-hills-trust","employees":96,"industry":"banking","score":7,"contacts":[{"name":"Tim Yu***k","title":"Vice President Information Technology","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Tim, I've been working with several SK companies similar to PEACE HILLS TRUST COMPANY on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Adam Mc***l","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_011","company":"Dynamo Electric","domain":"dynamogroup.ca","city":"Regina","revenue":12380000,"phone":"+13067793355","website":"http://www.dynamogroup.ca","linkedin":"http://www.linkedin.com/company/dynamo-electric","employees":70,"industry":"information technology & services","score":7,"contacts":[]},{"id":"blitz_012","company":"GMS (GROUP MEDICAL SERVICES)","domain":"gms.ca","city":"Regina","revenue":30000000,"phone":"+13063527638","website":"http://www.gms.ca","linkedin":"http://www.linkedin.com/company/gmshealthinsurance","employees":110,"industry":"insurance","score":7,"contacts":[{"name":"Kacey Mc***e","title":"Director IT, Data, PMO","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Kacey, I've been working with several SK companies similar to GMS (GROUP MEDICAL SERVICES) on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Brad He***r","title":"Manager, IT Operations (Cloud, Security & Infrastructure)","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_013","company":"Inland Audio Saskatoon","domain":"inlandav.ca","city":"Saskatoon","revenue":19182000,"phone":"+13066648622","website":"http://www.inlandav.ca","linkedin":"http://www.linkedin.com/company/inlandav","employees":63,"industry":"telecommunications","score":7,"contacts":[]},{"id":"blitz_014","company":"DOEPKER INDUSTRIES LTD","domain":"doepker.com","city":"Saskatoon","revenue":53001000,"phone":"+13069560057","website":"http://www.doepker.com","linkedin":"http://www.linkedin.com/company/doepker-industries-ltd","employees":93,"industry":"transportation/trucking/railroad","score":6.5,"contacts":[{"name":"Tarun Pa***h","title":"Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Tarun, I've been working with several SK companies similar to DOEPKER INDUSTRIES LTD on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_015","company":"McIlvenna Bay Operating Ltd  & Foran Mining Corporation","domain":"foranmining.com","city":"Saskatoon","revenue":0,"phone":"+13068084000","website":"http://www.foranmining.com","linkedin":"http://www.linkedin.com/company/foran-mining","employees":170,"industry":"mining & metals","score":6,"contacts":[{"name":"Ben La***e","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Ben, I've been working with several SK companies similar to McIlvenna Bay Operating Ltd  & Foran Mining Corporation on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_016","company":"March Consulting Associates Inc","domain":"marchconsulting.com","city":"Saskatoon","revenue":17245000,"phone":"+13066516375","website":"http://www.marchconsulting.com","linkedin":"http://www.linkedin.com/company/march-consulting-associates-inc-","employees":71,"industry":"information technology & services","score":6,"contacts":[]},{"id":"blitz_017","company":"HAZTECH ENERGY CORP","domain":"haztech.com","city":"Regina","revenue":0,"phone":"+13063529114","website":"http://www.haztech.com","linkedin":"http://www.linkedin.com/company/haztech-health-safety","employees":110,"industry":"oil & energy","score":6,"contacts":[]},{"id":"blitz_018","company":"KW Petroleum Services Ltd","domain":"petroservice.com","city":"Saskatoon","revenue":10000000,"phone":"+13062444468","website":"http://www.petroservice.com","linkedin":"http://www.linkedin.com/company/petroservice-limited","employees":110,"industry":"oil & energy","score":6,"contacts":[]},{"id":"blitz_019","company":"HARVARD WESTERN VENTURES INC","domain":"harvardwestern.com","city":"Regina","revenue":46273000,"phone":"+13067571633","website":"http://www.harvardwestern.com","linkedin":"http://www.linkedin.com/company/harvard-western-insurance","employees":70,"industry":"insurance","score":6,"contacts":[]},{"id":"blitz_020","company":"Regina Police Service","domain":"reginapolice.ca","city":"Regina","revenue":116180000,"phone":"+13067776500","website":"http://www.reginapolice.ca","linkedin":"http://www.linkedin.com/company/regina-police-service","employees":640,"industry":"law enforcement","score":6,"contacts":[{"name":"Paulette Ri***u","title":"I.T. Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Paulette, I've been working with several SK companies similar to Regina Police Service on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_021","company":"KNIGHT ARCHER INSURANCE","domain":"knightarcher.com","city":"Regina","revenue":4750000,"phone":"+13065692288","website":"http://www.knightarcher.com","linkedin":"http://www.linkedin.com/company/knight-archer-insurance","employees":120,"industry":"insurance","score":6,"contacts":[]},{"id":"blitz_022","company":"KRISTIAN ELECTRIC LTD.","domain":"kristian.ca","city":"Saskatoon","revenue":19452000,"phone":"+14032929111","website":"http://www.kristian.ca","linkedin":"http://www.linkedin.com/company/kristian-electric-ltd","employees":63,"industry":"machinery","score":6,"contacts":[]},{"id":"blitz_023","company":"UNIFIED VALVE GROUP LTD.","domain":"unifiedvalve.com","city":"Saskatoon","revenue":11929000,"phone":"+13069860099","website":"http://www.unifiedvalve.com","linkedin":"http://www.linkedin.com/company/unified-valve-group","employees":53,"industry":"oil & energy","score":6,"contacts":[{"name":"Kevin By***r","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Kevin, I've been working with several SK companies similar to UNIFIED VALVE GROUP LTD. on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_024","company":"PRAIRIE MOBILE COMMUNICATIONS","domain":"prairiemobile.com","city":"Saskatoon","revenue":0,"phone":"+13069332667","website":"http://www.prairiemobile.com","linkedin":"http://www.linkedin.com/company/prairie-mobile-communications","employees":120,"industry":"telecommunications","score":6,"contacts":[{"name":"Dean Va***e","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Dean, I've been working with several SK companies similar to PRAIRIE MOBILE COMMUNICATIONS on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_025","company":"COMTECH COMMUNICATION TECHNOLOGIES LTD.","domain":"comtech.ca","city":"Regina","revenue":6000000,"phone":"+13069930767","website":"http://www.comtech.ca","linkedin":"http://www.linkedin.com/company/comtechcomm","employees":89,"industry":"telecommunications","score":6,"contacts":[{"name":"Allan Ai***r","title":"Chief Information Officer (CIO)","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Allan, I've been working with several SK companies similar to COMTECH COMMUNICATION TECHNOLOGIES LTD. on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Scott Di***d","title":"CTO","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_026","company":"FUTURE TRANSFER CO. INC.","domain":"futuretransfer.com","city":"Saskatoon","revenue":28597000,"phone":"+15198427600","website":"http://www.futuretransfer.com","linkedin":"http://www.linkedin.com/company/ftransfer","employees":290,"industry":"chemicals","score":6,"contacts":[{"name":"Charles Ke***y","title":"Information Technology Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Charles, I've been working with several SK companies similar to FUTURE TRANSFER CO. INC. on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_027","company":"CAPITAL AUTOMOTIVE GROUP","domain":"capitalautomotivegroup.ca","city":"Regina","revenue":39800000,"phone":"+13065435410","website":"http://www.capitalautomotivegroup.ca","linkedin":"http://www.linkedin.com/company/capital-automotive-group","employees":190,"industry":"automotive","score":6,"contacts":[{"name":"Lee Ch***n","title":"Director Information Technology Infrastructure","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Lee, I've been working with several SK companies similar to CAPITAL AUTOMOTIVE GROUP on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Randy Cl***k","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_028","company":"SKEANS PNEUMATIC AND AUTOMATION INC.","domain":"skeans.com","city":"Saskatoon","revenue":15000000,"phone":"+13066513366","website":"http://www.skeans.com","linkedin":"http://www.linkedin.com/company/skeans","employees":55,"industry":"machinery","score":6,"contacts":[]},{"id":"blitz_029","company":"NORSPAN WOOD PRODUCTS INC","domain":"zytechtruss.com","city":"Saskatoon","revenue":555500000,"phone":"+13064773232","website":"http://www.zytechtruss.com","linkedin":"http://www.linkedin.com/company/zytech-building-sytems-inc.","employees":140,"industry":"building materials","score":6,"contacts":[{"name":"Jason Fa***r","title":"Systems Administrator","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Jason, I've been working with several SK companies similar to NORSPAN WOOD PRODUCTS INC on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_030","company":"OMNI SYSTEMS","domain":"omnisystem.com","city":"Saskatoon","revenue":75000000,"phone":"+12163775160","website":"http://www.omnisystem.com","linkedin":"http://www.linkedin.com/company/omni-systems","employees":160,"industry":"printing","score":6,"contacts":[]},{"id":"blitz_031","company":"KINDERSLEY TRANSPORT LTD.","domain":"kindersleytransport.com","city":"Saskatoon","revenue":14928000,"phone":"+13069341911","website":"http://www.kindersleytransport.com","linkedin":"http://www.linkedin.com/company/kindersleytransport","employees":81,"industry":"transportation/trucking/railroad","score":5.5,"contacts":[]},{"id":"blitz_032","company":"GABRIEL DUMONT INSTITUTE OF NATIVE STUDI","domain":"gdins.org","city":"Regina","revenue":14000000,"phone":"+13062426070","website":"http://www.gdins.org","linkedin":"http://www.linkedin.com/company/gabriel-dumont-institute","employees":280,"industry":"higher education","score":5.5,"contacts":[]},{"id":"blitz_033","company":"SASKATCHEWAN TEACHERS\\' FEDERATION","domain":"stf.sk.ca","city":"Saskatoon","revenue":50000000,"phone":"+13063731660","website":"http://www.stf.sk.ca","linkedin":"http://www.linkedin.com/company/saskteachersfed","employees":190,"industry":"primary/secondary education","score":5.5,"contacts":[]},{"id":"blitz_034","company":"WEBER SUPPLY COMPANY INC.","domain":"webersupply.com","city":"Regina","revenue":40000000,"phone":"+13063473232","website":"http://www.webersupply.com","linkedin":"http://www.linkedin.com/company/weber-supply-company-inc-","employees":120,"industry":"logistics & supply chain","score":5.5,"contacts":[{"name":"Chris We***r","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Chris, I've been working with several SK companies similar to WEBER SUPPLY COMPANY INC. on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_035","company":"GOODFELLOW INC.","domain":"goodfellow.com","city":"Saskatoon","revenue":23555000,"phone":"+13062429977","website":"http://www.goodfellow.com","linkedin":"http://www.linkedin.com/company/goodfellow-cambridge-limited","employees":99,"industry":"chemicals","score":5,"contacts":[{"name":"Richard Wi***n","title":"Chief Technology Officer","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Richard, I've been working with several SK companies similar to GOODFELLOW INC. on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Carl Pa***h","title":"Systems Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_036","company":"CALTECH SURVEYS","domain":"caltechgroup.com","city":"Regina","revenue":7500000,"phone":"+13067751814","website":"http://www.caltechgroup.com","linkedin":"http://www.linkedin.com/company/caltechgroup","employees":160,"industry":"professional training & coaching","score":5,"contacts":[{"name":"Cody Vo***t","title":"Director of IT","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Cody, I've been working with several SK companies similar to CALTECH SURVEYS on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_037","company":"LUTHERCARE SUNSET HOME OF SASKATOON LTD","domain":"luthercare.com","city":"Saskatoon","revenue":9749000,"phone":"+13066528566","website":"http://www.luthercare.com","linkedin":"http://www.linkedin.com/company/luthercare-communities","employees":600,"industry":"hospital & health care","score":5,"contacts":[{"name":"Kazi Ma***d","title":"Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Kazi, I've been working with several SK companies similar to LUTHERCARE SUNSET HOME OF SASKATOON LTD on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Alex Io***r","title":"Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_038","company":"TCU FINANCIAL GROUP","domain":"tcufinancialgroup.com","city":"Saskatoon","revenue":15294000,"phone":"+13066516700","website":"http://www.tcufinancialgroup.com","linkedin":"http://www.linkedin.com/company/tcu-financial-group","employees":91,"industry":"financial services","score":5,"contacts":[{"name":"Randy Martynuik","title":"Chief Information Officer","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Randy, I've been working with several SK companies similar to TCU FINANCIAL GROUP on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_039","company":"VIRTUS GROUP LLP","domain":"virtusgroup.ca","city":"Regina","revenue":25800000,"phone":"+13065226500","website":"http://www.virtusgroup.ca","linkedin":"http://www.linkedin.com/company/virtus-group-llp","employees":150,"industry":"accounting","score":5,"contacts":[]},{"id":"blitz_040","company":"McDougall Gauley","domain":"mcdougallgauley.com","city":"Regina","revenue":16256000,"phone":"+13066531212","website":"http://www.mcdougallgauley.com","linkedin":"http://www.linkedin.com/company/mcdougall-gauley-llp","employees":160,"industry":"law practice","score":5,"contacts":[{"name":"Nevan Is***c","title":"Infrastructure-Security Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Nevan, I've been working with several SK companies similar to McDougall Gauley on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Jim De***t","title":"IT Systems Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_041","company":"ADVANCE ENGINEERED PRODUCTS LTD. - H.O.","domain":"advanceengineeredproducts.com","city":"Regina","revenue":31000000,"phone":"+13067215678","website":"http://www.advanceengineeredproducts.com","linkedin":"http://www.linkedin.com/company/advance-engineered-products-group","employees":79,"industry":"machinery","score":5,"contacts":[]},{"id":"blitz_042","company":"Buckberger Baerg & Partners LLP","domain":"bbllp.ca","city":"Saskatoon","revenue":0,"phone":"+13066578969","website":"http://www.bbllp.ca","linkedin":"http://www.linkedin.com/company/buckberger-baerg-&-partners-llp","employees":89,"industry":"accounting","score":5,"contacts":[{"name":"Kent Ya***e","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Kent, I've been working with several SK companies similar to Buckberger Baerg & Partners LLP on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Cole Al***t","title":"Associate Systems Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_043","company":"AMRE SUPPLY COMPANY LTD.","domain":"amresupply.com","city":"Saskatoon","revenue":65000000,"phone":"+13069552673","website":"http://www.amresupply.com","linkedin":"http://www.linkedin.com/company/amre_supply","employees":160,"industry":"retail","score":5,"contacts":[]},{"id":"blitz_044","company":"CASCADIA METALS","domain":"cmetals.com","city":"Saskatoon","revenue":1000000,"phone":"+13068504511","website":"http://www.cmetals.com","linkedin":"http://www.linkedin.com/company/cascadia-metals","employees":250,"industry":"mining & metals","score":5,"contacts":[{"name":"Roy Se***e","title":"Network Admin","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Roy, I've been working with several SK companies similar to CASCADIA METALS on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_045","company":"FLOORING SUPERSTORE","domain":"flooringsuperstore.com","city":"Saskatoon","revenue":67000000,"phone":"+443301028444","website":"http://www.flooringsuperstore.com","linkedin":"http://www.linkedin.com/company/flooring-superstore","employees":160,"industry":"retail","score":5,"contacts":[]},{"id":"blitz_046","company":"WYNWARD INSURANCE GROUP","domain":"wynward.com","city":"Regina","revenue":0,"phone":"+13067571691","website":"http://www.wynward.com","linkedin":"http://www.linkedin.com/company/wynward","employees":84,"industry":"insurance","score":5,"contacts":[{"name":"Steve Lu***s","title":"AVP Technology & Chief Risk Officer","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Steve, I've been working with several SK companies similar to WYNWARD INSURANCE GROUP on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Joe Ca***l","title":"Systems Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_047","company":"KIDNEY FOUNDATION OF CANADA - SASKATCHEW","domain":"kidney.ca","city":"Saskatoon","revenue":23000000,"phone":"+15143694806","website":"http://www.kidney.ca","linkedin":"http://www.linkedin.com/company/the-kidney-foundation-of-canada","employees":160,"industry":"nonprofit organization management","score":5,"contacts":[{"name":"Catherine Le***t","title":"IT Infrastructure Manager at The Kidney Foundation","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Catherine, I've been working with several SK companies similar to KIDNEY FOUNDATION OF CANADA - SASKATCHEW on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_048","company":"UPS Store 228","domain":"theupsstore.ca","city":"Regina","revenue":12870000,"phone":"+14164844313","website":"http://www.theupsstore.ca","linkedin":"http://www.linkedin.com/company/the-ups-store-canada","employees":190,"industry":"printing","score":5,"contacts":[]},{"id":"blitz_049","company":"PRINT 1 INSTANT SERVICES LTD","domain":"instantprint.co.uk","city":"Regina","revenue":72844000,"phone":"+441912727327","website":"http://www.instantprint.co.uk","linkedin":"http://www.linkedin.com/company/instantprintuk","employees":49,"industry":"printing","score":5,"contacts":[]},{"id":"blitz_050","company":"CANADIAN LABOR CONGRESS","domain":"canadianlabour.ca","city":"Regina","revenue":42000000,"phone":"+13065256137","website":"http://www.canadianlabour.ca","linkedin":"http://www.linkedin.com/company/canadian-labour-congress","employees":110,"industry":"civic & social organization","score":5,"contacts":[]},{"id":"blitz_051","company":"ENERGY SAFETY CANADA","domain":"energysafetycanada.com","city":"Regina","revenue":0,"phone":"+13065517525","website":"http://www.energysafetycanada.com","linkedin":"http://www.linkedin.com/company/energy-safety-canada","employees":110,"industry":"oil & energy","score":5,"contacts":[{"name":"Travis Kr***r","title":"IT Director / Senior IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Travis, I've been working with several SK companies similar to ENERGY SAFETY CANADA on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_052","company":"MASKWA HIGH VOLTAGE LTD","domain":"maskwahv.com","city":"Regina","revenue":0,"phone":"+13064503647","website":"http://www.maskwahv.com","linkedin":"http://www.linkedin.com/company/entrustsolutionsgroupcanada","employees":83,"industry":"electrical/electronic manufacturing","score":5,"contacts":[]},{"id":"blitz_053","company":"CAPITAL PONTIAC BUICK CADILLAC GMC LTD.","domain":"capitalgmc.ca","city":"Regina","revenue":5549000,"phone":"+13065255211","website":"http://www.capitalgmc.ca","linkedin":"http://www.linkedin.com/company/capital-buick-cadillac-gmc","employees":62,"industry":"automotive","score":5,"contacts":[]},{"id":"blitz_054","company":"SASKCENTRAL","domain":"saskcentral.com","city":"Saskatoon","revenue":14457000,"phone":"+13065661286","website":"http://www.saskcentral.com","linkedin":"http://www.linkedin.com/company/saskcentral","employees":66,"industry":"financial services","score":5,"contacts":[]},{"id":"blitz_055","company":"SMITH INDUSTRIES","domain":"smithindustriesgroup.com","city":"Saskatoon","revenue":0,"phone":"+13017731266","website":"http://www.smithindustriesgroup.com","linkedin":"http://www.linkedin.com/company/joseph-smith-&-sons-inc","employees":77,"industry":"mining & metals","score":5,"contacts":[]},{"id":"blitz_056","company":"Kenroc Building Materials Co Ltd","domain":"kenroc.com","city":"Regina","revenue":42000000,"phone":"+13069331233","website":"http://www.kenroc.com","linkedin":"http://www.linkedin.com/company/kenroc-building-materials","employees":300,"industry":"building materials","score":5,"contacts":[]},{"id":"blitz_057","company":"ClearTech Industries Inc","domain":"cleartech.ca","city":"Regina","revenue":21000000,"phone":"+18003877503","website":"http://www.cleartech.ca","linkedin":"http://www.linkedin.com/company/cleartech-industries","employees":77,"industry":"chemicals","score":5,"contacts":[{"name":"Blaine Nelson","title":"Systems Administrator","email":"bnelson@cleartech.ca","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Blaine, I've been working with several SK companies similar to ClearTech Industries Inc on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Jason Di***r","title":"Junior Systems Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_058","company":"ICMS (INTEGRATED CROP MANAGEMENT SERVICES) Inc","domain":"icms-inc.com","city":"Saskatoon","revenue":0,"phone":"+12048576609","website":"http://www.icms-inc.com","linkedin":"http://www.linkedin.com/company/icms","employees":74,"industry":"research","score":5,"contacts":[]},{"id":"blitz_059","company":"All-Fab Building Components Inc","domain":"all-fab.com","city":"Saskatoon","revenue":10000000,"phone":"+12046618880","website":"http://www.all-fab.com","linkedin":"http://www.linkedin.com/company/all-fab-group","employees":85,"industry":"building materials","score":5,"contacts":[]},{"id":"blitz_060","company":"VERMEER CANADA INC","domain":"vermeercanada.com","city":"Saskatoon","revenue":0,"phone":"+13063823249","website":"http://www.vermeercanada.com","linkedin":"http://www.linkedin.com/company/vermeer-canada","employees":130,"industry":"machinery","score":5,"contacts":[]},{"id":"blitz_061","company":"FEDERATION OF SOVEREIGN INDIGENOUS NATIONS","domain":"fsin.ca","city":"Saskatoon","revenue":21034000,"phone":"+13066651215","website":"http://www.fsin.ca","linkedin":"http://www.linkedin.com/company/federation-of-sovereign-indigenous-nations","employees":60,"industry":"civic & social organization","score":5,"contacts":[{"name":"Gerald Bi***d","title":"Director of Information Technology","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Gerald, I've been working with several SK companies similar to FEDERATION OF SOVEREIGN INDIGENOUS NATIONS on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_062","company":"SURPLUS FURNITURE AND MATTRESS WAREHOUSE","domain":"surplusfurniture.com","city":"Saskatoon","revenue":70467000,"phone":"+13063432155","website":"http://www.surplusfurniture.com","linkedin":"http://www.linkedin.com/company/surplus-furniture-&-mattress","employees":410,"industry":"furniture","score":5,"contacts":[]},{"id":"blitz_063","company":"ENGINEERING","domain":"engineering.com","city":"Saskatoon","revenue":3800000,"phone":"+18885432447","website":"http://www.engineering.com","linkedin":"http://www.linkedin.com/company/engineering-com-inc-","employees":92,"industry":"online media","score":4.5,"contacts":[]},{"id":"blitz_064","company":"Tremcar West Inc","domain":"tremcar.com","city":"Saskatoon","revenue":10000000,"phone":"+13069319777","website":"http://www.tremcar.com","linkedin":"http://www.linkedin.com/company/tremcar","employees":700,"industry":"machinery","score":4,"contacts":[{"name":"Andre De***s","title":"I.T. Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Andre, I've been working with several SK companies similar to Tremcar West Inc on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_065","company":"SASKATCHEWAN CONSTRUCTION SAFETY ASSOCIATION INC","domain":"scsaonline.ca","city":"Regina","revenue":1517000,"phone":"+13066520907","website":"http://www.scsaonline.ca","linkedin":"http://www.linkedin.com/company/saskatchewan-construction-safety-association-scsa-","employees":54,"industry":"construction","score":4,"contacts":[]},{"id":"blitz_066","company":"SALTHILL PROPERTY MANAGEMENT INC.","domain":"salthillcapital.com","city":"Regina","revenue":0,"phone":"+13065841910","website":"http://www.salthillcapital.com","linkedin":"http://www.linkedin.com/company/salthill-capital","employees":150,"industry":"real estate","score":4,"contacts":[{"name":"Andre Si***a","title":"Senior IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Andre, I've been working with several SK companies similar to SALTHILL PROPERTY MANAGEMENT INC. on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_067","company":"DYNA INDUSTRIAL INC","domain":"dynaindustrial.com","city":"Saskatoon","revenue":8468000,"phone":"+13069334303","website":"http://www.dynaindustrial.com","linkedin":"http://www.linkedin.com/company/dynaindustrial-lp","employees":67,"industry":"machinery","score":4,"contacts":[]},{"id":"blitz_068","company":"TRAVELBRANDS INC","domain":"travelbrands.com","city":"Regina","revenue":0,"phone":"+13069342276","website":"http://www.travelbrands.com","linkedin":"http://www.linkedin.com/company/travelbrands-inc-","employees":510,"industry":"leisure, travel & tourism","score":4,"contacts":[]},{"id":"blitz_069","company":"Apex Automation Ltd","domain":"apexautomation.ca","city":"Saskatoon","revenue":0,"phone":"+13062419727","website":"http://www.apexautomation.ca","linkedin":"http://www.linkedin.com/company/apex-automation-ltd","employees":91,"industry":"industrial automation","score":4,"contacts":[]},{"id":"blitz_070","company":"SCOTT LAND & LEASE LTD","domain":"scottland.ca","city":"Regina","revenue":7579000,"phone":"+13063599000","website":"http://www.scottland.ca","linkedin":"http://www.linkedin.com/company/scott-land-&-lease-ltd.","employees":98,"industry":"oil & energy","score":4,"contacts":[]},{"id":"blitz_071","company":"QUOREX CONSTRUCTION SERVICES LTD.","domain":"quorex.ca","city":"Saskatoon","revenue":15250000,"phone":"+13062443717","website":"http://www.quorex.ca","linkedin":"http://www.linkedin.com/company/quorex-construction","employees":64,"industry":"construction","score":4,"contacts":[]},{"id":"blitz_072","company":"XEROX CANADA LTD - WESTERN SALES OPS - A","domain":"rayacom.com","city":"Regina","revenue":5622000,"phone":"+13069249241","website":"http://www.rayacom.com","linkedin":"http://www.linkedin.com/company/rayacom","employees":50,"industry":"printing","score":4,"contacts":[{"name":"Martin Tr***n","title":"Chief Technology Officer","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Martin, I've been working with several SK companies similar to XEROX CANADA LTD - WESTERN SALES OPS - A on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_073","company":"Saskatchewan Abilities Council Inc.","domain":"saskabilities.ca","city":"Watrous","revenue":35000000,"phone":"+13066531694","website":"http://www.saskabilities.ca","linkedin":"http://www.linkedin.com/company/saskatchewan-abilities-council","employees":390,"industry":"nonprofit organization management","score":4,"contacts":[]},{"id":"blitz_074","company":"HOPE\\'S HOME INCORPORATED","domain":"hopeshome.org","city":"Regina","revenue":15000000,"phone":"+13067572260","website":"http://www.hopeshome.org","linkedin":"http://www.linkedin.com/company/hopeshomeinc","employees":120,"industry":"individual & family services","score":4,"contacts":[]},{"id":"blitz_075","company":"SASKATOON PUBLIC LIBRARY","domain":"saskatoonlibrary.ca","city":"Saskatoon","revenue":898000,"phone":"+13069757558","website":"http://www.saskatoonlibrary.ca","linkedin":"http://www.linkedin.com/company/saskatoon-public-library","employees":140,"industry":"libraries","score":4,"contacts":[{"name":"Greg Ives","title":"Senior Manager, Information & Technology Services","email":"g.ives@saskatoonlibrary.ca","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Greg, I've been working with several SK companies similar to SASKATOON PUBLIC LIBRARY on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Cindagarry Ro***z","title":"Manager IT Services","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_076","company":"CANADA PLASMA RESOURCES","domain":"giveplasma.ca","city":"Saskatoon","revenue":0,"phone":"+13065007490","website":"http://www.giveplasma.ca","linkedin":"http://www.linkedin.com/company/canadian-plasma-resources","employees":58,"industry":"pharmaceuticals","score":4,"contacts":[]},{"id":"blitz_077","company":"EVOLVE SURFACE STRATEGIES INC.","domain":"evolvesurface.com","city":"Regina","revenue":0,"phone":"+14039122600","website":"http://www.evolvesurface.com","linkedin":"http://www.linkedin.com/company/evolve-surface-strategies-inc-","employees":140,"industry":"professional training & coaching","score":4,"contacts":[]},{"id":"blitz_078","company":"REGINA PUBLIC LIBRARY BOARD; THE","domain":"reginalibrary.ca","city":"Regina","revenue":5000000,"phone":"+13067776000","website":"http://www.reginalibrary.ca","linkedin":"http://www.linkedin.com/company/regina-public-library","employees":160,"industry":"libraries","score":4,"contacts":[]},{"id":"blitz_079","company":"AIESEC SASKATOON","domain":"aiesec.ca","city":"Saskatoon","revenue":40119000,"phone":"+14163681001","website":"http://www.aiesec.ca","linkedin":"http://www.linkedin.com/company/aiesec-canada","employees":130,"industry":"nonprofit organization management","score":4,"contacts":[]},{"id":"blitz_080","company":"MABE CANADA INC.","domain":"geappliances.ca","city":"Saskatoon","revenue":0,"phone":"+13065252395","website":"http://www.geappliances.ca","linkedin":"http://www.linkedin.com/company/geappliancescanada","employees":140,"industry":"mechanical or industrial engineering","score":4,"contacts":[]},{"id":"blitz_081","company":"SASKATOON PRAIRIELAND PARK CORPORATION","domain":"prairielandpark.com","city":"Saskatoon","revenue":0,"phone":"+13069317149","website":"http://www.prairielandpark.com","linkedin":"http://www.linkedin.com/company/prairieland","employees":64,"industry":"events services","score":4,"contacts":[]},{"id":"blitz_082","company":"FRONTIER SUPPLY CHAIN SOLUTIONS","domain":"frontierscs.com","city":"Regina","revenue":0,"phone":"+13065699300","website":"http://www.frontierscs.com","linkedin":"http://www.linkedin.com/company/frontierscs","employees":130,"industry":"logistics & supply chain","score":3.5,"contacts":[{"name":"James Sa***o","title":"Network/Systems Administrator","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey James, I've been working with several SK companies similar to FRONTIER SUPPLY CHAIN SOLUTIONS on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Keshav Ba***l","title":"Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_083","company":"JAY\\'S TRANSPORTATION GROUP LTD.","domain":"jays.ca","city":"Regina","revenue":0,"phone":"+13065255708","website":"http://www.jays.ca","linkedin":"http://www.linkedin.com/company/jays-transportation-group","employees":120,"industry":"transportation/trucking/railroad","score":3.5,"contacts":[]},{"id":"blitz_084","company":"Walker Projects Inc","domain":"","city":"Regina","revenue":0,"phone":"+13065229434","website":"","linkedin":"http://www.linkedin.com/company/mbcgroupinc","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_085","company":"THREE-O-SIX INDUSTRIAL SERVICES INC.","domain":"threeosix.ca","city":"Saskatoon","revenue":0,"phone":"+13063849306","website":"http://www.threeosix.ca","linkedin":"http://www.linkedin.com/company/three-o-six-industrial","employees":20,"industry":"construction","score":3,"contacts":[]},{"id":"blitz_086","company":"Suncorp Valuations Ltd","domain":"suncorpvaluations.com","city":"Saskatoon","revenue":0,"phone":"+13066520311","website":"http://www.suncorpvaluations.com","linkedin":"http://www.linkedin.com/company/suncorp-valuations","employees":88,"industry":"financial services","score":3,"contacts":[]},{"id":"blitz_087","company":"PLANNERA PENSIONS & BENEFITS","domain":"","city":"Regina","revenue":0,"phone":"+13067879775","website":"","linkedin":"http://www.linkedin.com/company/financial-and-consumer-affairs-authority-of-saskatchewan","employees":0,"industry":"","score":3,"contacts":[{"name":"Jeremy Hall","title":"Chief Technology Officer","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Jeremy, I've been working with several SK companies similar to PLANNERA PENSIONS & BENEFITS on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Jason Ng","title":"Director, IT Operations & Readiness","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Jason, I've been working with several SK companies similar to PLANNERA PENSIONS & BENEFITS on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_088","company":"SWIMMING CANADA","domain":"swimming.ca","city":"Saskatoon","revenue":9000000,"phone":"+13069784653","website":"http://www.swimming.ca","linkedin":"http://www.linkedin.com/company/swimming-canada","employees":130,"industry":"sports","score":3,"contacts":[]},{"id":"blitz_089","company":"North Shore Environmental Consultants Inc","domain":"northshoreenv.com","city":"Regina","revenue":0,"phone":"+13064509300","website":"http://www.northshoreenv.com","linkedin":"http://www.linkedin.com/company/north-shore-environmental-consultants-inc-","employees":74,"industry":"environmental services","score":3,"contacts":[]},{"id":"blitz_090","company":"BLACKWELL; DR THOMAS","domain":"haztech.com","city":"Saskatoon","revenue":0,"phone":"+13062446149","website":"http://www.haztech.com","linkedin":"http://www.linkedin.com/company/haztech-health-safety","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_091","company":"GABRIEL DUMONT INSTITUTE OF NATIVE STUDIES AND APPLIES RESEARCH INC","domain":"gdins.org","city":"Regina","revenue":0,"phone":"+13063474100","website":"http://www.gdins.org","linkedin":"http://www.linkedin.com/company/gabriel-dumont-institute","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_092","company":"LMNO CONSULTING","domain":"meetlmno.com","city":"Saskatoon","revenue":0,"phone":"+13063736233","website":"http://www.meetlmno.com","linkedin":"http://www.linkedin.com/company/meetlmno","employees":60,"industry":"marketing & advertising","score":3,"contacts":[]},{"id":"blitz_093","company":"HAZTECH ENERGY CORP.","domain":"haztech.com","city":"Regina","revenue":0,"phone":"+13063529114","website":"http://www.haztech.com","linkedin":"http://www.linkedin.com/company/haztech-health-safety","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_094","company":"GREAT WESTERN BREWING COMPANY","domain":"gwbc.ca","city":"Saskatoon","revenue":0,"phone":"+13066534653","website":"http://www.gwbc.ca","linkedin":"http://www.linkedin.com/company/great-western-brewing-company-ltd-","employees":79,"industry":"food & beverages","score":3,"contacts":[]},{"id":"blitz_095","company":"FLAMAN SALES LTD","domain":"flaman.com","city":"Saskatoon","revenue":0,"phone":"+13067264403","website":"http://www.flaman.com","linkedin":"http://www.linkedin.com/company/flaman-group","employees":0,"industry":"","score":3,"contacts":[{"name":"Jordan Moore","title":"IT Manager","email":"jordan.moore@flaman.com","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Jordan, I've been working with several SK companies similar to FLAMAN SALES LTD on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_096","company":"HARVARD WESTERN INSURANCE","domain":"harvardwestern.com","city":"Regina","revenue":0,"phone":"+13065434200","website":"http://www.harvardwestern.com","linkedin":"http://www.linkedin.com/company/harvard-western-insurance","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_097","company":"Gabriel Dumont","domain":"gdins.org","city":"Saskatoon","revenue":0,"phone":"+13062426070","website":"http://www.gdins.org","linkedin":"http://www.linkedin.com/company/gabriel-dumont-institute","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_098","company":"NATIONAL CONCRETE ACCESSORIES","domain":"nca.ca","city":"Saskatoon","revenue":0,"phone":"+13062423831","website":"http://www.nca.ca","linkedin":"http://www.linkedin.com/company/national-concrete-accessories","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_099","company":"PACIFIC ACCOUNTING & BUSINESS SERVICES","domain":"pacificabs.com","city":"Saskatoon","revenue":0,"phone":"+16393183316","website":"http://www.pacificabs.com","linkedin":"http://www.linkedin.com/company/pacific-accounting-&-business-services-inc-","employees":94,"industry":"accounting","score":3,"contacts":[]},{"id":"blitz_100","company":"PINACLE STAINLESS STEEL INC.","domain":"pinacle.ca","city":"Saskatoon","revenue":0,"phone":"+13063822811","website":"http://www.pinacle.ca","linkedin":"http://www.linkedin.com/company/pinacle-stainless-steel-inc-","employees":95,"industry":"wholesale","score":3,"contacts":[{"name":"Robert Ka***t","title":"Senior Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Robert, I've been working with several SK companies similar to PINACLE STAINLESS STEEL INC. on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_101","company":"THE UPS STORE #420","domain":"theupsstore.ca","city":"Saskatoon","revenue":0,"phone":"+13066512347","website":"http://www.theupsstore.ca","linkedin":"http://www.linkedin.com/company/the-ups-store-canada","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_102","company":"THE UPS STORE #518","domain":"theupsstore.ca","city":"Regina","revenue":0,"phone":"+14164844313","website":"http://www.theupsstore.ca","linkedin":"http://www.linkedin.com/company/the-ups-store-canada","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_103","company":"LUTHERCARE VILLAGE OPERATIONS INC.","domain":"luthercare.com","city":"Saskatoon","revenue":0,"phone":"+13066640501","website":"http://www.luthercare.com","linkedin":"http://www.linkedin.com/company/luthercare-communities","employees":0,"industry":"","score":3,"contacts":[{"name":"Kazi Ma***d","title":"Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Kazi, I've been working with several SK companies similar to LUTHERCARE VILLAGE OPERATIONS INC. on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Alex Io***r","title":"Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_104","company":"SRG Security Resource Group Inc","domain":"securityresourcegroup.com","city":"Regina","revenue":0,"phone":"+12047845800","website":"http://www.securityresourcegroup.com","linkedin":"http://www.linkedin.com/company/srg-security-resource-group-inc","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_105","company":"HERITAGE INN","domain":"heritageinn.net","city":"Saskatoon","revenue":2996000,"phone":"+13066658121","website":"http://www.heritageinn.net","linkedin":"http://www.linkedin.com/company/heritage-inn-hotel-&-convention-centre","employees":150,"industry":"hospitality","score":3,"contacts":[]},{"id":"blitz_106","company":"CP DISTRIBUTORS","domain":"cpdist.ca","city":"Saskatoon","revenue":0,"phone":"+13062423315","website":"http://www.cpdist.ca","linkedin":"http://www.linkedin.com/company/cp-distributors","employees":0,"industry":"","score":3,"contacts":[{"name":"David Me***s","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey David, I've been working with several SK companies similar to CP DISTRIBUTORS on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_107","company":"Saskatchewan Abilities Council - Kilburn","domain":"saskabilities.ca","city":"Saskatoon","revenue":0,"phone":"+18442605058","website":"http://www.saskabilities.ca","linkedin":"http://www.linkedin.com/company/saskatchewan-abilities-council","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_108","company":"PARTNERS IN EMPLOYMENT","domain":"saskabilities.ca","city":"Regina","revenue":0,"phone":"+13065222555","website":"http://www.saskabilities.ca","linkedin":"http://www.linkedin.com/company/saskatchewan-abilities-council","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_109","company":"SASKATCHEWAN ABILITIES COUNCIL - LOUISE","domain":"saskabilities.ca","city":"Saskatoon","revenue":0,"phone":"+13063744448","website":"http://www.saskabilities.ca","linkedin":"http://www.linkedin.com/company/saskatchewan-abilities-council","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_110","company":"VIRTUS GROUP","domain":"virtusgroup.ca","city":"Saskatoon","revenue":0,"phone":"+13066536100","website":"http://www.virtusgroup.ca","linkedin":"http://www.linkedin.com/company/virtus-group-llp","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_111","company":"BROOKDALE SUPPORTIVE LIVING","domain":"hopeshome.org","city":"Saskatoon","revenue":0,"phone":"+13062442080","website":"http://www.hopeshome.org","linkedin":"http://www.linkedin.com/company/hopeshomeinc","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_112","company":"GE CANADA","domain":"geappliances.ca","city":"Saskatoon","revenue":0,"phone":"+15065551212","website":"http://www.geappliances.ca","linkedin":"http://www.linkedin.com/company/geappliancescanada","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_113","company":"GREEN LINE HOSE & FITTINGS LTD.","domain":"greenlinehose.com","city":"Saskatoon","revenue":0,"phone":"+13066535001","website":"http://www.greenlinehose.com","linkedin":"http://www.linkedin.com/company/greenlinehose","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_114","company":"KL ENGINEERING","domain":"klengineering.com","city":"Saskatoon","revenue":0,"phone":"+13068809707","website":"http://www.klengineering.com","linkedin":"http://www.linkedin.com/company/kl-engineering-inc-","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_115","company":"SOUTHERN IRRIGATION","domain":"southernirrigation.com","city":"Saskatoon","revenue":0,"phone":"+13063820047","website":"http://www.southernirrigation.com","linkedin":"http://www.linkedin.com/company/southern-irrigation-ltd","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_116","company":"NFU","domain":"nfu.org","city":"Saskatoon","revenue":0,"phone":"+13066529465","website":"http://www.nfu.org","linkedin":"http://www.linkedin.com/company/national-farmers-union-usa-","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_117","company":"ASA ALLOYS","domain":"asaalloys.com","city":"Saskatoon","revenue":0,"phone":"+13069311880","website":"http://www.asaalloys.com","linkedin":"http://www.linkedin.com/company/asa-alloys","employees":0,"industry":"","score":3,"contacts":[{"name":"Chris He***n","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Chris, I've been working with several SK companies similar to ASA ALLOYS on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_118","company":"SASKABILITIES","domain":"saskabilities.ca","city":"Saskatoon","revenue":0,"phone":"+18442605058","website":"http://www.saskabilities.ca","linkedin":"http://www.linkedin.com/company/saskatchewan-abilities-council","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_119","company":"Indi Mortgage","domain":"indimortgage.ca","city":"Regina","revenue":0,"phone":"+13065914842","website":"http://www.indimortgage.ca","linkedin":"http://www.linkedin.com/company/indimortgage","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_120","company":"Century 21 Dome Realty Inc","domain":"century21.ca","city":"Regina","revenue":0,"phone":"+13067891222","website":"http://www.century21.ca","linkedin":"http://www.linkedin.com/company/century-21-innovative-realty-inc.-toronto","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_121","company":"MCDOUGALL GAULEY LLP","domain":"mcdougallgauley.com","city":"Regina","revenue":0,"phone":"+13067571641","website":"http://www.mcdougallgauley.com","linkedin":"http://www.linkedin.com/company/mcdougall-gauley-llp","employees":0,"industry":"","score":3,"contacts":[{"name":"Nevan Is***c","title":"Infrastructure-Security Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Nevan, I've been working with several SK companies similar to MCDOUGALL GAULEY LLP on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Jim De***t","title":"IT Systems Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_122","company":"TRAVELBRANDS INC.","domain":"travelbrands.com","city":"Saskatoon","revenue":0,"phone":"+13066651881","website":"http://www.travelbrands.com","linkedin":"http://www.linkedin.com/company/travelbrands-inc-","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_123","company":"DENISON MINES INC.","domain":"denisonmines.com","city":"Saskatoon","revenue":0,"phone":"+14169791991","website":"http://www.denisonmines.com","linkedin":"http://www.linkedin.com/company/denison-mines-usa-corp-","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_124","company":"WESTLUND SASKATOON","domain":"westlundpvf.com","city":"Saskatoon","revenue":0,"phone":"+13069332694","website":"http://www.westlundpvf.com","linkedin":"http://www.linkedin.com/company/westlund","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_125","company":"SHERBROOKE COMMUNITY SOCIETY INC","domain":"sherbrookecommunitycentre.ca","city":"Saskatoon","revenue":0,"phone":"+13066553638","website":"http://www.sherbrookecommunitycentre.ca","linkedin":"http://www.linkedin.com/company/sherbrooke-community-centre","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_126","company":"SASKATCHEWAN ABILITIES COUNCIL","domain":"saskabilities.ca","city":"Regina","revenue":0,"phone":"+13065699048","website":"http://www.saskabilities.ca","linkedin":"http://www.linkedin.com/company/saskatchewan-abilities-council","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_127","company":"SASKATCHEWAN ABILITIES COUNCIL - REGINA","domain":"saskabilities.ca","city":"Regina","revenue":0,"phone":"+13063744448","website":"http://www.saskabilities.ca","linkedin":"http://www.linkedin.com/company/saskatchewan-abilities-council","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_128","company":"LUTHERCARE COMMUNITIES","domain":"luthercare.com","city":"Saskatoon","revenue":0,"phone":"+13066640300","website":"http://www.luthercare.com","linkedin":"http://www.linkedin.com/company/luthercare-communities","employees":0,"industry":"","score":3,"contacts":[{"name":"Kazi Ma***d","title":"Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Kazi, I've been working with several SK companies similar to LUTHERCARE COMMUNITIES on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Alex Io***r","title":"Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_129","company":"MULTICRETE SYSTEMS INC","domain":"multicretesystems.com","city":"Saskatoon","revenue":0,"phone":"+12042625901","website":"http://www.multicretesystems.com","linkedin":"http://www.linkedin.com/company/multicrete-systems-inc-","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_130","company":"MORRIS INDUSTRIES LTD.","domain":"morrisequipment.ca","city":"Saskatoon","revenue":0,"phone":"+13063435251","website":"http://www.morrisequipment.ca","linkedin":"http://www.linkedin.com/company/morris-equipment-limited","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_131","company":"LUTHERAN SUNSET HOME OF SASKATOON","domain":"luthercare.com","city":"Saskatoon","revenue":0,"phone":"+13066640351","website":"http://www.luthercare.com","linkedin":"http://www.linkedin.com/company/luthercare-communities","employees":0,"industry":"","score":3,"contacts":[{"name":"Kazi Ma***d","title":"Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Kazi, I've been working with several SK companies similar to LUTHERAN SUNSET HOME OF SASKATOON on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Alex Io***r","title":"Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_132","company":"PARK TOWN HOTEL","domain":"parktownhotel.com","city":"Saskatoon","revenue":0,"phone":"+13062445564","website":"http://www.parktownhotel.com","linkedin":"http://www.linkedin.com/company/park-town-hotel","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_133","company":"PACE SOLUTIONS CORP.","domain":"pacesolutions.com","city":"Regina","revenue":0,"phone":"+13065275227","website":"http://www.pacesolutions.com","linkedin":"http://www.linkedin.com/company/pace-solutions-corp","employees":0,"industry":"","score":3,"contacts":[{"name":"Jeremy Br***y","title":"Vice President - Technical Services","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Jeremy, I've been working with several SK companies similar to PACE SOLUTIONS CORP. on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_134","company":"WOLSELEY INDUSTRIAL CANADA INC.","domain":"","city":"Saskatoon","revenue":0,"phone":"+13069348800","website":"","linkedin":"http://www.linkedin.com/company/wolseley-industrial","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_135","company":"Technology Professionals Saskatchewan","domain":"","city":"Regina","revenue":0,"phone":"+13067216633","website":"","linkedin":"http://www.linkedin.com/school/ptech-us","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_136","company":"MOTION","domain":"usemotion.com","city":"Saskatoon","revenue":0,"phone":"+13062429060","website":"http://www.usemotion.com","linkedin":"http://www.linkedin.com/company/motionapp","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_137","company":"Canadian Energy & Power Corp","domain":"cdnrg.com","city":"Saskatoon","revenue":0,"phone":"+13069346565","website":"http://www.cdnrg.com","linkedin":"http://www.linkedin.com/company/canadianenergy","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_138","company":"WAINBEE LIMITED","domain":"wainbee.com","city":"Saskatoon","revenue":0,"phone":"+19055681700","website":"http://www.wainbee.com","linkedin":"http://www.linkedin.com/company/wainbee-ltd","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_139","company":"DynaIndustrial","domain":"dynaindustrial.com","city":"Regina","revenue":0,"phone":"+13063597089","website":"http://www.dynaindustrial.com","linkedin":"http://www.linkedin.com/company/dynaindustrial-lp","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_140","company":"GREG WATKINS CMA","domain":"watkins.com","city":"Regina","revenue":0,"phone":"+13065847808","website":"http://www.watkins.com","linkedin":"http://www.linkedin.com/company/watkins-associated-industries","employees":0,"industry":"","score":3,"contacts":[{"name":"James Se***l","title":"Vice President Information Technology","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey James, I've been working with several SK companies similar to GREG WATKINS CMA on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_141","company":"CONVERGINT TECHNOLOGIES LTD","domain":"delcoautomation.com","city":"Saskatoon","revenue":0,"phone":"+13062446449","website":"http://www.delcoautomation.com","linkedin":"http://www.linkedin.com/company/delco-automation-inc.","employees":0,"industry":"","score":3,"contacts":[{"name":"Rob Ro***h","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Rob, I've been working with several SK companies similar to CONVERGINT TECHNOLOGIES LTD on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_142","company":"SHANAHAN\\'S BUILDING SPECIALTIES LIMITED","domain":"shanahans.com","city":"Saskatoon","revenue":0,"phone":"+13062424248","website":"http://www.shanahans.com","linkedin":"http://www.linkedin.com/company/shanahan%27s-limited-partnership","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_143","company":"HOPE\\'S HOME INCORPORATED -  H.O.","domain":"hopeshome.org","city":"Regina","revenue":0,"phone":"+13065224673","website":"http://www.hopeshome.org","linkedin":"http://www.linkedin.com/company/hopeshomeinc","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_144","company":"Millennium EMS Solutions Ltd","domain":"mems.ca","city":"Saskatoon","revenue":0,"phone":"+17804969048","website":"http://www.mems.ca","linkedin":"http://www.linkedin.com/company/millennium-ems-solutions-ltd-","employees":0,"industry":"","score":3,"contacts":[{"name":"Ian Mi***l","title":"VP Technology & Business Services","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Ian, I've been working with several SK companies similar to Millennium EMS Solutions Ltd on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_145","company":"QSI INTERIORS LTD","domain":"qsiinteriors.com","city":"Saskatoon","revenue":0,"phone":"+13069334000","website":"http://www.qsiinteriors.com","linkedin":"http://www.linkedin.com/company/qsi-interiors-ltd-","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_146","company":"TEAMS TRANSPORT","domain":"teamstransport.com","city":"Saskatoon","revenue":0,"phone":"+12042226289","website":"http://www.teamstransport.com","linkedin":"http://www.linkedin.com/company/t-e-a-m-s-transport","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_147","company":"QUEEN VICTORIA","domain":"atriaretirement.ca","city":"Regina","revenue":0,"phone":"+13067901900","website":"http://www.atriaretirement.ca","linkedin":"http://www.linkedin.com/company/atria-retirement-can","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_148","company":"Newco Logistics","domain":"newcogh.com","city":"Saskatoon","revenue":0,"phone":"+13069555565","website":"http://www.newcogh.com","linkedin":"http://www.linkedin.com/company/newco-catering-and-logistics","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_149","company":"LAKESHORE MEDICAL CLINIC","domain":"lakeshorechc.org","city":"Regina","revenue":0,"phone":"+13065849333","website":"http://www.lakeshorechc.org","linkedin":"http://www.linkedin.com/company/lakeshore-community-health-care","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_150","company":"EDEN CARE COMMUNITIES INC.","domain":"edencare.ca","city":"Regina","revenue":0,"phone":"+13065434055","website":"http://www.edencare.ca","linkedin":"http://www.linkedin.com/company/eden-care-communities","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_151","company":"HOWDEN CONSTRUCTION LTD.","domain":"baydo.ca","city":"Saskatoon","revenue":0,"phone":"+13069741727","website":"http://www.baydo.ca","linkedin":"http://www.linkedin.com/company/baydo-development-corporation","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_152","company":"RIMER ALCO NORTH AMERICA INC.","domain":"careicahealth.com","city":"Regina","revenue":0,"phone":"+12049281402","website":"http://www.careicahealth.com","linkedin":"http://www.linkedin.com/company/careica-health","employees":0,"industry":"","score":3,"contacts":[{"name":"Thiago Va***e","title":"Senior Network & M365 Platform Administrator","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Thiago, I've been working with several SK companies similar to RIMER ALCO NORTH AMERICA INC. on IT modernization. Would love a quick chat about what's on your radar."}},{"name":"Derek Re***s","title":"Network Administrator","email":"","phone":"","linkedin":"","personalIntel":{}}]},{"id":"blitz_153","company":"WESTDALE CONSTRUCTION CO. LIMITED","domain":"westdaleproperties.com","city":"Regina","revenue":0,"phone":"+13065466360","website":"http://www.westdaleproperties.com","linkedin":"http://www.linkedin.com/company/westdale-properties","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_154","company":"102144892 SASKATCHEWAN INC. O/A USMC SASKATOON","domain":"ucmas.ca","city":"Saskatoon","revenue":0,"phone":"+19058121919","website":"http://www.ucmas.ca","linkedin":"http://www.linkedin.com/company/ucmas-canada","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_155","company":"SARCAN RECYCLING","domain":"sarcan.ca","city":"Saskatoon","revenue":0,"phone":"+13069330616","website":"http://www.sarcan.ca","linkedin":"http://www.linkedin.com/company/sarcan-recycling","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_156","company":"P&H Milling Group","domain":"phmilling.com","city":"Saskatoon","revenue":0,"phone":"+13066678045","website":"http://www.phmilling.com","linkedin":"http://www.linkedin.com/company/p&h-milling-group","employees":0,"industry":"","score":3,"contacts":[{"name":"Jason Ya***t","title":"Network and Infrastructure Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Jason, I've been working with several SK companies similar to P&H Milling Group on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_157","company":"HAZMASTERS INC","domain":"hazmasters.com","city":"Saskatoon","revenue":0,"phone":"+13069869313","website":"http://www.hazmasters.com","linkedin":"http://www.linkedin.com/company/hazmasters-inc","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_158","company":"QUEEN ELIZABETH SCHOOL","domain":"qebarnet.co.uk","city":"Saskatoon","revenue":0,"phone":"+442084414646","website":"http://www.qebarnet.co.uk","linkedin":"http://www.linkedin.com/school/queen-elizabeth's-school-barnet","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_159","company":"Group2 Architecture Interior Design Ltd","domain":"group2.ca","city":"Saskatoon","revenue":0,"phone":"+13069792935","website":"http://www.group2.ca","linkedin":"http://www.linkedin.com/company/group2-architecture-interior-design-ltd","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_160","company":"TECH 7","domain":"tech7.us","city":"Saskatoon","revenue":0,"phone":"+13069782269","website":"http://www.tech7.us","linkedin":"http://www.linkedin.com/company/the-tech7-company","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_161","company":"ORTHOPAEDIC ASSOCIATES","domain":"oaevansville.com","city":"Saskatoon","revenue":0,"phone":"+13062441247","website":"http://www.oaevansville.com","linkedin":"http://www.linkedin.com/company/orthopaedic-associates---southern-indiana-&-western-kentucky","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_162","company":"ROBERTSON STROMBERG LLP","domain":"rslaw.com","city":"Saskatoon","revenue":0,"phone":"+13066527575","website":"http://www.rslaw.com","linkedin":"http://www.linkedin.com/company/robertson-stromberg-llp","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_163","company":"Woody\\'s RV World Ltd","domain":"woodysrv.com","city":"Saskatoon","revenue":0,"phone":"+14032582727","website":"http://www.woodysrv.com","linkedin":"http://www.linkedin.com/company/woody-s-rv-world","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_164","company":"KorMak Enterprises","domain":"cormac-corp.com","city":"Saskatoon","revenue":0,"phone":"+13062410918","website":"http://www.cormac-corp.com","linkedin":"http://www.linkedin.com/company/cormac-corporation","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_165","company":"STEPHENSON EQUIPMENT LTD","domain":"stephensonequipment.com","city":"Regina","revenue":0,"phone":"+13067571776","website":"http://www.stephensonequipment.com","linkedin":"http://www.linkedin.com/company/stephenson-equipment-inc.","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_166","company":"CAMPBELL COMPANY OF CANADA","domain":"campbellsoup.ca","city":"Saskatoon","revenue":0,"phone":"+18004107687","website":"http://www.campbellsoup.ca","linkedin":"http://www.linkedin.com/company/campbell-company-of-canada","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_167","company":"TOWERS REALTY GROUP","domain":"towersrealty.ca","city":"Regina","revenue":0,"phone":"+13065012670","website":"http://www.towersrealty.ca","linkedin":"http://www.linkedin.com/company/towers-realty-group-ltd","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_168","company":"THE UPS STORE #468","domain":"theupsstore.ca","city":"Saskatoon","revenue":0,"phone":"+13063846666","website":"http://www.theupsstore.ca","linkedin":"http://www.linkedin.com/company/the-ups-store-canada","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_169","company":"Shippers Supply","domain":"shippers-supply.com","city":"Regina","revenue":0,"phone":"+13067752323","website":"http://www.shippers-supply.com","linkedin":"http://www.linkedin.com/company/shippers-supply-inc.","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_170","company":"REGINA AIRPORT AUTHORITY INC","domain":"yqr.ca","city":"Regina","revenue":0,"phone":"+13067617555","website":"http://www.yqr.ca","linkedin":"http://www.linkedin.com/company/regina-airport-authority","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_171","company":"Norcan Fluid Power Ltd.","domain":"norcanfp.com","city":"Saskatoon","revenue":0,"phone":"+13065007587","website":"http://www.norcanfp.com","linkedin":"http://www.linkedin.com/company/norcan-fluid-power-ltd","employees":0,"industry":"","score":3,"contacts":[{"name":"Rudy Ko***t","title":"IT Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Rudy, I've been working with several SK companies similar to Norcan Fluid Power Ltd. on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_172","company":"VERITEXT LITIGATION SOLUTIONS","domain":"litigationservices.com","city":"Regina","revenue":0,"phone":"+18003301112","website":"http://www.litigationservices.com","linkedin":"http://www.linkedin.com/company/litigation-services","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_173","company":"SASKATOON MOTOR PRODUCTS","domain":"smpchev.ca","city":"Saskatoon","revenue":0,"phone":"+13062425552","website":"http://www.smpchev.ca","linkedin":"http://www.linkedin.com/company/saskatoon-motor-products-ltd-","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_174","company":"BENNETT DUNLOP FORD","domain":"bennettdunlopford.com","city":"Regina","revenue":0,"phone":"+13065255700","website":"http://www.bennettdunlopford.com","linkedin":"http://www.linkedin.com/company/bennett-dunlop-ford","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_175","company":"SASKATCHEWAN ALTERNATIVE INITIATIVES","domain":"saionline.ca","city":"Saskatoon","revenue":0,"phone":"+13062445013","website":"http://www.saionline.ca","linkedin":"http://www.linkedin.com/company/saskatchewan-alternative-initiatives-sai","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_176","company":"NORWESCO","domain":"norwesco.com","city":"Saskatoon","revenue":0,"phone":"+13062495511","website":"http://www.norwesco.com","linkedin":"http://www.linkedin.com/company/norwesco-inc.","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_177","company":"Pacesetter Homes","domain":"pacesetterhomestexas.com","city":"Saskatoon","revenue":0,"phone":"+13062447900","website":"http://www.pacesetterhomestexas.com","linkedin":"http://www.linkedin.com/company/pacesetter-homes-texas","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_178","company":"Kindersley Transport Ltd","domain":"kindersleytransport.com","city":"Saskatoon","revenue":0,"phone":"+14032798721","website":"http://www.kindersleytransport.com","linkedin":"http://www.linkedin.com/company/kindersleytransport","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_179","company":"MILTON HEIGHTS INC.","domain":"edencare.ca","city":"Regina","revenue":0,"phone":"+13065641200","website":"http://www.edencare.ca","linkedin":"http://www.linkedin.com/company/eden-care-communities","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_180","company":"BROADWAY TERRACE","domain":"edencare.ca","city":"Regina","revenue":0,"phone":"+13062060260","website":"http://www.edencare.ca","linkedin":"http://www.linkedin.com/company/eden-care-communities","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_181","company":"TCU FINANCIAL","domain":"tcufinancialgroup.com","city":"Regina","revenue":0,"phone":"+13066516500","website":"http://www.tcufinancialgroup.com","linkedin":"http://www.linkedin.com/company/tcu-financial-group","employees":0,"industry":"","score":3,"contacts":[{"name":"Randy Martynuik","title":"Chief Information Officer","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Randy, I've been working with several SK companies similar to TCU FINANCIAL on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_182","company":"ROYAL HOTEL REGINA, TRADEMARK COLLECTION BY WYNDHAM (FORMER EXECUTIVE ROYAL HOTEL REGINA)","domain":"royalhotelgroup.ca","city":"Regina","revenue":0,"phone":"+13065866755","website":"http://www.royalhotelgroup.ca","linkedin":"http://www.linkedin.com/company/royal-hotel-group","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_183","company":"PRAIRIE MACHINE & PARTS","domain":"prairiemachine.com","city":"Saskatoon","revenue":0,"phone":"+13069334812","website":"http://www.prairiemachine.com","linkedin":"http://www.linkedin.com/company/prairiemachine","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_184","company":"AUTISM SERVICES OF SASKATOON","domain":"autismservices.ca","city":"Saskatoon","revenue":0,"phone":"+13066657013","website":"http://www.autismservices.ca","linkedin":"http://www.linkedin.com/company/autism-services-of-saskatoon","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_185","company":"SASK LEGISLATIVE LIBRARY","domain":"legassembly.sk.ca","city":"Regina","revenue":0,"phone":"+13067872276","website":"http://www.legassembly.sk.ca","linkedin":"http://www.linkedin.com/company/legislative-assembly-service-saskatchewan","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_186","company":"HOME INN AND SUITES REGINA AIRPORT WEST","domain":"d3h.ca","city":"Regina","revenue":0,"phone":"+13065464663","website":"http://www.d3h.ca","linkedin":"http://www.linkedin.com/company/d3h-hotels-inc","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_187","company":"MONTGOMERY ELEMENTARY","domain":"dunwoodyhs.dekalb.k12.ga.us","city":"Saskatoon","revenue":0,"phone":"+16788748102","website":"http://dunwoodyhs.dekalb.k12.ga.us","linkedin":"http://www.linkedin.com/school/dunwoody-high-school","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_188","company":"ALL-FAB BUILDING COMPONENTS LP","domain":"all-fab.com","city":"Saskatoon","revenue":0,"phone":"+13066675564","website":"http://www.all-fab.com","linkedin":"http://www.linkedin.com/company/all-fab-group","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_189","company":"Digitex Canada Inc.","domain":"digitex.ca","city":"Regina","revenue":0,"phone":"+13062442679","website":"http://www.digitex.ca","linkedin":"http://www.linkedin.com/company/digitex-canada","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_190","company":"RDK TRANSPORTATION CO INC","domain":"paynetransportation.com","city":"Saskatoon","revenue":0,"phone":"+13066516955","website":"http://www.paynetransportation.com","linkedin":"http://www.linkedin.com/company/payne-transportation-lp","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_191","company":"The Saskatoon Co-operative Association Limited","domain":"saskatoonco-op.crs","city":"Saskatoon","revenue":0,"phone":"+13069333843","website":"http://www.saskatoonco-op.crs","linkedin":"http://www.linkedin.com/company/saskatoon-co-operative-association-ltd","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_192","company":"ATS RETAIL SOLUTIONS","domain":"tforce-solutions.com","city":"Regina","revenue":0,"phone":"+16042316300","website":"http://www.tforce-solutions.com","linkedin":"http://www.linkedin.com/company/ats-retail-solutions","employees":0,"industry":"","score":3,"contacts":[{"name":"Geovanni Ma***z","title":"Information Technology Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Geovanni, I've been working with several SK companies similar to ATS RETAIL SOLUTIONS on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_193","company":"UFCW LOCAL 1400","domain":"ufcw.ca","city":"Regina","revenue":0,"phone":"+13067914881","website":"http://www.ufcw.ca","linkedin":"http://www.linkedin.com/company/ufcw-canada","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_194","company":"DUMONT TECHNICAL INSTITUTE INC","domain":"gdins.org","city":"Saskatoon","revenue":0,"phone":"+13062426070","website":"http://www.gdins.org","linkedin":"http://www.linkedin.com/company/gabriel-dumont-institute","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_195","company":"McKillican International Inc","domain":"mckillican.com","city":"Saskatoon","revenue":0,"phone":"+17806650893","website":"http://www.mckillican.com","linkedin":"http://www.linkedin.com/company/mckillican","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_196","company":"CANADIAN FREIGHTWAYS LIMITED","domain":"tforce-solutions.com","city":"Saskatoon","revenue":0,"phone":"+13062424700","website":"http://www.tforce-solutions.com","linkedin":"http://www.linkedin.com/company/ats-retail-solutions","employees":0,"industry":"","score":3,"contacts":[{"name":"Geovanni Ma***z","title":"Information Technology Manager","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Geovanni, I've been working with several SK companies similar to CANADIAN FREIGHTWAYS LIMITED on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_197","company":"UFCW LOCAL 248P","domain":"ufcw.ca","city":"Saskatoon","revenue":0,"phone":"+13063824922","website":"http://www.ufcw.ca","linkedin":"http://www.linkedin.com/company/ufcw-canada","employees":0,"industry":"","score":3,"contacts":[]},{"id":"blitz_198","company":"Canadian Freightways","domain":"tst-cfexpress.com","city":"Saskatoon","revenue":0,"phone":"+13062420303","website":"http://www.tst-cfexpress.com","linkedin":"http://www.linkedin.com/company/tst-cf-express","employees":0,"industry":"","score":3,"contacts":[{"name":"Turhan Dj***t","title":"Manager, Technical Services, I.T.","email":"","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Turhan, I've been working with several SK companies similar to Canadian Freightways on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_199","company":"Flaman Sales Ltd.","domain":"flaman.com","city":"Saskatoon","revenue":0,"phone":"+13065007422","website":"http://www.flaman.com","linkedin":"http://www.linkedin.com/company/flaman-group","employees":0,"industry":"","score":3,"contacts":[{"name":"Jordan Moore","title":"IT Manager","email":"jordan.moore@flaman.com","phone":"","linkedin":"","personalIntel":{"careerHistory":[],"education":"","interests":[],"sportsTeams":[],"communityInvolvement":[],"suggestedOpener":"Hey Jordan, I've been working with several SK companies similar to Flaman Sales Ltd. on IT modernization. Would love a quick chat about what's on your radar."}}]},{"id":"blitz_200","company":"INTEGRATED CROP MANAGEMENT SERVICES INC.","domain":"icms-inc.com","city":"Saskatoon","revenue":0,"phone":"+13069563855","website":"http://www.icms-inc.com","linkedin":"http://www.linkedin.com/company/icms","employees":0,"industry":"","score":3,"contacts":[]}];
 let bzStatusFilter = 'all';
 let bzCadenceFilterVal = 'all';
@@ -6786,7 +7025,7 @@ function bzScoreColor(s) {
 function updateBlitzDashboard() {
     const total = blitzAccounts.length;
     let contacted = 0, meetings = 0, pipelineVal = 0, dueToday = 0;
-    const statusCounts = { fresh: 0, contacted: 0, meeting: 0, qualified: 0, nurture: 0, dead: 0 };
+    const statusCounts = { fresh: 0, contacted: 0, meeting: 0, qualified: 0, nurture: 0, dead: 0, pl_client: 0 };
     const cityCounts = {};
     const cityContacted = {};
     const today = new Date().toISOString().slice(0, 10);
@@ -6810,7 +7049,7 @@ function updateBlitzDashboard() {
     document.getElementById('bzKpiMeetings').textContent = meetings;
     document.getElementById('bzKpiPipeline').textContent = fmtSales(pipelineVal);
     document.getElementById('bzKpiDue').textContent = dueToday;
-
+    document.getElementById('bzKpiPlClient').textContent = statusCounts['pl_client'] || 0;
     // Momentum
     const pct = total ? Math.round(contacted / total * 100) : 0;
     document.getElementById('bzMomentumPct').textContent = pct + '%';
@@ -6847,9 +7086,9 @@ function updateBlitzDashboard() {
     // Funnel
     const funnelEl = document.getElementById('bzFunnel');
     const funnelMax = Math.max(...Object.values(statusCounts), 1);
-    const funnelColors = { fresh: 'var(--accent)', contacted: 'var(--accent3)', meeting: 'var(--accent2)', qualified: 'var(--accent5)', nurture: 'var(--text2)', dead: 'var(--text3)' };
-    funnelEl.innerHTML = ['fresh','contacted','meeting','qualified','nurture','dead'].map(s =>
-        '<div class="bz-funnel-step"><span class="bz-funnel-label" style="width:70px;">' + s.charAt(0).toUpperCase() + s.slice(1) + '</span>' +
+    const funnelColors = { fresh: 'var(--accent)', contacted: 'var(--accent3)', meeting: 'var(--accent2)', qualified: 'var(--accent5)', nurture: 'var(--text2)', dead: 'var(--text3)', pl_client: 'var(--accent2)' };
+    funnelEl.innerHTML = ['fresh','contacted','meeting','qualified','nurture','dead','pl_client'].map(s =>
+        '<div class="bz-funnel-step"><span class="bz-funnel-label" style="width:70px;">' + (s === 'pl_client' ? 'PL Client' : s.charAt(0).toUpperCase() + s.slice(1)) + '</span>' +
         '<div class="bz-funnel-bar" style="width:' + Math.max(statusCounts[s] / funnelMax * 120, 4) + 'px;background:' + funnelColors[s] + ';"></div>' +
         '<span class="bz-funnel-count">' + statusCounts[s] + '</span></div>'
     ).join('');
@@ -6869,7 +7108,7 @@ function updateBlitzDashboard() {
     // Hit list
     const hitList = blitzAccounts
         .map(a => ({ ...a, d: getBzData(a.id) }))
-        .filter(a => a.d.status !== 'dead' && a.d.status !== 'nurture')
+        .filter(a => a.d.status !== 'dead' && a.d.status !== 'nurture' && a.d.status !== 'pl_client')
         .sort((a, b) => {
             const aStale = bzDaysSince(a.d.lastTouch);
             const bStale = bzDaysSince(b.d.lastTouch);
@@ -6960,7 +7199,7 @@ function renderBlitz() {
                 '<span>' + (a.city || '—') + '</span>' +
                 '<span>' + (contact.name || '—') + '</span>' +
                 '<span class="bz-phone" onclick="event.stopPropagation();bzCopyPhone(\'' + phone + '\')">' + phone + '</span>' +
-                '<span><span class="bz-status bz-s-' + st + '">' + st + '</span></span>' +
+                '<span><span class="bz-status bz-s-' + st + '">' + (st === 'pl_client' ? 'PL Client' : st) + '</span></span>' +
                 '<span class="bz-stale ' + staleClass + '">' + staleText + '</span></div>';
         }).join('');
 }
@@ -7174,8 +7413,11 @@ function openBlitzDetail(id) {
         // Status + fields
         '<div class="bz-detail-section">' +
         '<div class="bz-detail-field"><label>Status</label><select id="bzDetStatus" onchange="bzDetailSave(\'' + id + '\')">' +
-        BLITZ_STATUSES.map(s => '<option value="' + s + '"' + (s === (d.status || 'fresh') ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>').join('') +
+        BLITZ_STATUSES.map(s => '<option value="' + s + '"' + (s === (d.status || 'fresh') ? ' selected' : '') + '>' + (s === 'pl_client' ? 'PL Client' : s.charAt(0).toUpperCase() + s.slice(1)) + '</option>').join('') +
         '</select></div>' +
+        ((d.status === 'pl_client') ? '<div style="padding:8px 12px;border-radius:8px;background:var(--accent2-light);color:var(--accent2);font-size:12px;font-weight:600;margin-bottom:8px;">Current Powerland customer — removed from prospecting.</div>' +
+        '<div class="bz-detail-field"><label>Client Since</label><input type="date" id="bzDetClientSince" value="' + (d.clientSince || '') + '" onchange="bzDetailSave(\'' + id + '\')"></div>' +
+        '<div class="bz-detail-field"><label>Account Rep</label><input type="text" id="bzDetAccountRep" value="' + (d.accountRep || '') + '" placeholder="Which rep owns this account?" onblur="bzDetailSave(\'' + id + '\')"></div>' : '') +
         '<div class="bz-detail-field"><label>Pipeline Value ($)</label><input type="number" id="bzDetValue" value="' + (d.pipelineValue || '') + '" onblur="bzDetailSave(\'' + id + '\')"></div>' +
         '<div class="bz-detail-field"><label>Next Action Date</label><input type="date" id="bzDetNextDate" value="' + (d.nextActionDate || '') + '" onchange="bzDetailSave(\'' + id + '\')"></div>' +
         '<div class="bz-detail-field"><label>Notes</label><textarea id="bzDetNotes" onblur="bzDetailSave(\'' + id + '\')">' + (d.notes || '') + '</textarea></div>' +
@@ -7210,6 +7452,10 @@ function bzDetailSave(id) {
     if (renewalEl) d.renewalDate = renewalEl.value;
     var compEl = document.getElementById('bzDetCompetitors');
     if (compEl) d.competitorNotes = compEl.value;
+    var clientSinceEl = document.getElementById('bzDetClientSince');
+    if (clientSinceEl) d.clientSince = clientSinceEl.value;
+    var accountRepEl = document.getElementById('bzDetAccountRep');
+    if (accountRepEl) d.accountRep = accountRepEl.value;
     setBzData(id, d);
 }
 
@@ -7234,7 +7480,7 @@ function bzStartCallMode(resume) {
     var today = new Date().toISOString().slice(0,10);
     var queue = blitzAccounts
         .map(function(a){ return Object.assign({}, a, { d: getBzData(a.id) }); })
-        .filter(function(a){ return a.d.status !== 'dead' && a.d.status !== 'nurture' && !a.d.skipped; })
+        .filter(function(a){ return a.d.status !== 'dead' && a.d.status !== 'nurture' && a.d.status !== 'pl_client' && !a.d.skipped; })
         .sort(function(a, b){
             // Cadence overdue first
             var aCad = bzCalcCadenceStep(a.id);
@@ -7395,6 +7641,7 @@ function bzLogOutcome(outcome) {
     stats.level = newLevel;
     bzSaveSprintStats(stats);
     bzCallSession.xpGained += xpEarned;
+    if (xpEarned > 0) showXpFloat(xpEarned);
 
     // Milestones
     if (outcome === 'meeting') showToast('success', 'MEETING BOOKED! +' + xpEarned + ' XP');
