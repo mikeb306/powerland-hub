@@ -106,7 +106,8 @@
             padding: 0 24px; height: 40px; border-bottom: 1px solid var(--border);
         }
         .topbar-brand { display: flex; align-items: center; gap: 8px; }
-        .topbar-xerox { font-weight: 700; font-size: 14px; color: var(--xerox-red); letter-spacing: .02em; }
+        .topbar-xerox { display:inline-flex; align-items:center; }
+        .topbar-xerox img { height:16px; }
         .topbar-its { font-size: 12px; color: var(--text2); font-weight: 500; }
         .topbar-center { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; position: absolute; left: 50%; transform: translateX(-50%); }
         .topbar-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
@@ -663,6 +664,25 @@
         .kanban-stat { font-size: 12px; color: var(--text2); }
         .kanban-stat strong { color: var(--text); font-family: var(--mono); }
 
+        /* PIPELINE TABLE */
+        .pipe-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+        .pipe-tbl th { text-align:left; padding:8px 10px; font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); border-bottom:1px solid var(--bg3); position:sticky; top:0; background:var(--bg); cursor:pointer; }
+        .pipe-tbl th:hover { color:var(--text); }
+        .pipe-tbl td { padding:6px 10px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:middle; }
+        .pipe-tbl tr:hover td { background:rgba(255,255,255,.03); }
+        .pipe-tbl .pipe-acct { font-weight:600; color:var(--text); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
+        .pipe-tbl .pipe-acct:hover { color:var(--accent); }
+        .pipe-tbl .pipe-val { font-family:var(--mono); font-weight:700; color:var(--accent2); }
+        .pipe-tbl .pipe-stage-sel { background:var(--bg2); color:var(--text); border:1px solid var(--bg3); border-radius:4px; padding:3px 6px; font-size:11px; cursor:pointer; }
+        .pipe-tbl .pipe-input { background:var(--bg2); color:var(--text); border:1px solid var(--bg3); border-radius:4px; padding:3px 6px; font-size:11px; width:90px; font-family:var(--mono); }
+        .pipe-tbl .pipe-input:focus, .pipe-tbl .pipe-stage-sel:focus { border-color:var(--accent); outline:none; }
+        .pipe-tbl .pipe-del { opacity:.3; cursor:pointer; font-size:14px; }
+        .pipe-tbl .pipe-del:hover { opacity:1; color:var(--accent4); }
+        .pipe-tbl-wrap { max-height:70vh; overflow-y:auto; border-radius:8px; border:1px solid var(--bg3); }
+        .pipe-add-row { display:flex; gap:8px; margin-top:10px; align-items:center; }
+        .pipe-add-row input, .pipe-add-row select { background:var(--bg2); color:var(--text); border:1px solid var(--bg3); border-radius:6px; padding:6px 10px; font-size:12px; }
+        .pipe-add-row button { background:var(--accent); color:#fff; border:none; border-radius:6px; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer; }
+
         /* WIN/LOSS ANALYTICS */
         .analytics-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
         .win-rate-ring { position: relative; width: 80px; height: 80px; margin: 0 auto 8px; }
@@ -1050,7 +1070,7 @@
             .velocity-value { font-size: 18px; }
             .contact-card { padding: 8px; }
             .topbar-header { height: 36px; }
-            .topbar-xerox { font-size: 12px; }
+            .topbar-xerox img { height:14px; }
             .topbar-its { font-size: 10px; }
             .topbar-restore { font-size: 10px; padding: 2px 6px; }
             .meddpicc-grid { grid-template-columns: 1fr; gap: 6px; }
@@ -1371,7 +1391,7 @@
 <nav class="topbar">
     <div class="topbar-header">
         <div class="topbar-brand">
-            <span class="topbar-xerox">Xerox</span>
+            <span class="topbar-xerox"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iODAwIiB3aWR0aD0iMTIwMCIgdmlld0JveD0iLTE1MCAtNTQuNjc5NzUgMTMwMCAzMjguMDc4NSI+PHBhdGggZD0iTTY4NC4yMTMgMEM2MTkuNTY3IDAgNTc2LjY2IDQ4LjA4MyA1NzYuNjYgMTA5LjI5YzAgNjQuNzEzIDQzLjQ5IDEwOS4yIDEwNy41NTQgMTA5LjIgNjIuODQgMCAxMDcuMzM0LTQ2LjQ4NiAxMDcuMzM0LTEwOS4yNTJDNzkxLjU0NyA0Ni40ODUgNzQ3LjA0NyAwIDY4NC4yMTMgMHpNMzE2LjE2Ny4xNTRjLTIwLjUzNyAwLTQ2LjUyMiA3LjA3My02NS42NDEgMjIuNzk1LTIyLjgwNyAxOC43Ni00MC40NjEgNDguMTE0LTQwLjQ2MSA4Ny42MDIgMCAzNC4wNSAxMS4wMzIgNjEuNDcyIDMwLjkzNyA4MC4wNDcgMTkuNDg1IDE4LjE5IDQ3LjA0NCAyOC4xMiA4MS4yMTcgMjguMTIgMjcuNTEgMCA2MC43MzUtMTAuMzgyIDc0Ljk4NS0xOS4xOTMgNC45ODctMy4wODEgNi41NTMtNC40MDQgNS4yNi05LjQ0MWwtOC45LTI1LjIwMWMtMS4wMzItNC4xMzMtNS42MTYtNS4xOTItOS4zNC0zLjM0Mi02LjI1NiAzLjA3NS0xMC45MjggNS40OTUtMTcuMjcgNy44MzQtMTIuMzIgNC41NTQtMjUuMDY2IDcuNjYtMzcuMiA3LjY2LTI1LjU0OCAwLTQwLjA3Ni02Ljk0My01MS4yLTE5Ljc1OC03LjA2Ny04LjEzNi0xMS4yMDYtMTguNDUtMTIuNDkzLTMwLjM2N2gxNDAuOThjNS4xMyAwIDcuNDE1LTMuNTQ1IDcuNDE1LTkuNTR2LTEwLjE2MWMwLTQuOTUtLjIyNC0xMi43Mi0uNjQ1LTE3LjM2Ny0yLjU5My0yOC4zODgtMTMuMDM3LTUxLjIyNy0zMC40Ni02Ni43MDFDMzY2LjU2MyA4LjIxIDM0NC4wMjguMTU0IDMxNi4xNjUuMTU0em0yMjkuODQ1LjIwM2MtNDAuNzA3IDAtNjUuNTY4IDkuMzM4LTgxLjUyIDI5LjkwNS0xMi4yMiAxNS43NzEtMTQuNDMgMzMuNDEzLTE0LjQxNSA3MS4xNTZ2MTAzLjU5Yy41NjMgNy4zODEgMy41MzIgMTAuODM0IDEwLjQzMSAxMC44MzRoMzIuMjA1YzcuNDUgMCAxMC40OTUtMy44ODYgMTAuNDk1LTEwLjgzNFY5OS40ODZjMC0yMy43NzIuMjktMzcuMDM4IDguNjUtNDYuMDEgNy4xOS03LjcxNSAxNi44MzUtMTIuNzYzIDM3LjA2OC0xMi43NjMgNC4wMSAwIDEzLjYyIDEuMDU4IDE2Ljk3MyAxLjQ2NyAxLjI2OC4xNTQgMi4zMDEuMjU0IDIuODQ2LjI1NCAzLjQ5IDAgNC43MDItMS4yNyA1LjgyMi01LjcwNWw0LjgzMi0yMy43NDljLjg5LTQuODY5LjE0OC04LjY1NS00LjcwMy05LjgwNkM1NjcuMzIgMS40MjkgNTU1LjU3OC4zNTcgNTQ2LjAxMi4zNTd6TTExLjg3IDMuMThjLTMuNTAyIDAtNi4wMiAyLjc5LTQuNTc4IDcuNTA2IDkuNTk2IDMxLjM1MSAzMy45MzcgNjguNTc1IDU5LjE3NSA5OS4xMjhDMzQuMzA1IDEzOC43OSAxMS44MTQgMTc3LjMzMS41MjcgMjA4LjNjLTEuNjY0IDQuNTU0LjkxNyA3LjUzMSAzLjQ1NCA3LjUzMWgzNy45NTNjNS40NjQgMCA3Ljk2OS0xLjk0NCAxMC40NzUtNy40OTQgMTAuMjU4LTIyLjY2NSAyNS40OTMtNDguODE5IDQ1LjQ3Mi03MC4wMyAxOC4zMTUgMTcuNjM1IDM0LjM0IDQ0LjQ1MSA0NC42MTIgNzAuMDMgMi44NzcgNy4wNzIgNi4yMDUgNy40OTQgMTAuNTA2IDcuNDk0aDQxLjM4YzcuOTIgMCA4LjYyLTQuMjk0IDcuMTk4LTguMDM3LTE1Ljc4NC00MS42MDQtNDkuMzYzLTg0LjA3LTY4LjMwMy0xMDIuMDA4IDE3LjM0My0xOC41MTMgNDguNzgxLTU0LjI2OSA2Mi41MTgtOTUuMSAyLjAyMy02LjAwNy0xLjcxNS03LjUwNS00LjgxNS03LjUwNWgtMzQuNjVjLTQuMjAyIDAtNy4wMSAxLjQ2Ny0xMC4xMTYgNy41MDYtMTguNjYgMzUuMTk0LTM1LjQ2IDU1Ljk0Ny00Mi42OTMgNjMuNDI3QzkyLjEyMSA2MC41ODEgNzcuMTM1IDM2LjI0IDY2LjE3IDEwLjY4NmMtMi4zODItNS41NDQtNC45LTcuNTA2LTkuNzItNy41MDZ6bTc5Ny44MzIgMGMtMy40OSAwLTYuMDE0IDIuNzktNC41NzggNy41MDYgOS41OSAzMS4zNTEgMzMuOTMgNjguNTc1IDU5LjE3NSA5OS4xMjgtMzIuMTU2IDI4Ljk3Ni01NC42NDcgNjcuNTE3LTY1LjkzMyA5OC40ODUtMS42NjUgNC41NTQuOTM0IDcuNTMxIDMuNDU5IDcuNTMxaDM3Ljk0N2M1LjQ1NyAwIDcuOTYzLTEuOTQ0IDEwLjQ2My03LjQ5NCAxMC4yNjUtMjIuNjY1IDI1LjQ5My00OC44MTkgNDUuNDc4LTcwLjAzIDE4LjMyMSAxNy42MzUgMzQuMzQ3IDQ0LjQ1MSA0NC42MDYgNzAuMDMgMi45MDIgNy4wNzIgNi4yMjQgNy40OTQgMTAuNTEyIDcuNDk0aDQxLjM4YzcuOTE0IDAgOC42Mi00LjI5NCA3LjIwNC04LjAzNy0xNS43OTctNDEuNjA0LTQ5LjM3Ni04NC4wNy02OC4yOTEtMTAyLjAwOCAxNy4zMy0xOC41MTMgNDguNzc1LTU0LjI2OSA2Mi41MDUtOTUuMSAyLjAzLTYuMDA3LTEuNzE0LTcuNTA1LTQuODItNy41MDVoLTM0LjYzN2MtNC4yMDcgMC03LjAyMiAxLjQ2Ny0xMC4xMjkgNy41MDYtMTguNjU1IDM1LjE5NC0zNS40NTQgNTUuOTQ3LTQyLjY4MSA2My40MjctMTEuNDEtMTMuNTMyLTI2LjM5NS0zNy44NzMtMzcuMzY1LTYzLjQyNy0yLjM3Ni01LjU0NC00LjkwOC03LjUwNi05LjcxNS03LjUwNnpNNjg0LjI0NSA0MC4wMDhjMzcuNjM4IDAgNTEuODIgMzIuNTUyIDUxLjgyIDY5LjI0NCAwIDM2LjcwNC0xNC4xODIgNjkuMjc5LTUxLjgyIDY5LjI3My0zNy42NSAwLTUyLjE1My0zMi41Ny01Mi4xNTMtNjkuMjczIDAtMzYuNjg1IDE0LjUwMi02OS4yNDQgNTIuMTUzLTY5LjI0NHptLTM2Ni4zMTUuMTg1YzI4LjE2IDAgNDUuMzYyIDE5LjEyNiA0NS4zNjIgNDcuNTE0djEuMjg3SDI2NS45OGMxLjA0Ni03LjA2IDMuMDYyLTEzLjc2OCA2LjIzLTIwLjEzNSA4LjY3NS0xNy40OTggMjUuMjItMjguNjY2IDQ1LjcyLTI4LjY2NnoiIGZpbGw9IiNkNDBlMmEiLz48L3N2Zz4=" alt="Xerox"></span>
             <span class="topbar-its">IT Solutions</span>
         </div>
         <span class="topbar-center">SK Command Center</span>
@@ -1654,12 +1674,19 @@
     <div class="container">
         <div class="sec-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
             <div>
-                <h2>Pipeline Board</h2>
-                <p>Drag deals between stages. MEDDPICC scoring optional.</p>
+                <h2>Pipeline</h2>
+                <p>Manage all deals. Toggle between board and table view.</p>
             </div>
-            <div class="kanban-summary" id="kanbanSummary"></div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="kanban-summary" id="kanbanSummary"></div>
+                <div style="display:flex;gap:2px;background:var(--bg2);border-radius:6px;padding:2px;">
+                    <button class="pipe-view-btn active" id="pvBoard" onclick="setPipeView('board')" style="padding:5px 12px;font-size:11px;border:none;border-radius:4px;cursor:pointer;font-weight:600;background:var(--accent);color:#fff;">Board</button>
+                    <button class="pipe-view-btn" id="pvTable" onclick="setPipeView('table')" style="padding:5px 12px;font-size:11px;border:none;border-radius:4px;cursor:pointer;font-weight:600;background:transparent;color:var(--text3);">Table</button>
+                </div>
+            </div>
         </div>
         <div class="kanban-board" id="kanbanBoard"></div>
+        <div id="pipelineTable" style="display:none;"></div>
     </div>
 </div>
 
@@ -5875,7 +5902,7 @@ function updateKPICards() {
     });
 
     const remainingQuota = Math.max(quota - closedWon, 1);
-    const attainment = Math.round(closedWon / quota * 100);
+    const attainment = Math.min(Math.round(closedWon / quota * 1000) / 10, 100);
     const coverage = weightedPipeline / remainingQuota;
     const closingCount = closingThisMonth.length;
     const closingValue = closingThisMonth.reduce((s, d) => s + d.value, 0);
@@ -6606,6 +6633,153 @@ function initKanbanDrag() {
             }
         });
     });
+}
+
+// ===== PIPELINE TABLE VIEW =====
+var pipeViewMode = 'board';
+var pipeSortCol = 'value';
+var pipeSortAsc = false;
+
+function setPipeView(mode) {
+    pipeViewMode = mode;
+    document.getElementById('kanbanBoard').style.display = mode === 'board' ? '' : 'none';
+    document.getElementById('pipelineTable').style.display = mode === 'table' ? '' : 'none';
+    document.getElementById('pvBoard').style.background = mode === 'board' ? 'var(--accent)' : 'transparent';
+    document.getElementById('pvBoard').style.color = mode === 'board' ? '#fff' : 'var(--text3)';
+    document.getElementById('pvTable').style.background = mode === 'table' ? 'var(--accent)' : 'transparent';
+    document.getElementById('pvTable').style.color = mode === 'table' ? '#fff' : 'var(--text3)';
+    if (mode === 'table') renderPipelineTable();
+}
+
+function renderPipelineTable() {
+    const el = document.getElementById('pipelineTable');
+    if (!el) return;
+    const deals = getAllPipelineDeals();
+
+    // Sort
+    deals.sort((a, b) => {
+        let va, vb;
+        if (pipeSortCol === 'account') { va = a.account.toLowerCase(); vb = b.account.toLowerCase(); }
+        else if (pipeSortCol === 'value') { va = a.value; vb = b.value; }
+        else if (pipeSortCol === 'stage') { va = STAGE_CONFIG[a.stage]?.order || 0; vb = STAGE_CONFIG[b.stage]?.order || 0; }
+        else if (pipeSortCol === 'days') { va = a.daysInStage; vb = b.daysInStage; }
+        else if (pipeSortCol === 'prob') { va = STAGE_CONFIG[a.stage]?.prob || 0; vb = STAGE_CONFIG[b.stage]?.prob || 0; }
+        else { va = a[pipeSortCol] || ''; vb = b[pipeSortCol] || ''; }
+        if (va < vb) return pipeSortAsc ? -1 : 1;
+        if (va > vb) return pipeSortAsc ? 1 : -1;
+        return 0;
+    });
+
+    const arrow = function(col) { return pipeSortCol === col ? (pipeSortAsc ? ' \u25B2' : ' \u25BC') : ''; };
+    const stageOpts = KANBAN_STAGES.map(s => '<option value="' + s + '">' + s + '</option>').join('');
+    const closeQOpts = ['Q1 2026','Q2 2026','Q3 2026','Q4 2026','Q1 2027','Q2 2027'].map(q => '<option value="' + q + '">' + q + '</option>').join('');
+
+    const rows = deals.map(deal => {
+        const d = getAcctData(deal.account);
+        const age = getDealAgeStatus(deal);
+        const ageStyle = age === 'critical' ? 'color:var(--accent4);font-weight:700;' : age === 'warning' ? 'color:var(--accent3);font-weight:700;' : '';
+        return '<tr>' +
+            '<td class="pipe-acct" onclick="openModal(\'' + deal.account.replace(/'/g, "\\'") + '\',\'' + deal.type + '\')">' + deal.account + '</td>' +
+            '<td><select class="pipe-stage-sel" onchange="pipeUpdateField(\'' + deal.account.replace(/'/g, "\\'") + '\',\'stage\',this.value)">' + KANBAN_STAGES.map(s => '<option value="' + s + '"' + (s === deal.stage ? ' selected' : '') + '>' + s + '</option>').join('') + '</select></td>' +
+            '<td><input class="pipe-input" type="text" value="' + (deal.value || '') + '" onchange="pipeUpdateField(\'' + deal.account.replace(/'/g, "\\'") + '\',\'value\',this.value)" placeholder="$0"></td>' +
+            '<td style="text-align:center;">' + (STAGE_CONFIG[deal.stage]?.prob || 0) + '%</td>' +
+            '<td style="text-align:center;' + ageStyle + '">' + deal.daysInStage + 'd</td>' +
+            '<td><select class="pipe-stage-sel" style="width:90px;" onchange="pipeUpdateField(\'' + deal.account.replace(/'/g, "\\'") + '\',\'closeQ\',this.value)">' + '<option value="">—</option>' + ['Q1 2026','Q2 2026','Q3 2026','Q4 2026','Q1 2027','Q2 2027'].map(q => '<option value="' + q + '"' + (q === (d.closeQ || '') ? ' selected' : '') + '>' + q + '</option>').join('') + '</select></td>' +
+            '<td><input class="pipe-input" style="width:180px;" type="text" value="' + (d.nextAction || '').replace(/"/g, '&quot;') + '" onchange="pipeUpdateField(\'' + deal.account.replace(/'/g, "\\'") + '\',\'nextAction\',this.value)" placeholder="Next step..."></td>' +
+            '<td><span class="pipe-del" onclick="pipeDeleteDeal(\'' + deal.account.replace(/'/g, "\\'") + '\')" title="Remove from pipeline">\u2716</span></td>' +
+        '</tr>';
+    }).join('');
+
+    const totalVal = deals.reduce((s, d) => s + d.value, 0);
+    const weighted = deals.reduce((s, d) => s + d.value * (STAGE_CONFIG[d.stage]?.prob || 0) / 100, 0);
+
+    el.innerHTML = '<div class="pipe-tbl-wrap"><table class="pipe-tbl">' +
+        '<thead><tr>' +
+        '<th onclick="pipeSortBy(\'account\')">Account' + arrow('account') + '</th>' +
+        '<th onclick="pipeSortBy(\'stage\')">Stage' + arrow('stage') + '</th>' +
+        '<th onclick="pipeSortBy(\'value\')">Value' + arrow('value') + '</th>' +
+        '<th onclick="pipeSortBy(\'prob\')">Prob' + arrow('prob') + '</th>' +
+        '<th onclick="pipeSortBy(\'days\')">Days' + arrow('days') + '</th>' +
+        '<th>Close</th>' +
+        '<th>Next Action</th>' +
+        '<th></th>' +
+        '</tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+        '<tfoot><tr style="border-top:2px solid var(--bg3);">' +
+        '<td style="font-weight:700;">' + deals.length + ' deals</td>' +
+        '<td></td>' +
+        '<td class="pipe-val">$' + totalVal.toLocaleString() + '</td>' +
+        '<td style="text-align:center;font-weight:600;">$' + Math.round(weighted).toLocaleString() + ' wtd</td>' +
+        '<td colspan="4"></td>' +
+        '</tr></tfoot>' +
+        '</table></div>' +
+        '<div class="pipe-add-row">' +
+        '<input id="pipeNewAcct" placeholder="Account name" style="flex:1;">' +
+        '<input id="pipeNewVal" placeholder="Value" style="width:100px;">' +
+        '<select id="pipeNewStage">' + stageOpts + '</select>' +
+        '<button onclick="pipeAddDeal()">+ Add Deal</button>' +
+        '</div>';
+}
+
+function pipeSortBy(col) {
+    if (pipeSortCol === col) pipeSortAsc = !pipeSortAsc;
+    else { pipeSortCol = col; pipeSortAsc = col === 'account'; }
+    renderPipelineTable();
+}
+
+function pipeUpdateField(account, field, value) {
+    const d = getAcctData(account);
+    if (field === 'value') {
+        d.value = String(Math.round(Number(String(value).replace(/[$,\s]/g, '')) || 0));
+    } else if (field === 'stage') {
+        d.stage = value;
+        d.stageEnteredDate = new Date().toISOString().slice(0, 10);
+        if (STAGE_CONFIG[value]) d.prob = String(STAGE_CONFIG[value].prob);
+        if (!d.activities) d.activities = [];
+        d.activities.push({ type: 'stage_change', date: new Date().toISOString(), note: 'Moved to ' + value });
+        if (value === 'Closed Won') showToast('success', account + ' — Closed Won!');
+    } else {
+        d[field] = value;
+    }
+    setAcctData(account, d);
+    renderPipelineTable();
+    renderKanban();
+    updateDashPipeline();
+    updateKPICards();
+}
+
+function pipeDeleteDeal(account) {
+    if (!confirm('Remove "' + account + '" from pipeline? (Sets stage back to Fresh)')) return;
+    const d = getAcctData(account);
+    d.stage = 'Fresh';
+    d.value = '';
+    d.prob = '';
+    setAcctData(account, d);
+    renderPipelineTable();
+    renderKanban();
+    updateDashPipeline();
+    updateKPICards();
+    showToast('info', account + ' removed from pipeline');
+}
+
+function pipeAddDeal() {
+    const acct = document.getElementById('pipeNewAcct').value.trim();
+    const val = document.getElementById('pipeNewVal').value.trim().replace(/[$,]/g, '');
+    const stage = document.getElementById('pipeNewStage').value;
+    if (!acct) { showToast('error', 'Enter account name'); return; }
+    const d = getAcctData(acct);
+    d.stage = stage;
+    d.value = val || '';
+    d.stageEnteredDate = new Date().toISOString().slice(0, 10);
+    if (STAGE_CONFIG[stage]) d.prob = String(STAGE_CONFIG[stage].prob);
+    setAcctData(acct, d);
+    document.getElementById('pipeNewAcct').value = '';
+    document.getElementById('pipeNewVal').value = '';
+    renderPipelineTable();
+    renderKanban();
+    updateDashPipeline();
+    updateKPICards();
+    showToast('success', acct + ' added to ' + stage);
 }
 
 // ===== TOAST NOTIFICATIONS =====
