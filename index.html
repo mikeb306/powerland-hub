@@ -680,6 +680,18 @@
         .pipe-tbl .pipe-del:hover { opacity:1; color:var(--accent4); }
         .pipe-tbl-wrap { max-height:70vh; overflow-y:auto; border-radius:8px; border:1px solid var(--bg3); }
         .pipe-add-row { display:flex; gap:8px; margin-top:10px; align-items:center; }
+        .dn-table { width:100%; border-collapse:collapse; font-size:12px; }
+        .dn-table th { text-align:left; padding:6px 10px; font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--text3); border-bottom:1px solid var(--bg3); }
+        .dn-table td { padding:6px 10px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:middle; }
+        .dn-table tr:hover td { background:rgba(255,255,255,.03); }
+        .dn-table .dn-label { color:var(--text2); font-weight:500; }
+        .dn-table .dn-hint { font-size:10px; color:var(--text3); display:block; margin-top:2px; }
+        .dn-table input { background:var(--bg2); color:var(--text); border:1px solid var(--bg3); border-radius:4px; padding:5px 8px; font-size:13px; font-family:var(--mono); width:130px; }
+        .dn-table input:focus { border-color:var(--accent); outline:none; }
+        .dn-table .dn-del { opacity:.3; cursor:pointer; font-size:14px; }
+        .dn-table .dn-del:hover { opacity:1; color:var(--accent4); }
+        .dn-add-btn { background:var(--bg3); color:var(--text2); border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer; }
+        .dn-add-btn:hover { background:var(--accent); color:#fff; }
         .pipe-add-row input, .pipe-add-row select { background:var(--bg2); color:var(--text); border:1px solid var(--bg3); border-radius:6px; padding:6px 10px; font-size:12px; }
         .pipe-add-row button { background:var(--accent); color:#fff; border:none; border-radius:6px; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer; }
 
@@ -1424,6 +1436,7 @@
             <div class="topbar-dd-menu" id="dd-tools">
                 <button class="topbar-dd-item" data-page="playbook">Playbook</button>
                 <button class="topbar-dd-item" data-page="calendar">Calendar</button>
+                <button class="topbar-dd-item" onclick="openDashNumbers()">Dashboard Numbers</button>
                 <button class="topbar-dd-item" data-page="tools">Backup / Restore</button>
             </div>
         </div>
@@ -3230,6 +3243,39 @@ Sr Account Executive | Xerox IT Solutions
     </div>
 </div>
 
+<!-- DASHBOARD NUMBERS EDITOR MODAL -->
+<div class="modal-overlay hidden" id="dashNumModal">
+    <div class="modal" style="max-width:620px;">
+        <div class="modal-header">
+            <h2>Dashboard Numbers</h2>
+            <button class="modal-close" onclick="closeDashNumbers()">&times;</button>
+        </div>
+        <div class="modal-body" style="padding:16px 22px;">
+            <p style="font-size:11px;color:var(--text3);margin:0 0 14px;">Edit financial targets and actuals. Changes update the dashboard immediately.</p>
+            <table class="dn-table">
+                <thead><tr><th>Metric</th><th>Value</th><th></th></tr></thead>
+                <tbody id="dnTableBody"></tbody>
+            </table>
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <span style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;">Run-Rate / Recurring Revenue</span>
+                    <button class="dn-add-btn" onclick="dnAddRunRate()">+ Add Line</button>
+                </div>
+                <p style="font-size:10px;color:var(--text3);margin:0 0 10px;">Monthly recurring business that isn't tracked as individual deals. Gets added to closed revenue automatically.</p>
+                <table class="dn-table">
+                    <thead><tr><th>Description</th><th>Monthly $</th><th></th></tr></thead>
+                    <tbody id="dnRunRateBody"></tbody>
+                </table>
+                <div style="text-align:right;margin-top:6px;font-size:11px;color:var(--text3);" id="dnRunRateTotal"></div>
+            </div>
+        </div>
+        <div class="modal-footer" style="justify-content:flex-end;gap:8px;">
+            <button class="modal-btn modal-btn-ghost" onclick="closeDashNumbers()">Close</button>
+            <button class="modal-btn modal-btn-primary" onclick="saveDashNumbers()">Save All</button>
+        </div>
+    </div>
+</div>
+
 <!-- CALENDAR SETUP MODAL -->
 <div class="modal-overlay hidden" id="calSetupModal">
     <div class="modal-card" style="max-width:540px;">
@@ -4057,7 +4103,7 @@ function editDashNum(key, label, currentVal, cb) {
 
 function updateMonthlyCalc() {
     const quota = getQuota();
-    const revBase = getRevenueBase();
+    const revBase = getRevenueBase() + getRunRateAnnual();
     const now = new Date();
     const monthsLeft = Math.max(12 - now.getMonth(), 1);
     const remaining = Math.max(quota - revBase, 0);
@@ -4077,6 +4123,104 @@ if (!localStorage.getItem('xits_revenue_base_fy26')) localStorage.setItem('xits_
 if (!localStorage.getItem('xits_profit_fy26')) localStorage.setItem('xits_profit_fy26', '7250');
 
 updateMonthlyCalc();
+
+// ===== DASHBOARD NUMBERS EDITOR =====
+function getRunRateMonthly() {
+    try { var rr = JSON.parse(localStorage.getItem('xits_run_rate') || '[]'); return rr.reduce(function(s,r){ return s + (Number(r.monthly) || 0); }, 0); } catch(e){ return 0; }
+}
+function getRunRateAnnual() { return getRunRateMonthly() * 12; }
+function getTotalClosedRev() { return getRevenueBase() + getRunRateAnnual(); }
+
+var DN_FIELDS = [
+    { key: 'xits_annual_target', label: 'Annual Quota Target', hint: 'Your FY2026 quota from Xerox', fmt: '$' },
+    { key: 'xits_revenue_base_fy26', label: 'Closed Revenue (Deals)', hint: 'Booked deal revenue YTD — not including run-rate', fmt: '$' },
+    { key: 'xits_profit_fy26', label: 'Profit YTD', hint: 'Gross profit on closed deals', fmt: '$' },
+];
+
+function openDashNumbers() {
+    document.getElementById('dashNumModal').classList.remove('hidden');
+    renderDnTable();
+    renderDnRunRate();
+}
+function closeDashNumbers() {
+    document.getElementById('dashNumModal').classList.add('hidden');
+}
+
+function renderDnTable() {
+    var html = '';
+    DN_FIELDS.forEach(function(f) {
+        var val = localStorage.getItem(f.key) || '0';
+        html += '<tr><td class="dn-label">' + f.label + '<span class="dn-hint">' + f.hint + '</span></td>';
+        html += '<td><input type="text" id="dn_' + f.key + '" value="' + Number(val).toLocaleString() + '" onfocus="this.value=this.value.replace(/,/g,\'\')" onblur="this.value=Number(this.value.replace(/[^0-9.-]/g,\'\')||0).toLocaleString()"></td>';
+        html += '<td></td></tr>';
+    });
+    // Show computed total
+    var totalRev = getTotalClosedRev();
+    html += '<tr style="border-top:2px solid var(--bg3);"><td class="dn-label" style="color:var(--accent2);font-weight:700;">Total Recognized Revenue<span class="dn-hint">Deals + Run-Rate (annualized)</span></td>';
+    html += '<td style="font-family:var(--mono);font-weight:700;color:var(--accent2);font-size:14px;" id="dnTotalRev">$' + totalRev.toLocaleString() + '</td><td></td></tr>';
+    document.getElementById('dnTableBody').innerHTML = html;
+}
+
+function renderDnRunRate() {
+    var rr;
+    try { rr = JSON.parse(localStorage.getItem('xits_run_rate') || '[]'); } catch(e){ rr = []; }
+    var html = '';
+    rr.forEach(function(r, i) {
+        html += '<tr><td><input type="text" class="dn-rr-desc" data-i="' + i + '" value="' + (r.desc || '').replace(/"/g,'&quot;') + '" style="width:200px;font-family:inherit;" placeholder="e.g. SaskTel MPS monthly"></td>';
+        html += '<td><input type="text" class="dn-rr-val" data-i="' + i + '" value="' + Number(r.monthly||0).toLocaleString() + '" onfocus="this.value=this.value.replace(/,/g,\'\')" onblur="this.value=Number(this.value.replace(/[^0-9.-]/g,\'\')||0).toLocaleString()"></td>';
+        html += '<td><span class="dn-del" onclick="dnDelRunRate(' + i + ')">&times;</span></td></tr>';
+    });
+    if (rr.length === 0) {
+        html = '<tr><td colspan="3" style="color:var(--text3);font-size:11px;text-align:center;padding:12px;">No run-rate lines yet. Click "+ Add Line" above.</td></tr>';
+    }
+    document.getElementById('dnRunRateBody').innerHTML = html;
+    var total = rr.reduce(function(s,r){ return s + (Number(r.monthly)||0); }, 0);
+    document.getElementById('dnRunRateTotal').innerHTML = 'Monthly: <b>$' + total.toLocaleString() + '</b> &middot; Annual: <b>$' + (total * 12).toLocaleString() + '</b>';
+}
+
+function dnAddRunRate() {
+    var rr;
+    try { rr = JSON.parse(localStorage.getItem('xits_run_rate') || '[]'); } catch(e){ rr = []; }
+    rr.push({ desc: '', monthly: 0 });
+    localStorage.setItem('xits_run_rate', JSON.stringify(rr));
+    renderDnRunRate();
+}
+function dnDelRunRate(i) {
+    var rr;
+    try { rr = JSON.parse(localStorage.getItem('xits_run_rate') || '[]'); } catch(e){ rr = []; }
+    rr.splice(i, 1);
+    localStorage.setItem('xits_run_rate', JSON.stringify(rr));
+    renderDnRunRate();
+    renderDnTable(); // update total
+}
+
+function saveDashNumbers() {
+    // Save main fields
+    DN_FIELDS.forEach(function(f) {
+        var el = document.getElementById('dn_' + f.key);
+        if (el) {
+            var val = Math.round(Number(el.value.replace(/[^0-9.-]/g, '')) || 0);
+            localStorage.setItem(f.key, String(val));
+        }
+    });
+    // Save run-rate lines
+    var descs = document.querySelectorAll('.dn-rr-desc');
+    var vals = document.querySelectorAll('.dn-rr-val');
+    var rr = [];
+    descs.forEach(function(el, i) {
+        var monthly = Math.round(Number(vals[i].value.replace(/[^0-9.-]/g, '')) || 0);
+        if (el.value.trim() || monthly > 0) {
+            rr.push({ desc: el.value.trim(), monthly: monthly });
+        }
+    });
+    localStorage.setItem('xits_run_rate', JSON.stringify(rr));
+    // Refresh everything
+    updateMonthlyCalc();
+    updateKPICards();
+    renderDnTable();
+    renderDnRunRate();
+    showToast('success', 'Dashboard numbers saved');
+}
 
 // One-time deal seed from OpenClaw Telegram import (Feb 2026)
 if (!localStorage.getItem('xits_deals_seeded_feb26_v3')) {
@@ -5874,7 +6018,7 @@ function updateKPICards() {
     const allAccts = [...entAccounts.map(a=>a.name), ...smbAccounts.map(a=>a.name),
         ...k12.map(a=>a.name), ...higherEd.map(a=>a.name), ...creditUnions.map(a=>a.name)];
     const revenueBase = getRevenueBase();
-    let closedWon = revenueBase, weightedPipeline = 0;
+    let closedWon = revenueBase + getRunRateAnnual(), weightedPipeline = 0;
     const closingThisMonth = [];
     const now = new Date();
     const currentMonth = now.getMonth();
