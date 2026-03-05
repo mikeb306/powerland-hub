@@ -291,7 +291,8 @@
         .pillar-card.expanded .pillar-chevron { transform:rotate(90deg); color:var(--accent); }
         .pillar-icon { font-size: 20px; margin-bottom: 8px; }
         .pillar-name { font-size: 12px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
-        .pillar-vendors { font-size: 11px; color: var(--text3); line-height: 1.5; }
+        .pillar-vendors { display:flex; gap:5px; flex-wrap:wrap; margin-top:6px; }
+        .pillar-vendor-badge { display:inline-block; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:600; letter-spacing:.02em; border:1px solid; line-height:1.4; }
         .pillar-services { font-size: 11px; color: var(--accent); margin-top: 6px; }
         .pillar-detail { max-height:0; overflow:hidden; transition:max-height .3s ease; }
         .pillar-card.expanded .pillar-detail { max-height:300px; }
@@ -1279,6 +1280,19 @@
         .bz-touch-log .outcome-not_interested { color:var(--accent4); }
         .bz-coaching-tip { font-size:11px;color:var(--text2);padding:5px 10px;background:rgba(79,140,255,.04);border-left:2px solid var(--accent);margin-bottom:5px;line-height:1.4; }
         .bz-coaching-tip strong { color:var(--accent); }
+        .bz-intel-card { border-radius:8px;padding:10px 12px;margin:6px 0;font-size:12px;line-height:1.5; }
+        .bz-intel-card-label { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px; }
+        .bz-intel-card-item { padding:2px 0;color:var(--text2); }
+        .bz-intel-card-item strong { color:var(--text); }
+        .bz-intel-card-role { background:rgba(79,140,255,.06);border:1px solid rgba(79,140,255,.15); }
+        .bz-intel-card-role .bz-intel-card-label { color:var(--accent); }
+        .bz-intel-card-pains { background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.12); }
+        .bz-intel-card-pains .bz-intel-card-label { color:var(--accent4); }
+        .bz-intel-card-opps { background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.12); }
+        .bz-intel-card-opps .bz-intel-card-label { color:var(--accent2); }
+        .bz-intel-card-size { background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.12); }
+        .bz-intel-card-size .bz-intel-card-label { color:var(--accent3); }
+        .bz-intel-warn { color:var(--accent4)!important;font-style:italic; }
         .bz-xp-popup { position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:999;text-align:center;pointer-events:none; }
         .bz-xp-popup .level-title { font-size:28px;font-weight:800;color:var(--accent2);text-shadow:0 0 20px rgba(52,211,153,.4); }
         .bz-xp-popup .level-subtitle { font-size:14px;color:var(--text2);margin-top:4px; }
@@ -1800,7 +1814,7 @@
             <div class="pillar-card" style="border-left-color:#3b82f6;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#9729;&#65039;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">Cloud</div>
-                <div class="pillar-vendors">Microsoft 365 &middot; Azure &middot; AWS</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#00a4ef;border-color:#00a4ef;background:rgba(0,164,239,.08);">Microsoft 365</span><span class="pillar-vendor-badge" style="color:#0078d4;border-color:#0078d4;background:rgba(0,120,212,.08);">Azure</span><span class="pillar-vendor-badge" style="color:#ff9900;border-color:#ff9900;background:rgba(255,153,0,.08);">AWS</span></div>
                 <div class="pillar-services">Licensing, migration, management</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">M365 E1/E3/E5/Copilot, Azure IaaS/PaaS/AVD, AWS</span></div>
@@ -1811,7 +1825,7 @@
             <div class="pillar-card" style="border-left-color:#8b5cf6;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#128187;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">Virtualization</div>
-                <div class="pillar-vendors">Azure Local &middot; Hyper-V &middot; VMware &middot; Nutanix &middot; HPE Morpheus</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#0078d4;border-color:#0078d4;background:rgba(0,120,212,.08);">Azure Local</span><span class="pillar-vendor-badge" style="color:#0078d4;border-color:#0078d4;background:rgba(0,120,212,.08);">Hyper-V</span><span class="pillar-vendor-badge" style="color:#696969;border-color:#696969;background:rgba(105,105,105,.08);">VMware</span><span class="pillar-vendor-badge" style="color:#024da1;border-color:#024da1;background:rgba(2,77,161,.08);">Nutanix</span><span class="pillar-vendor-badge" style="color:#01a982;border-color:#01a982;background:rgba(1,169,130,.08);">HPE</span></div>
                 <div class="pillar-services">HCI, private cloud, VDI</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">Azure Local, VMware (Broadcom exodus), Nutanix HCI, HPE Morpheus</span></div>
@@ -1822,7 +1836,7 @@
             <div class="pillar-card" style="border-left-color:#6366f1;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#128421;&#65039;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">Infrastructure</div>
-                <div class="pillar-vendors">Dell &middot; HPE &middot; Lenovo</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#007db8;border-color:#007db8;background:rgba(0,125,184,.08);">Dell</span><span class="pillar-vendor-badge" style="color:#01a982;border-color:#01a982;background:rgba(1,169,130,.08);">HPE</span><span class="pillar-vendor-badge" style="color:#e2231a;border-color:#e2231a;background:rgba(226,35,26,.08);">Lenovo</span></div>
                 <div class="pillar-services">Servers, storage, compute</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">Dell PowerEdge, HPE ProLiant/Synergy, Lenovo ThinkSystem</span></div>
@@ -1833,7 +1847,7 @@
             <div class="pillar-card" style="border-left-color:#0ea5e9;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#128190;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">Endpoint</div>
-                <div class="pillar-vendors">Dell &middot; HP &middot; Lenovo</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#007db8;border-color:#007db8;background:rgba(0,125,184,.08);">Dell</span><span class="pillar-vendor-badge" style="color:#0096d6;border-color:#0096d6;background:rgba(0,150,214,.08);">HP</span><span class="pillar-vendor-badge" style="color:#e2231a;border-color:#e2231a;background:rgba(226,35,26,.08);">Lenovo</span></div>
                 <div class="pillar-services">Laptops, desktops, thin clients</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">Dell Latitude/OptiPlex, HP EliteBook, Lenovo ThinkPad, HP thin clients</span></div>
@@ -1844,7 +1858,7 @@
             <div class="pillar-card" style="border-left-color:#ef4444;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#128274;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">Security</div>
-                <div class="pillar-vendors">Arctic Wolf &middot; Darktrace &middot; Netskope &middot; Fortinet &middot; Palo Alto &middot; Check Point &middot; SentinelOne</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#1b365d;border-color:#1b365d;background:rgba(27,54,93,.08);">Arctic Wolf</span><span class="pillar-vendor-badge" style="color:#ff6600;border-color:#ff6600;background:rgba(255,102,0,.08);">Darktrace</span><span class="pillar-vendor-badge" style="color:#33a0da;border-color:#33a0da;background:rgba(51,160,218,.08);">Netskope</span><span class="pillar-vendor-badge" style="color:#ee3124;border-color:#ee3124;background:rgba(238,49,36,.08);">Fortinet</span><span class="pillar-vendor-badge" style="color:#fa582d;border-color:#fa582d;background:rgba(250,88,45,.08);">Palo Alto</span><span class="pillar-vendor-badge" style="color:#6c2eb9;border-color:#6c2eb9;background:rgba(108,46,185,.08);">SentinelOne</span></div>
                 <div class="pillar-services">SASE, EDR/XDR, SOC, firewall</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">Arctic Wolf MDR, Darktrace AI-NDR, Netskope SASE, Fortinet FW, Palo Alto, SentinelOne EDR</span></div>
@@ -1855,7 +1869,7 @@
             <div class="pillar-card" style="border-left-color:#f59e0b;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#128737;&#65039;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">Data Protection</div>
-                <div class="pillar-vendors">Veeam &middot; Zerto &middot; Backupify</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#00b336;border-color:#00b336;background:rgba(0,179,54,.08);">Veeam</span><span class="pillar-vendor-badge" style="color:#00b4a0;border-color:#00b4a0;background:rgba(0,180,160,.08);">Zerto</span><span class="pillar-vendor-badge" style="color:#4285f4;border-color:#4285f4;background:rgba(66,133,244,.08);">Backupify</span></div>
                 <div class="pillar-services">Backup, DR, replication</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">Veeam backup, Zerto DR/CDP, Backupify SaaS backup</span></div>
@@ -1866,7 +1880,7 @@
             <div class="pillar-card" style="border-left-color:#d946ef;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#128424;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">Print & Document Mgmt</div>
-                <div class="pillar-vendors">Xerox &middot; M-Files</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#c8102e;border-color:#c8102e;background:rgba(200,16,46,.08);">Xerox</span><span class="pillar-vendor-badge" style="color:#3d5fa4;border-color:#3d5fa4;background:rgba(61,95,164,.08);">M-Files</span></div>
                 <div class="pillar-services">MPS, ECM, document workflows</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">Xerox MFPs + production, M-Files ECM/DMS</span></div>
@@ -1877,7 +1891,7 @@
             <div class="pillar-card" style="border-left-color:#14b8a6;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#127760;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">Network</div>
-                <div class="pillar-vendors">HPE Aruba &middot; Cisco &middot; Extreme &middot; Juniper</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#ff8300;border-color:#ff8300;background:rgba(255,131,0,.08);">Aruba</span><span class="pillar-vendor-badge" style="color:#049fd9;border-color:#049fd9;background:rgba(4,159,217,.08);">Cisco</span><span class="pillar-vendor-badge" style="color:#6a2382;border-color:#6a2382;background:rgba(106,35,130,.08);">Extreme</span><span class="pillar-vendor-badge" style="color:#84b135;border-color:#84b135;background:rgba(132,177,53,.08);">Juniper</span></div>
                 <div class="pillar-services">Switching, wireless, SD-WAN</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">HPE Aruba campus/CX, Cisco Catalyst/Meraki, Extreme, Juniper DC</span></div>
@@ -1888,7 +1902,7 @@
             <div class="pillar-card" style="border-left-color:#a855f7;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#129302;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">AI</div>
-                <div class="pillar-vendors">Microsoft Copilot &middot; Iterate.ai &middot; VAIDIO</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#00a4ef;border-color:#00a4ef;background:rgba(0,164,239,.08);">Copilot</span><span class="pillar-vendor-badge" style="color:#1a73e8;border-color:#1a73e8;background:rgba(26,115,232,.08);">Iterate.ai</span><span class="pillar-vendor-badge" style="color:#2563eb;border-color:#2563eb;background:rgba(37,99,235,.08);">VAIDIO</span></div>
                 <div class="pillar-services">AI adoption, automation, video analytics, workshops</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">Microsoft Copilot M365/Security, Iterate.ai enterprise, VAIDIO video analytics</span></div>
@@ -1899,7 +1913,7 @@
             <div class="pillar-card" style="border-left-color:#22c55e;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#128736;&#65039;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">Managed IT Services</div>
-                <div class="pillar-vendors">Virtual CIO &middot; RMM &middot; MDR/EDR/XDR &middot; NOC/SOC</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#22c55e;border-color:#22c55e;background:rgba(34,197,94,.08);">vCIO</span><span class="pillar-vendor-badge" style="color:#3b82f6;border-color:#3b82f6;background:rgba(59,130,246,.08);">RMM</span><span class="pillar-vendor-badge" style="color:#ef4444;border-color:#ef4444;background:rgba(239,68,68,.08);">MDR/XDR</span><span class="pillar-vendor-badge" style="color:#f59e0b;border-color:#f59e0b;background:rgba(245,158,11,.08);">NOC/SOC</span></div>
                 <div class="pillar-services">Remote monitoring, managed security, service desk</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">Virtual CIO, RMM, MDR/EDR/XDR, NOC/SOC, helpdesk</span></div>
@@ -1910,7 +1924,7 @@
             <div class="pillar-card" style="border-left-color:#f97316;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#128295;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">IT Professional Services</div>
-                <div class="pillar-vendors">Design &amp; Implementation &middot; Cloud Migration &middot; Network Design</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#f97316;border-color:#f97316;background:rgba(249,115,22,.08);">Design & Impl</span><span class="pillar-vendor-badge" style="color:#0078d4;border-color:#0078d4;background:rgba(0,120,212,.08);">Cloud Migration</span><span class="pillar-vendor-badge" style="color:#14b8a6;border-color:#14b8a6;background:rgba(20,184,166,.08);">Network</span></div>
                 <div class="pillar-services">Architecture, data center, wireless, project delivery</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">Architecture, cloud migration, network design, DC buildout</span></div>
@@ -1921,7 +1935,7 @@
             <div class="pillar-card" style="border-left-color:#64748b;" onclick="this.classList.toggle('expanded')">
                 <div class="pillar-header"><div class="pillar-icon">&#128230;</div><span class="pillar-chevron">&#9654;</span></div>
                 <div class="pillar-name">IT Support Services</div>
-                <div class="pillar-vendors">Installation &middot; Imaging &middot; Depot Repair &middot; Deployment</div>
+                <div class="pillar-vendors"><span class="pillar-vendor-badge" style="color:#64748b;border-color:#64748b;background:rgba(100,116,139,.08);">Install</span><span class="pillar-vendor-badge" style="color:#64748b;border-color:#64748b;background:rgba(100,116,139,.08);">Imaging</span><span class="pillar-vendor-badge" style="color:#64748b;border-color:#64748b;background:rgba(100,116,139,.08);">Depot Repair</span><span class="pillar-vendor-badge" style="color:#64748b;border-color:#64748b;background:rgba(100,116,139,.08);">Deploy</span></div>
                 <div class="pillar-services">Asset mgmt, disposal, warranty, logistics</div>
                 <div class="pillar-detail"><div class="pillar-detail-inner">
                     <div class="pillar-detail-row"><span class="pillar-detail-label">Products</span><span class="pillar-detail-val">Install, imaging, depot repair, deployment, IMAC</span></div>
@@ -7081,19 +7095,177 @@ function bzRemoveAccount(id) {
     }
 }
 
+// ===== INTEL ENGINE — Industry + Role + Org insights =====
+var BZ_INDUSTRY_INTEL = {
+    'mining': {pains:['Remote site connectivity & IT support','Aging fleet of ruggedized devices & printers','Cybersecurity for OT/IT convergence (SCADA systems)','High cost of downtime — every hour = lost production','Compliance reporting (environmental, safety, NI 43-101)'],opps:['Managed print for remote camp offices','Endpoint hardening for field laptops/tablets','Secure document workflows for drill logs & assay reports','Mobile device management for geologists & engineers','Disaster recovery — mine sites need local backup']},
+    'oil': {pains:['Price volatility forcing IT budget cuts','Field office connectivity & print infrastructure','Regulatory compliance docs (AER, SaskEnergy)','Legacy SCADA & control systems needing modernization','Seasonal workforce = device provisioning headaches'],opps:['Cost-per-page managed print saves 20-30%','Ruggedized endpoint solutions for field crews','Document management for well files & land agreements','Cloud migration with hybrid on-prem for latency-sensitive apps','Cybersecurity assessments — insurance requirements tightening']},
+    'agriculture': {pains:['Seasonal peaks strain IT infrastructure','Rural connectivity — poor internet at grain elevators/plants','Paper-heavy processes (bills of lading, grain tickets, inspections)','Small IT teams managing multiple locations','Weather & commodity risk = tight budgets'],opps:['Digitize paper workflows — scan-to-cloud grain docs','Managed print across multiple facilities','M365 for collaboration across distributed teams','Endpoint management for seasonal workers','Cybersecurity basics — ransomware targeting ag companies']},
+    'food': {pains:['Food safety compliance documentation','Multi-facility operations with inconsistent IT','Cold chain monitoring & reporting requirements','High employee turnover = constant onboarding','Thin margins — every IT dollar scrutinized'],opps:['Managed print for labeling, compliance docs, shipping','Document automation for HACCP & food safety records','Standardized endpoint fleet across all locations','Cloud-based collaboration replacing legacy systems','Print cost reduction — typically 20-30% savings']},
+    'government': {pains:['Legacy systems & long procurement cycles','Public scrutiny on IT spending','Accessibility requirements (WCAG compliance)','Citizen-facing services need digitization','Cybersecurity mandates with limited budget'],opps:['Managed print — huge fleets, high waste, easy savings','Document workflow automation for permit/license processing','Endpoint refresh cycles — standardization saves money','Secure print (pull-printing) for confidential docs','IT assessment services — justify modernization budget']},
+    'education': {pains:['Budget constraints — annual funding cycles','1:1 device programs straining IT teams','Print costs spiraling across campuses','Cybersecurity — student data protection','Remote/hybrid learning infrastructure still evolving'],opps:['Managed print cuts school division costs 25-40%','Chromebook/laptop fleet management','Secure document workflows for admin offices','Cloud migration & M365 adoption','IT staffing augmentation — lean teams need help']},
+    'healthcare': {pains:['Patient data security (PHIA compliance in SK)','Legacy EMR systems with printing dependencies','Distributed clinics with inconsistent IT','Downtime directly impacts patient care','Strict document retention & disposal requirements'],opps:['Secure managed print — pull printing for patient docs','Endpoint management for clinical workstations','Document digitization — paper charts to electronic','Cybersecurity assessments — healthcare #1 target','Disaster recovery & business continuity planning']},
+    'construction': {pains:['Project-based operations — IT needs change constantly','Field workers need mobile access to plans & docs','Large format printing for blueprints & drawings','Multiple job sites with inconsistent connectivity','Tight margins — IT seen as overhead not investment'],opps:['Large format managed print solutions','Rugged tablets/laptops for site supervisors','Cloud document management for project files','M365 for cross-company collaboration','Mobile printing solutions for trailers & field offices']},
+    'manufacturing': {pains:['OT/IT convergence — shop floor meets office network','Supply chain disruption documentation','Quality control reporting & compliance','Aging equipment with proprietary control systems','Skilled labor shortage — need tech to multiply workforce'],opps:['Managed print for production labels, QC docs, shipping','Endpoint management for design/engineering workstations','Document workflow for ISO compliance','Cybersecurity for connected manufacturing','IT infrastructure assessment — find hidden costs']},
+    'financial': {pains:['Regulatory compliance (OSFI, privacy laws)','Secure document handling — contracts, statements, filings','Branch office IT consistency','Customer data protection — reputational risk','Digital transformation pressure from fintech competitors'],opps:['Secure managed print with audit trails','Pull-printing for confidential financial documents','Endpoint hardening & encryption','Document workflow automation for loan processing','M365 security & compliance features']},
+    'insurance': {pains:['Policy document management at scale','Claims processing still paper-heavy','Multi-branch IT standardization','Regulatory compliance documentation','Cybersecurity — adjuster laptops are vulnerable endpoints'],opps:['Managed print for policy docs & claims forms','Document digitization & workflow automation','Endpoint security for mobile adjusters','Cloud-based collaboration for distributed teams','Print cost analysis — insurance orgs print heavily']},
+    'telecom': {pains:['Rapid technology changes require constant infrastructure updates','Customer-facing documentation & billing','Field technician device management','Network security — they ARE the network','Legacy systems integration with modern platforms'],opps:['Managed print for retail locations & call centers','Endpoint management for field technicians','Document workflow for service orders & contracts','IT consulting — even telecom companies outsource IT','Cybersecurity partnerships']},
+    'transportation': {pains:['Distributed operations — terminals, yards, offices','Driver/operator communication & documentation','Compliance paperwork (DOT, safety, maintenance logs)','Fleet management systems integration','Remote locations with limited IT support'],opps:['Managed print for dispatch, BOLs, manifests','Rugged devices for drivers & yard workers','Document digitization for compliance records','M365 for multi-location collaboration','Mobile printing for terminals & loading docks']},
+    'retail': {pains:['POS system management & security','Seasonal staffing = device provisioning','Multi-location IT consistency','Customer data protection (PCI compliance)','Thin margins — IT must show clear ROI'],opps:['Managed print for receipts, signage, back office','POS endpoint management','Document workflows for HR onboarding','Cloud-based inventory & operations','Cybersecurity basics — PCI compliance help']},
+    'nonprofit': {pains:['Extremely tight budgets — every dollar to mission','Small/no IT staff','Donor data security','Grant reporting documentation','Volunteer workforce = device management challenges'],opps:['Managed print — nonprofits often overspend on print 40%+','M365 nonprofit licensing (deep discounts)','Document workflow for grant applications','Basic cybersecurity — protect donor data','IT assessment — find waste they don\'t know about']},
+    'research': {pains:['Data security for proprietary research','Large file handling & collaboration','Lab equipment integration','Publication & report production','Grant-funded IT — budget tied to project cycles'],opps:['Managed print for publications & lab documentation','Secure document workflows for research data','High-performance endpoint solutions','Cloud storage & collaboration platforms','IT consulting for grant-funded infrastructure']}
+};
+
+var BZ_ROLE_INTEL = {
+    'cto': {focus:'Strategic technology direction, build vs buy, digital transformation roadmap',talk:'Architecture, innovation, competitive advantage through technology, tech debt',style:'Peer-level conversation — don\'t sell features, sell vision and outcomes',avoid:'Don\'t lead with specs or pricing. CTOs think in capabilities, not products.'},
+    'cio': {focus:'IT governance, risk management, aligning IT with business strategy',talk:'TCO reduction, compliance, board-level IT metrics, vendor consolidation',style:'Executive conversation — business outcomes, risk mitigation, strategic alignment',avoid:'Don\'t get technical too fast. CIOs care about business impact first.'},
+    'vp_it': {focus:'Operational efficiency, team capacity, budget optimization',talk:'Staff productivity, managed services to extend team, technology standardization',style:'Problem-solver conversation — "what keeps you up at night" approach',avoid:'Don\'t assume they have unlimited budget. They\'re usually fighting for resources.'},
+    'director': {focus:'Department-level strategy, team management, cross-functional alignment',talk:'Process improvement, team efficiency, reducing operational complexity',style:'Collaborative — they need partners who understand their constraints',avoid:'Don\'t pitch to them if you should be talking to their boss. Ask about decision process.'},
+    'manager': {focus:'Day-to-day operations, ticket queues, fire-fighting, team bandwidth',talk:'Time savings, reducing helpdesk tickets, simplifying management burden',style:'Empathy-first — they\'re in the trenches. Show you understand their pain.',avoid:'Don\'t oversell. Managers are skeptical of big promises — they\'ve been burned.'},
+    'admin': {focus:'Hands-on systems, troubleshooting, keeping things running',talk:'Technical specifics, ease of management, vendor support quality',style:'Technical credibility — they\'ll test your knowledge. Be honest about limits.',avoid:'Don\'t skip them. They\'re the influencer who can kill or champion your deal.'},
+    'procurement': {focus:'Cost, contract terms, vendor compliance, RFP process',talk:'TCO analysis, competitive pricing, SLA guarantees, references',style:'Process-oriented — respect their timeline and requirements',avoid:'Don\'t try to go around procurement. Build an ally here and it smooths everything.'},
+    'finance': {focus:'Budget, ROI, cost predictability, OpEx vs CapEx',talk:'Monthly cost reduction, eliminating surprise expenses, financial reporting',style:'Numbers-driven — bring data, not stories',avoid:'Don\'t pitch technology. Pitch financial outcomes with proof points.'},
+    'operations': {focus:'Business process efficiency, uptime, workflow continuity',talk:'Process automation, reducing paper, minimizing downtime impact',style:'Practical — show how it affects their actual daily operations',avoid:'Don\'t use IT jargon. Speak in business process terms.'},
+    'owner': {focus:'Growth, profitability, competitive positioning, risk',talk:'Revenue impact, cost savings as % of revenue, business resilience',style:'Direct, bottom-line focused — how does this help them grow or save',avoid:'Don\'t waste their time with details. Lead with the business case, 60 seconds or less.'}
+};
+
+function bzGetIndustryKey(industry) {
+    if (!industry) return null;
+    var ind = industry.toLowerCase();
+    if (ind.includes('mining') || ind.includes('metals')) return 'mining';
+    if (ind.includes('oil') || ind.includes('energy') || ind.includes('gas') || ind.includes('renewable')) return 'oil';
+    if (ind.includes('agri') || ind.includes('farm') || ind.includes('dairy') || ind.includes('grain')) return 'agriculture';
+    if (ind.includes('food') || ind.includes('beverage')) return 'food';
+    if (ind.includes('government') || ind.includes('public') || ind.includes('civic') || ind.includes('political') || ind.includes('law enforcement')) return 'government';
+    if (ind.includes('education') || ind.includes('school') || ind.includes('librar')) return 'education';
+    if (ind.includes('health') || ind.includes('hospital') || ind.includes('medical') || ind.includes('pharma') || ind.includes('wellness')) return 'healthcare';
+    if (ind.includes('construct') || ind.includes('building') || ind.includes('civil eng')) return 'construction';
+    if (ind.includes('manufactur') || ind.includes('machiner') || ind.includes('industrial') || ind.includes('automation') || ind.includes('electrical') || ind.includes('chemical')) return 'manufacturing';
+    if (ind.includes('financ') || ind.includes('bank') || ind.includes('accounting') || ind.includes('real estate')) return 'financial';
+    if (ind.includes('insurance')) return 'insurance';
+    if (ind.includes('telecom')) return 'telecom';
+    if (ind.includes('transport') || ind.includes('trucking') || ind.includes('logistics') || ind.includes('supply chain') || ind.includes('aviation') || ind.includes('airline')) return 'transportation';
+    if (ind.includes('retail') || ind.includes('wholesale') || ind.includes('luxury') || ind.includes('furniture')) return 'retail';
+    if (ind.includes('nonprofit') || ind.includes('individual') || ind.includes('social')) return 'nonprofit';
+    if (ind.includes('research') || ind.includes('higher ed')) return 'research';
+    if (ind.includes('print')) return 'manufacturing';
+    if (ind.includes('information tech') || ind.includes('information ser') || ind.includes('online')) return null;
+    if (ind.includes('event') || ind.includes('leisure') || ind.includes('travel') || ind.includes('hospitality') || ind.includes('restaurant') || ind.includes('sport')) return 'retail';
+    if (ind.includes('marketing') || ind.includes('advertising') || ind.includes('training') || ind.includes('professional') || ind.includes('law prac')) return null;
+    return null;
+}
+
+function bzGetRoleKey(title) {
+    if (!title) return null;
+    var t = title.toLowerCase();
+    if (t.includes('cto') || t.includes('chief technology')) return 'cto';
+    if (t.includes('cio') || t.includes('chief information')) return 'cio';
+    if (t.includes('vp') || t.includes('vice president')) return 'vp_it';
+    if (t.includes('director')) return 'director';
+    if (t.includes('manager') || t.includes('supervisor') || t.includes('lead') || t.includes('head of')) return 'manager';
+    if (t.includes('admin') || t.includes('analyst') || t.includes('engineer') || t.includes('architect') || t.includes('specialist') || t.includes('technician') || t.includes('coordinator')) return 'admin';
+    if (t.includes('procurement') || t.includes('purchasing') || t.includes('buyer') || t.includes('supply')) return 'procurement';
+    if (t.includes('cfo') || t.includes('finance') || t.includes('controller') || t.includes('accounting')) return 'finance';
+    if (t.includes('operations') || t.includes('coo') || t.includes('facilities')) return 'operations';
+    if (t.includes('owner') || t.includes('ceo') || t.includes('president') || t.includes('founder') || t.includes('partner') || t.includes('principal') || t.includes('gm') || t.includes('general manager')) return 'owner';
+    return 'manager';
+}
+
+function bzGetSizeInsights(employees) {
+    if (!employees) return [];
+    if (employees <= 50) return ['Likely no dedicated IT staff — owner/office manager handles tech','IT decisions made by 1-2 people — short sales cycle if you find the right person','Probably using consumer-grade equipment — easy upgrade opportunity','Pain: no vendor management, reactive IT, surprise costs'];
+    if (employees <= 150) return ['Probably 1-2 IT people wearing many hats','IT team drowning in tickets — managed services pitch resonates','Growing pains: outgrowing SMB tools, need enterprise-lite solutions','Decision: IT Manager + one executive (CFO or COO usually)'];
+    if (employees <= 300) return ['IT team of 3-8 — enough to have opinions, not enough to do everything','Sweet spot for managed print — big enough fleet to justify, small enough team to need help','Likely evaluating or recently deployed M365','Multi-location probable — standardization is a pain point'];
+    return ['Dedicated IT department with budget authority','Formal procurement process — expect RFP/RFQ','Multiple stakeholders — need champion + executive sponsor','Existing vendor relationships — competitive displacement requires strong business case'];
+}
+
+function bzBuildOpener(contact, a) {
+    var title = (contact.title || '').toLowerCase();
+    var firstName = (contact.name || '').split(' ')[0].replace(/\*/g, '');
+    var ind = (a.industry || '').toLowerCase();
+    var emp = a.employees || 0;
+    if (!firstName || firstName.length < 2) return null;
+
+    var indKey = bzGetIndustryKey(a.industry);
+    var roleKey = bzGetRoleKey(contact.title);
+
+    // Role-specific openers
+    if (roleKey === 'cto' || roleKey === 'cio') return '"' + firstName + ', I\'ve been talking to a few IT leaders in SK ' + (ind ? ind : 'companies') + ' about how they\'re handling [cybersecurity/cloud migration/vendor consolidation] this year. Curious what\'s top of mind for you."';
+    if (roleKey === 'owner') return '"' + firstName + ', I work with a number of SK businesses your size helping them cut IT costs without cutting capability. Usually save 20-30% on print alone. Worth a 10-minute chat?"';
+    if (roleKey === 'finance' || roleKey === 'procurement') return '"' + firstName + ', we\'ve been helping similar-sized SK companies turn unpredictable IT spend into a flat monthly cost. Usually find $15-40K in annual savings on print/devices alone."';
+    if (roleKey === 'operations') return '"' + firstName + ', quick question — are you still dealing with paper-heavy processes or has your team moved most workflows digital? I ask because we\'ve been helping SK ' + (ind ? ind : 'companies') + ' cut processing time significantly."';
+
+    // Industry-specific for IT roles
+    if (indKey === 'mining' || indKey === 'oil') return '"' + firstName + ', I work with a few SK resource companies on their IT infrastructure. Remote site IT support and device management keeps coming up as a pain point. Is that on your radar?"';
+    if (indKey === 'agriculture' || indKey === 'food') return '"' + firstName + ', we\'ve been working with several SK ag companies to modernize their print and IT infrastructure across multiple facilities. Curious if that\'s something you\'ve been looking at."';
+    if (indKey === 'government' || indKey === 'education') return '"' + firstName + ', I\'ve been working with a few public sector organizations in SK on managed print and endpoint standardization. The cost savings tend to be significant. Is that something you\'d be open to exploring?"';
+    if (indKey === 'healthcare') return '"' + firstName + ', I work with several SK healthcare organizations on secure print and endpoint management — patient data compliance is driving a lot of the conversation right now. Is that something on your plate?"';
+    if (indKey === 'construction' || indKey === 'manufacturing') return '"' + firstName + ', we\'re working with a number of SK industrial companies on print/IT infrastructure. Shop floor to office consistency keeps coming up. How are you handling that?"';
+
+    // Generic but still specific
+    if (emp > 200) return '"' + firstName + ', I work with several SK companies your size helping them get their IT costs under control — managed print, endpoint management, that kind of thing. Usually find significant waste they didn\'t know about. Worth a quick chat?"';
+    return '"' + firstName + ', quick question — how are you handling print and IT devices right now? We\'ve been finding that a lot of SK companies in the ' + (emp < 100 ? '50-100' : '100-500') + ' employee range are overspending by 25-40% without realizing it."';
+}
+
 function renderCallIntelPanel(a, d, contact, intel, cadStep) {
     const el = document.getElementById('bzCallIntelCol');
     let html = '';
-    // Company Intel
-    html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Company Intel</div>';
+    var indKey = bzGetIndustryKey(a.industry);
+    var roleKey = bzGetRoleKey(contact.title);
+    var indIntel = indKey ? BZ_INDUSTRY_INTEL[indKey] : null;
+    var roleIntel = roleKey ? BZ_ROLE_INTEL[roleKey] : null;
+    var sizeInsights = bzGetSizeInsights(a.employees);
+
+    // === WHO YOU'RE CALLING ===
+    if (contact.name) {
+        html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Who You\'re Calling</div>';
+        html += '<div class="bz-intel-row"><span>Name</span><strong>' + contact.name + '</strong></div>';
+        if (contact.title) html += '<div class="bz-intel-row"><span>Title</span><strong>' + contact.title + '</strong></div>';
+        if (roleIntel) {
+            html += '<div class="bz-intel-card bz-intel-card-role">';
+            html += '<div class="bz-intel-card-label">Role Intel</div>';
+            html += '<div class="bz-intel-card-item"><strong>Focus:</strong> ' + roleIntel.focus + '</div>';
+            html += '<div class="bz-intel-card-item"><strong>Talk about:</strong> ' + roleIntel.talk + '</div>';
+            html += '<div class="bz-intel-card-item"><strong>Style:</strong> ' + roleIntel.style + '</div>';
+            html += '<div class="bz-intel-card-item bz-intel-warn"><strong>Avoid:</strong> ' + roleIntel.avoid + '</div>';
+            html += '</div>';
+        }
+        // Show any real contact background data if we have it
+        if (intel.careerHistory && intel.careerHistory.length) {
+            html += '<div style="margin-top:6px;"><strong style="font-size:11px;">Career:</strong>';
+            html += '<div class="bz-touch-log">' + intel.careerHistory.map(function(ch){ return '<div><span>' + (ch.years||'') + '</span><strong>' + ch.title + '</strong> @ ' + ch.company + '</div>'; }).join('') + '</div></div>';
+        }
+        if (intel.education) html += '<div class="bz-intel-row"><span>Education</span><strong>' + intel.education + '</strong></div>';
+        var tags = [];
+        if (intel.interests && intel.interests.length) intel.interests.forEach(function(i){tags.push(i);});
+        if (intel.sportsTeams && intel.sportsTeams.length) intel.sportsTeams.forEach(function(i){tags.push(i);});
+        if (intel.communityInvolvement && intel.communityInvolvement.length) intel.communityInvolvement.forEach(function(i){tags.push(i);});
+        if (tags.length) html += '<div class="bz-intel-tags">' + tags.map(function(t){return '<span>'+t+'</span>';}).join('') + '</div>';
+        html += '</div>';
+    }
+
+    // === INDUSTRY BATTLE CARD ===
+    if (indIntel) {
+        html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Industry Battle Card — ' + (indKey.charAt(0).toUpperCase() + indKey.slice(1)) + '</div>';
+        html += '<div class="bz-intel-card bz-intel-card-pains">';
+        html += '<div class="bz-intel-card-label">Pain Points & Triggers</div>';
+        indIntel.pains.forEach(function(p){ html += '<div class="bz-intel-card-item">&#9888; ' + p + '</div>'; });
+        html += '</div>';
+        html += '<div class="bz-intel-card bz-intel-card-opps">';
+        html += '<div class="bz-intel-card-label">Opportunities for Powerland</div>';
+        indIntel.opps.forEach(function(o){ html += '<div class="bz-intel-card-item">&#10004; ' + o + '</div>'; });
+        html += '</div>';
+        html += '</div>';
+    }
+
+    // === COMPANY FACTS ===
+    html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Company Facts</div>';
     if (a.industry) html += '<div class="bz-intel-row"><span>Industry</span><strong>' + a.industry + '</strong></div>';
     if (a.employees) html += '<div class="bz-intel-row"><span>Employees</span><strong>' + a.employees + '</strong></div>';
     if (a.itHeadcount) html += '<div class="bz-intel-row"><span>IT Headcount</span><strong>' + a.itHeadcount + '</strong></div>';
     if (a.revenue) html += '<div class="bz-intel-row"><span>Revenue</span><strong>' + fmtSales(a.revenue) + '</strong></div>';
     if (a.foundedYear) html += '<div class="bz-intel-row"><span>Founded</span><strong>' + a.foundedYear + '</strong></div>';
     if (a.domain) html += '<div class="bz-intel-row"><span>Domain</span><strong>' + a.domain + '</strong></div>';
-    // M365 / Vendor / Renewal
-    const m365 = d.m365Status || 'unknown';
+    var m365 = d.m365Status || 'unknown';
     html += '<div class="bz-intel-row"><span>M365</span><strong style="color:' + (m365==='yes'?'var(--accent2)':m365==='no'?'var(--accent4)':'var(--text3)') + ';">' + m365.toUpperCase() + '</strong></div>';
     if (d.currentVendor) html += '<div class="bz-intel-row"><span>Current Vendor</span><strong>' + d.currentVendor + '</strong></div>';
     if (d.renewalDate) html += '<div class="bz-intel-row"><span>Renewal</span><strong>' + d.renewalDate + '</strong></div>';
@@ -7101,21 +7273,16 @@ function renderCallIntelPanel(a, d, contact, intel, cadStep) {
     if (a.description) html += '<div class="bz-intel-desc">' + a.description + '</div>';
     if (a.keywords && a.keywords.length) html += '<div class="bz-intel-tags">' + a.keywords.map(function(k){return '<span>'+k+'</span>';}).join('') + '</div>';
     html += '</div>';
-    // Contact Background
-    if (contact.name) {
-        html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Contact Background</div>';
-        if (intel.careerHistory && intel.careerHistory.length) {
-            html += '<div class="bz-touch-log">' + intel.careerHistory.map(function(ch){ return '<div><span>' + (ch.years||'') + '</span><strong>' + ch.title + '</strong> @ ' + ch.company + '</div>'; }).join('') + '</div>';
-        }
-        if (intel.education) html += '<div class="bz-intel-row"><span>Education</span><strong>' + intel.education + '</strong></div>';
-        var tags = [];
-        if (intel.interests) intel.interests.forEach(function(i){tags.push(i);});
-        if (intel.sportsTeams) intel.sportsTeams.forEach(function(i){tags.push(i);});
-        if (intel.communityInvolvement) intel.communityInvolvement.forEach(function(i){tags.push(i);});
-        if (tags.length) html += '<div class="bz-intel-tags">' + tags.map(function(t){return '<span>'+t+'</span>';}).join('') + '</div>';
-        html += '</div>';
+
+    // === ORG SIZE INTEL ===
+    if (sizeInsights.length) {
+        html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Org Size Intel (' + (a.employees||'?') + ' emp)</div>';
+        html += '<div class="bz-intel-card bz-intel-card-size">';
+        sizeInsights.forEach(function(s){ html += '<div class="bz-intel-card-item">&#8226; ' + s + '</div>'; });
+        html += '</div></div>';
     }
-    // Touch History
+
+    // === TOUCH HISTORY ===
     var cadence = d.cadence || [];
     if (cadence.length) {
         html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Touch History (' + cadence.length + ')</div>';
@@ -7123,15 +7290,17 @@ function renderCallIntelPanel(a, d, contact, intel, cadStep) {
             return '<div><span>' + (c.date||'').slice(5) + '</span><span>' + c.type + '</span><span class="outcome-' + c.outcome + '">' + c.outcome + '</span>' + (c.note ? '<span>' + c.note + '</span>' : '') + '</div>';
         }).join('') + '</div></div>';
     }
+
     // Persistence Tracker
     var rejections = d.rejections || 0;
     var pct = Math.min(rejections / 4 * 100, 100);
     html += '<div class="bz-intel-section"><div class="bz-intel-section-title">Persistence Tracker</div>';
-    html += '<div style="font-size:10px;color:var(--text2);">80% of prospects say no 4 times before yes</div>';
+    html += '<div style="font-size:11px;color:var(--text2);">80% of prospects say no 4 times before yes</div>';
     html += '<div class="bz-rejection-bar"><div class="bz-rejection-bar-fill" style="width:' + pct + '%;"></div></div>';
-    html += '<div style="font-size:9px;color:var(--text3);margin-top:2px;">' + rejections + '/4 rejections — ' + (rejections >= 4 ? 'statistically due for yes' : (4 - rejections) + ' more before breakthrough') + '</div></div>';
-    // Coaching
-    html += '<div class="bz-intel-section"><div class="bz-intel-section-title" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">Coaching <span class="collapse-icon">&#9660;</span></div><div>';
+    html += '<div style="font-size:10px;color:var(--text3);margin-top:2px;">' + rejections + '/4 rejections — ' + (rejections >= 4 ? 'statistically due for yes' : (4 - rejections) + ' more before breakthrough') + '</div></div>';
+
+    // === COACHING (collapsed) ===
+    html += '<div class="bz-intel-section"><div class="bz-intel-section-title" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">Coaching <span class="collapse-icon">&#9654;</span></div><div style="display:none;">';
     html += '<div class="bz-coaching-tip"><strong>"How have you been?"</strong> = 6.6x success opener (Gong)</div>';
     html += '<div class="bz-coaching-tip">Talk:listen target: <strong>43%/57%</strong> — let them talk</div>';
     html += '<div class="bz-coaching-tip">Successful calls avg <strong>5:50</strong> — keep them engaged</div>';
@@ -7147,7 +7316,7 @@ function renderCallIntelPanel(a, d, contact, intel, cadStep) {
     html += '<div class="bz-coaching-tip"><strong>Qualifying:</strong> "If we could solve X, would it make sense to explore?"</div>';
     html += '</div></div>';
     // Objection handling
-    html += '<div class="bz-intel-section"><div class="bz-intel-section-title" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">Objection: "Not Interested" <span class="collapse-icon">&#9654;</span></div><div style="display:none;">';
+    html += '<div class="bz-intel-section"><div class="bz-intel-section-title" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">Objection Handling <span class="collapse-icon">&#9654;</span></div><div style="display:none;">';
     html += '<div class="bz-coaching-tip"><strong>1. Agree:</strong> "Totally understand — most people say that initially"</div>';
     html += '<div class="bz-coaching-tip"><strong>2. Ask:</strong> "Quick question — who handles your print/IT currently?"</div>';
     html += '<div class="bz-coaching-tip"><strong>3. Redirect:</strong> "Just want to see if there\'s a way we can save you time/money on X"</div>';
@@ -7804,8 +7973,9 @@ function bzRenderCallAccount() {
     contactHtml += '</div>';
     document.getElementById('bzCallContact').innerHTML = contactHtml;
 
-    // Opener
-    document.getElementById('bzCallOpener').innerHTML = intel.suggestedOpener ? intel.suggestedOpener : '<span style="color:var(--text3);">No opener — lead with "How have you been?" (6.6x success)</span>';
+    // Opener — dynamic based on role + industry
+    var dynamicOpener = bzBuildOpener(contact, a);
+    document.getElementById('bzCallOpener').innerHTML = dynamicOpener || '<span style="color:var(--text3);">No opener — lead with "How have you been?" (6.6x success)</span>';
 
     document.getElementById('bzCallNotes').value = '';
     var compSel = document.getElementById('bzCallCompetitor');
