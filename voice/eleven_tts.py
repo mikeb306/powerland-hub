@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""ElevenLabs TTS script — converts text to speech and saves as MP3."""
+"""TTS script — converts text to speech using OpenAI TTS API and saves as MP3.
+
+Originally used ElevenLabs; swapped to OpenAI TTS (2026-03-18) because ElevenLabs
+credits were exhausted. The function signature is unchanged so all importers
+(morning-briefing.py, weekly-wrap.py, deal-alerts.py) continue to work.
+"""
 
 import argparse
 import json
@@ -9,6 +14,7 @@ import sys
 import requests
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "voice-config.json")
+OPENCLAW_CONFIG = os.path.expanduser("~/.openclaw/openclaw.json")
 
 
 def load_config():
@@ -16,42 +22,49 @@ def load_config():
         return json.load(f)
 
 
+def _get_openai_key():
+    """Load OpenAI API key from openclaw.json (under env.OPENAI_API_KEY)."""
+    try:
+        with open(OPENCLAW_CONFIG, "r") as f:
+            data = json.load(f)
+        key = data.get("env", {}).get("OPENAI_API_KEY", "") or data.get("OPENAI_API_KEY", "")
+        if key:
+            return key
+    except (FileNotFoundError, json.JSONDecodeError, KeyError):
+        pass
+
+    # Fallback: environment variable
+    key = os.environ.get("OPENAI_API_KEY", "")
+    if key:
+        return key
+
+    print("ERROR: No OPENAI_API_KEY found in ~/.openclaw/openclaw.json or environment", file=sys.stderr)
+    sys.exit(1)
+
+
 def text_to_speech(text, output_path, config=None):
     if config is None:
         config = load_config()
 
-    api_key = config["ELEVEN_API_KEY"]
-    voice_id = config["VOICE_ID"]
-    model_id = config.get("MODEL_ID", "eleven_multilingual_v2")
+    model = config.get("OPENAI_TTS_MODEL", "tts-1")
+    voice = config.get("OPENAI_TTS_VOICE", "nova")
+    api_key = _get_openai_key()
 
-    if api_key == "YOUR_ELEVENLABS_API_KEY_HERE":
-        print("ERROR: Set your ELEVEN_API_KEY in voice-config.json", file=sys.stderr)
-        sys.exit(1)
-    if voice_id == "YOUR_VOICE_ID_HERE":
-        print("ERROR: Set your VOICE_ID in voice-config.json", file=sys.stderr)
-        sys.exit(1)
-
-    url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+    url = "https://api.openai.com/v1/audio/speech"
     headers = {
-        "Accept": "audio/mpeg",
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
-        "xi-api-key": api_key,
     }
     payload = {
-        "text": text,
-        "model_id": model_id,
-        "voice_settings": {
-            "stability": 0.5,
-            "similarity_boost": 0.75,
-            "style": 0.3,
-            "use_speaker_boost": True,
-        },
+        "model": model,
+        "input": text,
+        "voice": voice,
     }
 
-    resp = requests.post(url, json=payload, headers=headers, timeout=60)
+    resp = requests.post(url, json=payload, headers=headers, timeout=120)
 
     if resp.status_code != 200:
-        print(f"ERROR: ElevenLabs API returned {resp.status_code}", file=sys.stderr)
+        print(f"ERROR: OpenAI TTS API returned {resp.status_code}", file=sys.stderr)
         print(resp.text[:500], file=sys.stderr)
         sys.exit(1)
 
@@ -65,7 +78,7 @@ def text_to_speech(text, output_path, config=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="ElevenLabs Text-to-Speech")
+    parser = argparse.ArgumentParser(description="OpenAI Text-to-Speech")
     parser.add_argument("--text", required=True, help="Text to convert to speech")
     parser.add_argument(
         "--output",

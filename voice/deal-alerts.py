@@ -237,6 +237,14 @@ def send_telegram(text, audio_path=None):
 
 
 def main():
+    # Weekend check — no deal alerts on Sat/Sun (America/Regina = CST, no DST)
+    import zoneinfo
+    tz = zoneinfo.ZoneInfo("America/Regina")
+    today_dow = datetime.now(tz).weekday()  # Monday=0, Sunday=6
+    if today_dow >= 5:  # Saturday=5, Sunday=6
+        print("Weekend — skipping deal alerts.")
+        return
+
     alerts, state = check_alerts()
 
     if not alerts:
