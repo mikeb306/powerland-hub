@@ -27,5 +27,11 @@ Single-file CRM application for Xerox IT Solutions pipeline management.
 - Territory map, account tiering, win/loss analytics
 - Mobile responsive, offline sync, data import/export
 
+## Apollo MCP (2026-03-25)
+- Two Apollo MCP integrations available in Claude Code sessions:
+  - `mcp__apollo-api__*` — contacts search, org enrich/search, deals, sequences, workflows, email, analytics
+  - `mcp__claude_ai_Apollo_io__*` — contacts CRUD, company search, org enrich, people match, emailer campaigns
+- Use these for live Apollo queries instead of manual API calls
+
 ## Git
 - Remote: `https://github.com/mikeb306/powerland-hub.git` (branch: main)
