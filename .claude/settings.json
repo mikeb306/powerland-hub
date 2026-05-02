@@ -1,0 +1,9 @@
+{
+  "sandbox": {
+    "network": {
+      "allowedDomains": [
+        "powerland-hub-v2.vercel.app"
+      ]
+    }
+  }
+}
